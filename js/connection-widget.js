@@ -1313,7 +1313,13 @@ return {
 		console.log('Launching a new SPJS.');
 
 		// Launch the SPJS in max garbage collection mode.
-		this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
+			this.SPJS.go = spawn(`cd json-server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+
+		} else {
+			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+
+		}
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max'], { shell: true });
 		// Launch the SPJS in verbose mode with max garbage collection.
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-v'], { shell: true });
@@ -3054,7 +3060,7 @@ return {
 			this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
 
 		// If a message contains only characters like '!' or '%', send to device without buffering.
-	} else if (/\W/.test(Msg) && !/ |\w|\?/.test(Msg)) {
+		} else if (/\W/.test(Msg) && !/ |\w|\?/.test(Msg)) {
 			this.newportSendNoBuf(port, { Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
 
 		} else {

@@ -47,6 +47,10 @@ define(['jquery','gui','amplify'], function ($) {
 		hostMeta.os = 'Solaris';
 	}
 
+	if (navigator.onLine) {
+		console.log('Connected to the internet.');
+	}
+
 	console.log(hostMeta);
 
 	(function testCode() {
