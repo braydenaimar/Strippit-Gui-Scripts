@@ -3054,7 +3054,7 @@ return {
 			this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
 
 		// If a message contains only characters like '!' or '%', send to device without buffering.
-	} else if (/\W/.test(Msg) && !/ |\w|\?/.test(Msg)) {
+		} else if (/\W/.test(Msg) && !/ |\w|\?/.test(Msg)) {
 			this.newportSendNoBuf(port, { Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
 
 		} else {
