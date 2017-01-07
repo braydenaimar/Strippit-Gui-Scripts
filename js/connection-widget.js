@@ -645,7 +645,7 @@ return {
 					const logIndex = IndexMap[i];
 					const logItem = this[port].logData[logIndex];
 
-					console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
+					// console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
 					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
@@ -692,7 +692,7 @@ return {
 					const logIndex = IndexMap[i];
 					const logItem = this[port].logData[logIndex];
 
-					console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
+					// console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
 					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
@@ -1315,7 +1315,7 @@ return {
 		// Launch the SPJS in max garbage collection mode.
 		// If on a Raspberry Pi.
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
-			this.SPJS.go = spawn(`cd json_server && serial-port-json-server`, ['-gc max', '-allowexec'], { shell: true });
+			this.SPJS.go = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 		} else {
 			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
@@ -1688,7 +1688,8 @@ return {
 
 		// Check for errors in the portList (aka. no serial numbers, vid/pid).
 		// If any errors are present, discard data and get portList again.
-		if (!this.validifyPortList(dataObj)) {
+		// Linux os will show ports like '/dev/ttyAMA0' with no assocciated serial number.
+		if (hostMeta.platform !== 'linux' && !this.validifyPortList(dataObj)) {
 			// console.warn("Got corrupted port list data.");
 			console.log('Got corrupted port list data.');
 
