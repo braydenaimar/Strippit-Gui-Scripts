@@ -1313,7 +1313,14 @@ return {
 		console.log('Launching a new SPJS.');
 
 		// Launch the SPJS in max garbage collection mode.
-		this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+		// If on a Raspberry Pi.
+		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
+			this.SPJS.go = spawn(`cd json_server && serial-port-json-server`, ['-gc max', '-allowexec'], { shell: true });
+
+		} else {
+			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+
+		}
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max'], { shell: true });
 		// Launch the SPJS in verbose mode with max garbage collection.
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-v'], { shell: true });
