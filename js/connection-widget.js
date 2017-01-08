@@ -1798,7 +1798,9 @@ return {
 					continue;
 
 				} else if (x === 'RelatedNames') {
-					dataObj[safePort][x] = this.makePortSafe(data[i][x]);
+					// HACK: just make the first related name safe.
+					// FIXME: make a loop to make all related names safe.
+					dataObj[safePort][x] = data[i][x] ? this.makePortSafe(data[i][x][0]) : [];
 
 				} else {
 					dataObj[safePort][x] = data[i][x];
