@@ -2038,8 +2038,8 @@ return {
 						matchIndex = i;
 						// If this port has any related ports.
 						if (portList[port].RelatedNames) {
-							let a = Number(port.replace(/com|fs-dev-fs-tty\w+/i, ''));
-							let b = Number(portList[port].RelatedNames[0].replace(/com|fs-dev-fs-tty\w+/i, ''));
+							let a = Number(port.replace(/com|fs-dev-fs-tty\D{3}/i, ''));
+							let b = Number(portList[port].RelatedNames[0].replace(/com|fs-dev-fs-tty\D{3}/i, ''));
 
 							console.log(`a: ${a}\nb: ${b}`);
 
