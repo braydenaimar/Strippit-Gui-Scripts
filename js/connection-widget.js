@@ -255,7 +255,9 @@ return {
 		// FIXME: Set the removeLogOnClose flag to false to prevent a port's log from being closed when the port is closed so that issues can be more easily troubleshooted.
 		removeLogOnClose: true,
 		// The maximum age of an unverified command that will be set to status error in the log when the SPJS closes (milliseconds).
-		errorCmdOnSpjsCloseMaxAge: 5000,
+		// Set to null for no limit.
+		// errorCmdOnSpjsCloseMaxAge: 5000,
+		errorCmdOnSpjsCloseMaxAge: null,
 		// The maximum age of a command in the Spjs that can be assigned the status 'sent'.
 		sentSpjsCmdMaxAge: 10000,
 		// Sets if the time to verify a given command is added beside the command in the console log as a comment.
@@ -1674,12 +1676,14 @@ return {
 
 			let { matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Index: verifyMap[i] });
 
-			if (matchTime - Date.now() < this.consoleLog.errorCmdOnSpjsCloseMaxAge) {
+			// If the command is not verified and the spjs is closed, set the message to error.
+			if (this.consoleLog.errorCmdOnSpjsCloseMaxAge === null || matchTime - Date.now() < this.consoleLog.errorCmdOnSpjsCloseMaxAge) {
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'SPJS Closed' });
 
-			// If the command is older, stop searching.
-			} else {
-				break;
+			// If the command is older than the stale command limit, .
+			} else if (this.consoleLog.staleCmdLimit !== null && matchTime - Date.now() > this.consoleLog.staleCmdLimit) {
+				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
+
 			}
 		}
 
