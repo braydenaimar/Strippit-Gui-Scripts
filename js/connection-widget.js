@@ -2133,8 +2133,14 @@ return {
 		const safePort = this.makePortSafe(Port);
 
 		// If this was caused by an 'open' command in the SPJS, set the status of that command to 'Executed'.
-		const refCmd = `open ${Port}`;
-		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' });
+		let refCmd = `open ${Port} ${Baud} ${BufferType}`;
+
+		if (!this.consoleLog.updateCmd('SPJS', { Msg: refCmd, Status: 'Executed' })) {
+
+			refCmd = `open ${Port}`;
+			this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' });
+
+		}
 
 		this.portConnected(safePort);
 		this.sendPortInits(safePort);
