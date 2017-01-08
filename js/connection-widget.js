@@ -2038,8 +2038,10 @@ return {
 						matchIndex = i;
 						// If this port has any related ports.
 						if (portList[port].RelatedNames) {
-							let a = Number(port.replace(/com|\/dev\/tty\w+/i, ''));
-							let b = Number(portList[port].RelatedNames[0].replace(/com|\/dev\/tty\w+/i, ''));
+							let a = Number(port.replace(/com|fs-dev-fs-tty\w+/i, ''));
+							let b = Number(portList[port].RelatedNames[0].replace(/com|fs-dev-fs-tty\w+/i, ''));
+
+							console.log(`a: ${a}\nb: ${b}`);
 
 							// If this port is greater than it's related port, use the next meta object in the deviceMeta array.
 							if (a > b && matchIndex < deviceMeta.length - 1 && JSON.stringify(deviceMeta[i].VidPids.toLowerCase()) === JSON.stringify(deviceMeta[i + 1].VidPids.toLowerCase())) {
