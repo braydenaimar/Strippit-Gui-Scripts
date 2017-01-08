@@ -1774,7 +1774,7 @@ return {
 
 			for (let x in data[i]) {
 				if (x === 'Name') continue;
-				dataObj[data[i].Name][x] = data[i][x];
+				dataObj[safePort][x] = data[i][x];
 			}
 		}
 
