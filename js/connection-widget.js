@@ -602,7 +602,7 @@ return {
 
 			const that = this;
 
-			if (IndexMap === undefined) {
+			if (IndexMap === undefined && Index === undefined) {
 				console.warn('IndexMap is undefined.');
 				IndexMap = this[port].cmdMap;
 
@@ -1632,22 +1632,29 @@ return {
 
 		const verifyMap = this.consoleLog.SPJS.verifyMap;
 
-		// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
-		for (let i = verifyMap.length; i > 0; i--) {
-			// Only mark commands that are more recent than the errorCmdOnSpjsCloseMaxAge setting.
-			// this.consoleLog.updateCmd('SPJS', { Id: this.consoleLog.SPJS.logData[verifyMap[i]].Id, MaxAge: this.consoleLog.errorCmdOnSpjsCloseMaxAge, Status: 'Error', Comment: 'SPJS Closed' });
+		if (verifyMap.length > 0) {
 
-			let { matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Index: verifyMap[i] });
+			// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
+			for (let i = verifyMap.length - 1; i > 0; i--) {
+				// Only mark commands that are more recent than the errorCmdOnSpjsCloseMaxAge setting.
+				// this.consoleLog.updateCmd('SPJS', { Id: this.consoleLog.SPJS.logData[verifyMap[i]].Id, MaxAge: this.consoleLog.errorCmdOnSpjsCloseMaxAge, Status: 'Error', Comment: 'SPJS Closed' });
 
-			// If the command is not verified and the spjs is closed, set the message to error.
-			if (this.consoleLog.errorCmdOnSpjsCloseMaxAge === null || matchTime - Date.now() < this.consoleLog.errorCmdOnSpjsCloseMaxAge) {
-				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'SPJS Closed' });
+				let { matchId, matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Index: verifyMap[i] });
 
-			// If the command is older than the stale command limit, .
-			} else if (this.consoleLog.staleCmdLimit !== null && matchTime - Date.now() > this.consoleLog.staleCmdLimit) {
-				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
+				if (!matchId) continue;
+
+				// If the command is not verified and the spjs is closed, set the message to error.
+				if (this.consoleLog.errorCmdOnSpjsCloseMaxAge === null || matchTime - Date.now() < this.consoleLog.errorCmdOnSpjsCloseMaxAge) {
+					this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'SPJS Closed' });
+
+					// If the command is older than the stale command limit, .
+				} else if (this.consoleLog.staleCmdLimit !== null && matchTime - Date.now() > this.consoleLog.staleCmdLimit) {
+					this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
+
+				}
 
 			}
+
 		}
 
 		// Clear the verifyBuffer since any commands still not executed will not be able to execute now that the SPJS has disconnected/closed.
@@ -1668,6 +1675,7 @@ return {
 		// TODO: Do this in the portListDomUpdate() method.
 		$('#' + this.id + ' .serialport-connection-warning').addClass("hidden");
 		$('#' + this.id + ' .spjs-connection-warning').removeClass("hidden");
+
 		this.portListDomUpdate();
 
 		console.log("openPorts: " + gui.parseObject(this.SPJS.openPorts));
