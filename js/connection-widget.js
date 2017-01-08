@@ -128,17 +128,17 @@ return {
 			]
 		},
 		// { Friendly: 'Tinyg v9', Baud: 115200, Buffer: 'tinygg2', VidPids: [{ Vid: '', Pid: '' }] },
-		{ Friendly: 'FTDI or TinyG',
-			Baud: 115200,
-			Buffer: 'tinyg',
-			useReceivedFriendly: true,
-			autoConnectPort: true,
-			portMuted: false,
-			VidPids: [
-				// { Vid: '0403', Pid: '6015' }
-				{ Vid: '', Pid: '' }
-			]
-		},
+		// { Friendly: 'FTDI or TinyG',
+		// 	Baud: 115200,
+		// 	Buffer: 'tinyg',
+		// 	useReceivedFriendly: true,
+		// 	autoConnectPort: false,
+		// 	portMuted: false,
+		// 	VidPids: [
+		// 		// { Vid: '0403', Pid: '6015' }
+		// 		{ Vid: '', Pid: '' }
+		// 	]
+		// },
 		{ Friendly: 'Arduino Uno',
 			Baud: 9600,
 			Buffer: 'default',
@@ -192,6 +192,16 @@ return {
 			portMuted: false,
 			VidPids: [
 				{ Vid: '2047', Pid: '0013' }
+			]
+		},
+		{ Friendly: 'Device Not Recognized',
+			Baud: 9600,
+			Buffer: 'default',
+			useReceivedFriendly: true,
+			autoConnectPort: false,
+			portMuted: false,
+			VidPids: [
+				{ Vid: '', Pid: '' }
 			]
 		}
 	],
