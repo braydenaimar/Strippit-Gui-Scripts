@@ -1136,20 +1136,29 @@ return {
 
 		// Click events for each port in the serial port list.
 		$('#' + this.id + ' .splist-panel table.serial-port-list').on('click', "tr", function(evt) {
-			var port = $(this).attr("evt-data");
-			var portMeta = that.SPJS.portMeta;
-			var msg = "";
+
+			const port = $(this).attr("evt-data");
+			const portMeta = that.SPJS.portMeta;
+
+			let Msg = "";
+
+			const unsafePort = that.makePortUnSafe(port);
 
 			if (that.SPJS.openPorts.indexOf(port) == -1) {
-				console.log("Port " + port + " selected.\n  ...opening port.");
-				msg = "open " + port + " " + portMeta[port].Baud + " " + portMeta[port].Buffer;
+
+				console.log("Port " + unsafePort + " selected.\n  ...opening port.");
+				Msg = "open " + unsafePort + " " + portMeta[port].Baud + " " + portMeta[port].Buffer;
 
 			} else {
-				console.log("Port " + port + " selected.\n  ...closing port.");
-				msg = "close " + port;
+
+				console.log("Port " + unsafePort + " selected.\n  ...closing port.");
+				Msg = "close " + unsafePort;
 				that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
+
 			}
-			publish('/' + that.id + '/spjs-send', msg);
+
+			that.newspjsSend({ Msg });
+
 		});
 	},
 	initConsoleInput: function () {
@@ -1354,7 +1363,7 @@ return {
 
 		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
 
-			terminal = spawn('cd Strippit-Gui-Scripts && git pull');
+			terminal = spawn('cd Strippit-Gui-Scripts && git pull', [], { shell: true });
 
 			terminal.stdout.on('data', (data) => {
 				console.log(`Git pull stdout: ${data}`);
