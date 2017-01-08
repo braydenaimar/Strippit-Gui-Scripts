@@ -55,6 +55,7 @@ define(['jquery','gui','amplify'], function ($) {
 
 	(function testCode() {
 		console.groupCollapsed('OS Module');
+		console.log('OS:', hostMeta.os);
 		console.log('Platform:', os.platform());
 		console.log('Architecture:', os.arch());
 		console.log('CPUs:', os.cpus());

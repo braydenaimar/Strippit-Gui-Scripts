@@ -588,9 +588,12 @@ return {
 			// Arg. IndexMap [array][optional] - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
 			// Arg. StartFrom [number/string][optional] - Defaults to zero (eg. 10, 'Last').
 
+			const that = this;
+
 			if (IndexMap === undefined) {
 				console.warn('IndexMap is undefined.');
 				IndexMap = this[port].cmdMap;
+
 			}
 
 			let matchIndex = Index;
@@ -631,21 +634,32 @@ return {
 			// If the Index argument was omitted, search the port's console log for a match.
 			if (Index === undefined && SearchFrom >= 0) {
 
+				console.log('Searching forwards through the log for a match (ie. old to recent).');
+
 				// Debugging purposes only.
-				if (SearchFrom > IndexMap.length) {
+				if (SearchFrom == IndexMap.length) {
+					console.groupEnd();
+
+					return false;
+
+				} else if (SearchFrom > IndexMap.length) {
+
 					for (let i = 0; i < 10; i++) {
 						console.groupEnd();
 					}
+
 					throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
+
 				}
 
-				console.log('Searching forwards through the log for a match (ie. old to recent).');
+
 
 				for (let i = SearchFrom; i < IndexMap.length; i++) {
+
 					const logIndex = IndexMap[i];
 					const logItem = this[port].logData[logIndex];
 
-					// console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
+					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
 					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
@@ -655,11 +669,16 @@ return {
 					if (Type !== undefined && logItem.Type !== Type) continue;
 					if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
 					if (MaxAge && logItem.Time - Date.now() > MaxAge) {
+
 						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+
 							this.updateCmd(port, { Index: logIndex, Status: 'Error', Comment: 'Stale', UpdateRelated: true });
 							throw 'Stale! Stale! Stale! Command is stale.'
+
 						}
+
 						console.log('Over max age.');
+
 						continue;
 					}
 
@@ -671,28 +690,41 @@ return {
 						}
 
 						if (matchCount == Meta.length) continue;
+
 					}
 
 					console.log('  ...got a match.');
 					matchIndex = logIndex;
-					break;
 
-					// if ((Length !== undefined && PartMsg === undefined && logItem.Msg.length == Length) || (PartMsg !== undefined && Length === undefined && refMsg.test(msgData)) || (Length !== undefined && PartMsg !== undefined && logItem.Msg.length == Length && refMsg.test(msgData)) || (Length === undefined && PartMsg === undefined && logItem[dataRef] === data)) {
-					// 	console.log('  ...got a match');
-					// 	matchIndex = logIndex;
-					// 	break;
-					// }
+					break;
 				}
 
 			} else if (Index === undefined && SearchFrom < 0) {
 
 				console.log('Searching backwards through the log for a match (ie. recent to old).');
 
+				// Debugging purposes only.
+				if (SearchFrom * -1 == IndexMap.length) {
+					console.groupEnd();
+
+					return false;
+
+				} else if (SearchFrom * -1 > IndexMap.length) {
+
+					for (let i = 0; i < 10; i++) {
+						console.groupEnd();
+					}
+
+					throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
+
+				}
+
 				for (let i = SearchFrom * -1; i >= 0; i--) {
+
 					const logIndex = IndexMap[i];
 					const logItem = this[port].logData[logIndex];
 
-					// console.log(`Item: ${i}\n  Log index: ${logIndex}\n  ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type')))) }: ${Length !== undefined ? Length : (PartMsg !== undefined ? refMsg : logItem[dataRef])}`);
+					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
 					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
@@ -702,11 +734,16 @@ return {
 					if (Type !== undefined && logItem.Type !== Type) continue;
 					if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
 					if (MaxAge && logItem.Time - Date.now() > MaxAge) {
+
 						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+
 							this.updateCmd(port, { Index: logIndex, Status: 'Error', Comment: 'Stale', UpdateRelated: true });
 							throw 'Stale! Stale! Stale! Command is stale.'
+
 						}
+
 						console.log('Over max age.');
+
 						continue;
 					}
 
@@ -718,6 +755,7 @@ return {
 						}
 
 						if (matchCount == Meta.length) continue;
+
 					}
 
 					console.log('  ...got a match.');
@@ -797,7 +835,7 @@ return {
 			}
 
 			if (SearchFrom === undefined && (Status === 'Warning' || Status === 'Error')) {
-				SearchFrom = -1;
+				SearchFrom = this[port].cmdMap[this[port].cmdMap.length - 1] * -1;
 
 			} else if (SearchFrom === undefined) {
 				SearchFrom = 0;
@@ -1616,9 +1654,11 @@ return {
 
 	onVersion: function (data) {
 		const { Version } = data;
-		// Ex. {"Version" : "1.92"}
-		console.log("SPJS -Version-\n  Version: " + Version);
+		// Ex. { "Version": "1.92" }
 
+		console.log(`SPJS -Version-\n  Version: ${Version}`);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Version' });
 		this.consoleLog.updateCmd('SPJS', { Msg: 'version', Status: 'Executed' });
 
@@ -1627,9 +1667,11 @@ return {
 	},
 	onCommands: function (data) {
 		const { Commands } = data;
-		// Ex. {"Commands" : ["list", "open [portName] [baud]", ...]}
-		console.log("SPJS -Commands-");
+		// Ex. { "Commands" : [ "list", "open [portName] [baud]", ... ] }
 
+		console.log('SPJS -Commands-');
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Commands' });
 
 		this.SPJS.commands = Commands;
@@ -1637,38 +1679,45 @@ return {
 	},
 	onBufferAlgorithm: function (data) {
 		const { BufferAlgorithm } = data;
-		console.log("SPJS -BufferAlgorithm-\n BufferAlgorithm: " + BufferAlgorithm);
 
+		console.log(`SPJS -BufferAlgorithm-\n BufferAlgorithm: ${BufferAlgorithm}`);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'BufferAlgorithm' });
 		this.consoleLog.updateCmd('SPJS', { Msg: 'bufferalgorithms', Status: 'Executed' });
 
 	},
 	onBaudRate: function (data) {
 		const { BaudRate } = data;
-		console.log("SPJS -BaudRate-\n BaudRate: " + BaudRate);
+		console.log(`SPJS -BaudRate-\n BaudRate: ${BaudRate}`);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'BaudRate' });
 		this.consoleLog.updateCmd('SPJS', { Msg: 'baudrates', Status: 'Executed' });
 
 	},
 	onHostname: function (data) {
 		const { Hostname } = data;
-		// Ex. {"Hostname" : "Braydens-Laptop"}
-		console.log("SPJS -Hostname-\n  Hostname: " + Hostname);
+		// Ex. { "Hostname": "Braydens-Laptop" }
 
+		console.log(`SPJS -Hostname-\n  Hostname: ${Hostname}`);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Hostname' });
 		this.consoleLog.updateCmd('SPJS', { Msg: 'hostname', Status: 'Executed' });
 
 		this.SPJS.hostname = Hostname;
 
-		publish(`/${this.id}/spjs-send`, 'list');
+		this.newspjsSend({ Msg: 'list' });
 
 	},
 	onSerialPorts: function (data) {
 		// This method parses the port list data received from the SPJS.
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'SerialPorts' });
 
-	 	let that = this;
+	 	const that = this;
 
 		// Sort the portList data array by ascending port number. Technically this is not really needed... but ocd ;)
 		data = data.SerialPorts.sort((a, b) => {
@@ -1677,12 +1726,15 @@ return {
 
 		let dataObj = {};
 		// Make the port list data into an object.
-		for (let port = 0; port < data.length; port++) {
-			dataObj[data[port].Name] = {};
+		for (let i = 0; i < data.length; i++) {
+			// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
+			safePort = this.makePortSafe(data[i].Name);
 
-			for (let i in data[port]) {
-				if (i === 'Name') continue;
-				dataObj[data[port].Name][i] = data[port][i];
+			dataObj[safePort] = {};
+
+			for (let x in data[i]) {
+				if (x === 'Name') continue;
+				dataObj[data[i].Name][x] = data[i][x];
 			}
 		}
 
@@ -1995,48 +2047,52 @@ return {
 		const portList = this.SPJS.portList;
 		const portMeta = this.SPJS.portMeta;
 
-		for(let port in portMeta) {
+		for (let port in portMeta) {
 			// console.log("Port " + portMeta[port].Name + gui.parseObject(portMeta[port], 2));
 			// If the port's autoConnectPort property is 'true', and the port is not already open, send an 'open' command to the SPJS.
+			const unsafePort = this.makePortUnSafe(port);
+
 			if (portMeta[port].autoConnectPort && !portList[port].IsOpen) {
-				console.log("Port " + port + " ...connecting");
+				console.log(`Port '${unsafePort}' ...connecting`);
 
-				const message = `open ${port} ${portMeta[port].Baud} ${portMeta[port].Buffer}`;
+				const Msg = `open ${unsafePort} ${portMeta[port].Baud} ${portMeta[port].Buffer}`;
 
-				publish(`/${this.id}/spjs-send`, message);
+				this.newspjsSend({ Msg });
 
 			} else if (portList[port].IsOpen) {
-				console.log("Port " + port + " ...already open");
+				console.log(`Port '${unsafePort}' ...already open`);
 
 			} else {
-				console.log("Port " + port + " ...nope");
+				console.log(`Port '${unsafePort}' ...nope`);
 			}
 		}
 
 		console.groupEnd();
 	},
 	onPortOpen: function (data) {
-		const { Desc, Port, IsPrimary, Baud, BufferType, Cmd } = data;
+		const { Cmd, Port, IsPrimary, Baud, BufferType, Desc } = data;
 		// Ex. {Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2"}
 		console.log("SPJS -PortOpen-" + gui.parseObject(data, 2));
 
-		const that = this;
-
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+
+		const that = this;
+		const safePort = this.makePortSafe(Port);
 
 		// If this was caused by an 'open' command in the SPJS, set the status of that command to 'Executed'.
 		const refCmd = `open ${Port}`;
 		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' });
 
-		this.portConnected(data.Port);
-		this.sendPortInits(Port);
+		this.portConnected(safePort);
+		this.sendPortInits(safePort);
 
 		// publish(`/${this.id}/port-open`, port);
 
 		// Get port list to keep the portList object up to date.
 		// Use a delay to avoid getting corrupted port list data.
 		setTimeout(function() {
-			publish(`/${that.id}/spjs-send`, 'list');
+			that.newspjsSend({ Msg: 'list' });
 		}, 250);
 	},
 	portConnected: function (port) {
@@ -2227,41 +2283,47 @@ return {
 		if (nextPort && nextPort.length && nextPort != "SPJS") this.portDisconnected(nextPort);
 	},
 	onPortOpenFail: function (data) {
-		const { Desc, Port, Baud, Cmd } = data;
+		const { Cmd, Port, Baud, Desc } = data;
 		// Ex. {Cmd: "OpenFail", Desc: "Error opening port. The system cannot find the file specified.", Port: "COM99", Baud: 115200}
-		console.log("SPJS -PortOpenFail-\n  Cmd: " + data.Cmd + "\n  Port: " + data.Port + "\n  Baud: " + data.Baud + "\n  Desc: " + data.Desc);
+		console.log(`SPJS -PortOpenFail-\n  Cmd: ${Cmd}\n  Port: ${Port}\n  Baud: ${Baud}\n  Desc: ${Desc}`);
+
+		// Add the message to the SPJS log.
+		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
 		const that = this;
-
-		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+		const safePort = this.makePortSafe(Port);
 
 		// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
 		const refCmd = `open ${Port}`;
 		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Error' });
 
-		this.portDisconnected(Port);
+		this.portDisconnected(safePort);
 
 		// Repeatedly attempt to connect to a port.
 		if (this.SPJS.requestListDelay !== null) {
 			setTimeout(function() {
-				publish(`/${that.id}/spjs-send`, 'list');
+				that.newspjsSend({ Msg: 'list' });
 			}, this.SPJS.requestListDelay);
 		}
 
 	},
 	onPortClose: function (data) {
-		const { Desc, Port, Baud, Cmd } = data;
+		const { Cmd, Port, Baud, Desc } = data;
 		// Ex. {Cmd: "Close", Desc: "Got unregister/close on port.", Port: "COM10", Baud: 115200}
 		console.log("SPJS -PortClose-\n  Cmd: " + data.Cmd + "\n  Port: " + data.Port + "\n  Baud: " + data.Baud + "\n  Desc: " + data.Desc);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
 		const that = this;
+		const safePort = this.makePortSafe(Port);
+
 		const refCmd = `close ${Port}`;
 
 		// If the port closed because of a SPJS command, prevent the port from autoconnecting again.
 		if (this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' })) {
 			// FIXME: Fix this.
+			// FIXME: This is weird, the port doesnt autoconnect even though there is no code here.
 			// this.deviceMeta[this.SPJS.portMeta[].metaIndex].autoConnectPort = false;
 
 		// If the port did not close because of a SPJS command, we know that the port disconnected unexpectedly.
@@ -2271,12 +2333,12 @@ return {
 			// IDEA: Publish the unexpected port close event so that other widgets can respond accordingly.
 		}
 
-		this.portDisconnected(Port);
+		this.portDisconnected(safePort);
 
 		// Get port list to keep the portList object up to date.
 		// Use a delay to avoid getting corrupted port list data.
 		setTimeout(function() {
-			publish(`/${that.id}/spjs-send`, 'list');
+			that.newspjsSend({ Msg: 'list' });
 		}, 250);
 
 	},
@@ -2328,151 +2390,205 @@ return {
 
 	},
 	onBroadcast: function (data) {
-		const { Msg, Cmd } = data;
+		const { Cmd, Msg } = data;
 		// Ex. {Cmd: "Broadcast", Msg: "helloworld↵"}
 		console.log(`SPJS -Broadcast-\n  Cmd: ${Cmd}\n  Msg: ${Msg}`);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
 		this.consoleLog.updateCmd('SPJS', { PartMsg: 'broadcast', Status: 'Executed' });
-		// this.logCmdStatus('SPJS', {Cmd: 'broadcast'}, 'Executed');
+
 	},
 	onWipedQueue: function (data) {
-		const { Port, QCnt, Cmd } = data;
-		// Ex. {"Cmd":"WipedQueue","QCnt":0,"Port":"COM10"}
-		console.log("SPJS -WipedQueue-\n  Cmd: " + data.Cmd + "\n  QCnt: " + data.QCnt + "\n  Port: " + data.Port);
+		const { Cmd, QCnt, Port } = data;
+		// Ex. { "Cmd": "WipedQueue", "QCnt": 0, "Port": "COM10" }
 
+		console.log(`SPJS -WipedQueue-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Port: ${Port}`);
+
+		// Add the mess age to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+
+		const safePort = this.makePortSafe(Port);
+
 	},
 	onQueuedJson: function (data) {
-		const { P, Data, QCnt, Cmd } = data;
-		// Ex. {"Cmd":"Queued","QCnt":1,"P":"COM10","Data":[{"D":"\n","Id":"startup1","Pause":0}]}
-		// Ex. {Cmd: "Queued", QCnt: 2, P: "COM10", Data: :[{D: "$sys↵", Id:"console18", Pause: 0}, {D: "{"ej":""}↵", Id:"console18-part-2-2", Pause: 0}]}
-		console.log(`SPJS -QueuedJson-${gui.parseObject(data, 2)}`);
-		// let onQueuedJsonLog = "SPJS -QueuedJson-\n  Cmd: " + data.Cmd + "\n  QCnt: " + data.QCnt;
-		// $.each(data.Data, function(i, item) {
-		// 	onQueuedJsonLog += "\n  Data[" + i + "]:\n    D: " + item.D + "\n    Id: " + item.Id + "\n    Pause: " + item.Pause;
-		// });
-		// onQueuedJsonLog += "\n  Port: " + data.P;
-		// console.log(onQueuedJsonLog);
+		const { Cmd, QCnt, P, Data } = data;
 
+		// Ex. { "Cmd": "Queued", "QCnt": 1, "P": "COM10", "Data": [{ "D": "\n", "Id": "startup1", "Pause": 0 }] }
+		// Ex. { "Cmd": "Queued", "QCnt": 2, "P": "COM10", "Data": [{ "D": "$sys\n", "Id": "console18", "Pause": 0 }, { "D": "{"ej":""}\n", "Id": "console18-part-2-2", "Pause": 0 }] }
+
+		console.log(`SPJS -QueuedJson-${gui.parseObject(data, 2)}`);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+
+		const safePort = this.makePortSafe(P);
 
 		for (let i = 0; i < Data.length; i++) {
 
-			if (Data[i].Id === '' && !this.consoleLog.updateCmd(P, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true })) {
-				console.log('No match found searching for portSendNoBuf commands.');
-
-				// this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Completed', UpdateRelated: true });
-
-			} else if (Data[i].Id === '') {
-				// break;
-
-			}
-
+			// If a command was sent in one line that the device parses as two lines, it will add a suffix to the command's id like: 'com10n7' -> 'com10n7-part-1-2' and 'com10n7-part-1-2'.
+			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
 			const refId = Data[i].Id.split('-part')[0];
 
-			if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Queued', UpdateRelated: true })) {
-				this.consoleLog.updateCmd(P, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true });
-			}
+			if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+
+			if (this.consoleLog.updateCmd(safePort, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+
+			if (this.consoleLog.updateCmd(safePort, { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+
+			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
+			if (this.consoleLog.updateCmd('SPJS', { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+
+			console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
 
 		}
 
 	},
 	// FIXME: Make this work for multiple commands at a time (when a list of data and ids are received).
 	onQueuedText: function (data) {
-		const { Port, D, Ids, QCnt, Cmd } = data;
-		// Ex. {Cmd: "Queued", QCnt: 1, Ids: Array[1], D: Array[1], Port: "COM10"}
-		console.log("SPJS -QueuedText-");
+		const { Cmd, QCnt, Ids, D, Port } = data;
+		// Ex. { "Cmd": "Queued", "QCnt": 2, "Ids": [ "" ], "D": [ "!" ], "Port": "COM5" }
 
+		console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+
+		const safePort = this.makePortSafe(Port);
+
+		for (let i = 0; i < D.length; i++) {
+
+			// If a command was sent in one line that the device parses as two lines, it will add a suffix to the command's id like: 'com10n7' -> 'com10n7-part-1-2' and 'com10n7-part-1-2'.
+			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
+			const refId = Ids[i].split('-part')[0];
+			if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+
+			if (this.consoleLog.updateCmd(safePort, { Msg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+
+			if (this.consoleLog.updateCmd(safePort, { PartMsg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+
+			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
+			if (this.consoleLog.updateCmd('SPJS', { PartMsg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+
+			console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
+
+		}
+
 	},
 	onWriteJson: function (data) {
-		const { P, Id, QCnt, Cmd } = data;
-		// Ex. {"Cmd":"Write","QCnt":0,"Id":"startup1","P":"COM10"}
-		// Ex. {Cmd: "Write", QCnt: 1, Id: "console18", P: "COM10"}
-		// Ex. {Cmd: "Write", QCnt: 0, Id: "console18-part-2-2", P: "COM10"}
-		// Ex. {Cmd: "Write", QCnt: 0, Id: "", P: "COM10"} <- from send text instead of json
+		const { Cmd, QCnt, Id, P } = data;
+
+		// Ex. { "Cmd": "Write", "QCnt" :0, "Id": "startup1", "P": "COM10" }
+		// Ex. { "Cmd": "Write", "QCnt": 1, "Id": "console18", "P": "COM10" }
+		// Ex. { "Cmd": "Write", "QCnt": 0, "Id": "console18-part-2-2", "P": "COM10" }
+		// Ex. { "Cmd": "Write", "QCnt": 0, "Id": "", "P": "COM10" } <- from send text instead of json.
+		// Ex. { "Cmd": "Write", "QCnt": 1, "Id": "", "P": "COM5" }
+
 		console.log(`SPJS -WriteJson-${gui.parseObject(data, 2)}`);
 		// console.log("SPJS -WriteJson-\n  Cmd: " + data.Cmd + "\n  QCnt: " + data.QCnt + "\n  Id: " + data.Id + "\n  Port: " + data.P);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		// See if we have an Id in the resposne, if so it is from a json send and we need to see the response.
-		// If there is no id, look for a recent command sent without buffering.
-		if (Id === '') {
-
-			if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Completed', UpdateRelated: true })) {
-				console.log('No match found searching for portSendNoBuf commands.');
-			}
-
-			return;
-		}
-
-		const refId = Id.split('-part')[0];
-
-		// if (Id.includes('-part')) {
-		// 	console.warn(`There was '-part' added onto the id.\nId: ${Id}\nNew Id: ${refId}`);
+		// // See if we have an Id in the resposne, if so it is from a json send and we need to see the response.
+		// // If there is no id, look for a recent command sent without buffering.
+		// if (Id === '') {
+		//
+		// 	if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Written', UpdateRelated: true })) {
+		// 		console.log('No match found searching for portSendNoBuf commands.');
+		// 	}
+		//
+		// 	return;
+		// }
+		//
+		// const refId = Id.split('-part')[0];
+		//
+		// // if (Id.includes('-part')) {
+		// // 	console.warn(`There was '-part' added onto the id.\nId: ${Id}\nNew Id: ${refId}`);
+		// // }
+		//
+		// // If the command was sent in json for with one or more other commands, look for it in the port's console log.
+		// if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Written', UpdateRelated: true })) {
+		// 	this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' });
+		//
 		// }
 
-		// If the command was sent in json for with one or more other commands, look for it in the port's console log.
-		if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Written', UpdateRelated: true })) {
-			this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' });
+		const safePort = this.makePortSafe(P);
+		const refId = Id.split('-part')[0];
 
-		}
-		// this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' });
-		// this.logCmdStatus(P, {Id: refId}, 'Written');
-		// this.logCmdStatus('SPJS', {Id: refId}, 'Written');
+		if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true })) return;
+		if (this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' })) return;
+
+		// The message could be from a recent sendNoBuf command.
+		const refMsg = `sendnobuf ${P}`;
+		const cmdMap = this.consoleLog[safePort].cmdMap;
+
+		if (!Id && this.consoleLog[safePort].cmdMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - this.consoleLog[safePort].cmdMap.length })) return;
 
 	},
 	onCompleteJson: function (data) {
-		const {Cmd, Id, P} = data;
-		// Ex. {Cmd: "Complete", Id: "internalInit0", P: "COM10"}
-		// Ex. {Cmd: "CompleteFake", Id: "console18", P: "COM10"}
-		// Ex. {Cmd: "Complete", Id: "console18-part-2-2", P: "COM10"}
+		const { Cmd, Id, P } = data;
+
+		// Ex. { "Cmd": "Complete", "Id": "internalInit0", "P": "COM10" }
+		// Ex. { "Cmd": "CompleteFake", "Id": "console18", "P": "COM10" }
+		// Ex. { "Cmd": "Complete", "Id": "console18-part-2-2", "P": "COM10" }
+		// Ex. { "Cmd": "CompleteFake", "Id": "", "P": "COM5" } <- from send text instead of json.
+
 		console.log(`SPJS -CompleteJson-\n  Cmd: ${Cmd}\n  Id: ${Id}\n  Port: ${P}`);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		// if (!Id) {
-		// 	return false;
+		// // If there is no id, look for a recent command sent without buffering.
+		// if (Id === '') {
+		// 	if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Completed', UpdateRelated: true })) {
+		// 		console.log('No match found searching for portSendNoBuf commands.');
+		// 	}
+		// 	return;
+		// }
+		// // const refId = (Id.match('-part')) ? Id.split()
+		// const refId = Id.split('-part')[0];
+		//
+		// // If the command was sent in json for with one or more other commands, look for it in the port's console log.
+		// if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Completed', UpdateRelated: true })) {
+		// 	this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' });
 		// }
 
-		// If there is no id, look for a recent command sent without buffering.
-		if (Id === '') {
-
-			if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Completed', UpdateRelated: true })) {
-				console.log('No match found searching for portSendNoBuf commands.');
-			}
-
-			return;
-		}
-
-		// const refId = (Id.match('-part')) ? Id.split()
+		const safePort = this.makePortSafe(P);
 		const refId = Id.split('-part')[0];
 
-		// If the command was sent in json for with one or more other commands, look for it in the port's console log.
-		if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Completed', UpdateRelated: true })) {
-			this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' });
+		if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Completed', UpdateRelated: true })) return;
+		if (this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' })) return;
 
-		}
+		// The message could be from a recent sendNoBuf command.
+		const refMsg = `sendnobuf ${P}`;
+		const cmdMap = this.consoleLog[safePort].cmdMap;
 
-		// this.logCmdStatus(P, {Id: refId}, 'Completed');
-		// this.logCmdStatus('SPJS', {Id: refId}, 'Completed');
+		if (!Id && this.consoleLog[safePort].cmdMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - this.consoleLog[safePort].cmdMap.length })) return;
 
 	},
 	onErrorText: function (data) {
 		const { Error } = data;
+
 		// Ex. { "Error": "We could not find the serial port 10 that you were trying to apply the feedrate override to. This error is ok actually because it just means you have not opened the serial port yet." }
 		// Ex. { "Error": "You did not specify a port and baud rate in your open cmd" }
 		// Ex. { "Error": "Could not understand command." }
-		console.warn(`SPJS -ErrorText-\n  Error: ${Error}`);
+		// Ex. { "Error": "Could not parse send command: sendNoBuf" }
 
+		console.log(`SPJS -ErrorText-\n  Error: ${Error}`);
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
-		// If the verifyBuffer has anything in it, make the most recent command have a status of error.
-		const verifyMap = this.consoleLog.SPJS.verifyMap;
-		verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], Status: 'Error' });
+		const refMsg = Error.includes(':') ? Error.substring(Error.indexOf(':') + 2) : null;
+
+		if (!refMsg || (refMsg && !this.consoleog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' }))) {
+			// If the verifyBuffer has anything in it, make the most recent command have a status of error.
+			const verifyMap = this.consoleLog.SPJS.verifyMap;
+			verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
+
+		}
 
 	},
 	onErrorJson: function (data) {
@@ -2480,16 +2596,18 @@ return {
 
 		console.warn('SPJS -ErrorJson-\n ', data);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 	},
 	onSystemAlarm: function (data) {
-		// Ex. {er: {fb: 78.02, st: 27, msg: "System alarmed", val: 1}}
 		const { er } = data;
+		// Ex. { "er": { "fb": 78.02, "st": 27, "msg": "System alarmed", "val": 1 } }
 
 		const { Label, Desc } = this.lookupStatusCode(er.st);
 
 		console.warn('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${ Desc ? `\n  Desc: ${Desc}` : ''}`);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
 	},
@@ -2513,42 +2631,48 @@ return {
 
 	},
 	onFeedRateOverride: function (data) {
-		const { Desc, Port, FeedRateOverride, IsOn, Cmd } = data;
-		// Ex. {"Cmd":"FeedRateOverride","Desc":"Successfully set the feedrate override.","Port":"COM10","FeedRateOverride":3,"IsOn":true}
+		const { Cmd, Desc, Port, FeedRateOverride, IsOn } = data;
+		// Ex. { "Cmd": "FeedRateOverride", "Desc": "Successfully set the feedrate override.", "Port": "COM10", "FeedRateOverride": 3, "IsOn": true }
+
 		console.log(`SPJS -FeedRateOverride-\n  Desc: ${Desc}\n  Port: ${Port}\n  FeedRateOverride: ${FeedRateOverride}\n  IsOn: ${IsOn}\n  Cmd: ${Cmd}`);
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
-		this.consoleLog.updateCmd('SPJS', { PartMsg: 'fro com' , Status: 'Executed' });
+		this.consoleLog.updateCmd('SPJS', { PartMsg: 'fro ' , Status: 'Executed' });
+
 	},
 	onRawPortData: function (data) {
 		const { P, D } = data;
-		// Ex. {P: "COM10", D: "{"r":{"fv":0.970,"fb":78.02,"cv":5,"hp":3,"hv":0,"…"02130215d42","msg":"SYSTEM READY"},"f":[1,0,0]}↵"}
-		// Ex. {P: "COM10", D: "[fb]  firmware build             78.02↵"}
-		// Ex. {P: "COM10", D: "{"r":{"rxm":null},"f":[1,100,9]}↵"}
-		// Ex. {P: "COM10", D: "{"r":{"ej":1},"f":[1,0,9]}↵"}
-		// Ex. {P: "COM10", D: "{"r":{"gc":"G0X0"},"f":[1,102,7]}↵"} <- from send text instead of json
-		// console.log('SPJS -RawPortData-');
+
+		// Ex. { "P": "COM10", "D": "{"r":{"fv":0.970,"fb":78.02,"cv":5,"hp":3,"hv":0,"…"02130215d42","msg":"SYSTEM READY" }, "f": [1,0,0]}\n" }
+		// Ex. { "P": "COM10", "D": "[fb]  firmware build             78.02\n" }
+		// Ex. { "P": "COM10", "D": "{"r":{"rxm":null},"f":[1,100,9]}\n" }
+		// Ex. { "P": "COM10", "D": "{"r":{"ej":1},"f":[1,0,9]}\n" }
+		// Ex. { "P": "COM10", "D": "{"r":{"gc":"G0X0"},"f":[1,102,7]}\n" } <- from send text instead of json
 
 		const logMessage = JSON.stringify(data, null, " ").replace(/\\\"/g, '"').replace(/\t/g, '    ');
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'RawPortData' });
 
-		let port = data.P;
+		const port = data.P;
+		const safePort = this.makePortSafe(port);
 
 		// If the dataRecvBuffer object for this port is not defined, define it.
-		if (this.dataRecvBuffer[port] === undefined) {
-			this.dataRecvBuffer[port] = '';
+		if (this.dataRecvBuffer[safePort] === undefined) {
+			this.dataRecvBuffer[safePort] = '';
 		}
 
 		// Buffer the raw data onto the dataRecvBuffer object.
-		this.dataRecvBuffer[port] += data.D;
+		this.dataRecvBuffer[safePort] += data.D;
 
 		// If there is at least one full line of raw data in the data buffer and this port is open, parse the data in the raw data buffer.
-		if (this.dataRecvBuffer[port].match(/\n/) && this.consoleLog.openLogs.indexOf(port) != -1) {
+		if (this.dataRecvBuffer[safePort].match(/\n/) && this.consoleLog.openLogs.indexOf(safePort) != -1) {
 			// console.log('  ...parsing raw data.');
-			this.parseRawPortData(port);
+			this.parseRawPortData(safePort);
 
 		// If this port is not open yet.
-		} else if (this.consoleLog.openLogs.indexOf(port) == -1) {
+		} else if (this.consoleLog.openLogs.indexOf(safePort) == -1) {
 			// console.log('  ...port not open yet.');
 		}
 
@@ -2713,6 +2837,7 @@ return {
 		}
 
 		console.groupEnd();
+
 	},
 	onQueueCnt: function (data) {
 		const { QCnt } = data;
@@ -2720,6 +2845,7 @@ return {
 		console.log(`SPJS -QueueCnt-\n  QCnt: ${QCnt}`);
 
 		this.queueCount = Number(QCnt);
+
 	},
 	onGarbageCollection: function (data) {
 		const { gc } = data;
@@ -2736,16 +2862,20 @@ return {
 	},
 	onGarbageHeap: function (data) {
 		const { Alloc, TotalAlloc, Sys, Lookups, Mallocs, Frees, HeapAlloc, HeapSys, HeapIdle, HeapInuse, HeapReleased, HeapObjects, StackInuse, StackSys, MSpanInuse, MSpanSys, MCacheInuse, MCacheSys, BuckHashSys, GCSys, OtherSys, NextGC, LastGC, PauseTotalNS, PauseNS, PauseEnd, NumGC, GCCPUFraction, EnableGC, DebugGC, BySize } = data;
+
 		console.log('SPJS -GarbageCollectionHeap-');
 
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'GarbageHeap' });
 
 		console.log(`GCCPUFraction: ${(GCCPUFraction * 100).toFixed(10)}%`);
+
 	},
 	onExecRuntimeStatus: function (data) {
-		// Ex. {"ExecRuntimeStatus":"Done","OS":"windows","Arch":"amd64","Goroot":"/usr/local/go","NumCpu":4}
-		// The ExecRuntimeStatus message is a result of calling the 'execruntime' command.
 		const { ExecRuntimeStatus, OS, Arch, Goroot, NumCpu } = data;
+
+		// The ExecRuntimeStatus message is a result of calling the 'execruntime' command.
+		// Ex. { "ExecRuntimeStatus": "Done", "OS": "windows", "Arch": "amd64", "Goroot": "/usr/local/go", "NumCpu": 4 }
 
 		console.log('SPJS -ExecRuntimeStatus-');
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'ExecRuntimeStatus' });
@@ -2753,12 +2883,14 @@ return {
 		const statusMeta = {
 			Done: 'Executed'
 		};
+
 		this.consoleLog.updateCmd('SPJS', { Msg: 'execruntime', Status: statusMeta[ExecRuntimeStatus]});
+
 	},
 	onExecStatus: function (data) {
-		// Ex. {"ExecStatus":"Error","Id":"","Cmd":"C:\\WINDOWS\\system32\\cmd.exe","Args":["cd thermika"],"Output":"Error trying to execute terminal command. No user/pass provided or command line switch was not specified to allow exec command. Provide a valied username/password or restart spjs with -allowexec command line option to exec command."}
-		// Ex. { "ExecStatus": "Progress", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld"}
-		// Ex. { "ExecStatus": "Done", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld"}
+		// Ex. { "ExecStatus": "Error", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "cd thermika" ], "Output": "Error trying to execute terminal command. No user/pass provided or command line switch was not specified to allow exec command. Provide a valied username/password or restart spjs with -allowexec command line option to exec command." }
+		// Ex. { "ExecStatus": "Progress", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
+		// Ex. { "ExecStatus": "Done", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
 		const { ExecStatus, Id, Cmd, Args, Output } = data;
 
 		console.log('SPJS -ExecStatus-');
@@ -2769,25 +2901,34 @@ return {
 			Done: 'Executed',
 			Error: 'Error'
 		};
-		let comment = '';
+
+		let Comment = '';
 
 		if (ExecStatus === 'Error' && Output.includes('No user/pass provided')) {
-			comment = 'Permission Denied';
+			Comment = 'Permission Denied';
+
+		} else if (ExecStatus === 'Error') {
+			Comment = 'Failed';
+
 		}
 
 		let Msg = 'exec';
+
 		for (let i = 0; i < Args.length; i++) {
 			Msg += ` ${Args[i]}`;
+
 		}
 
-		this.consoleLog.updateCmd('SPJS', { Msg, Status: statusMeta[ExecStatus], Comment: comment });
+		this.consoleLog.updateCmd('SPJS', { Msg, Status: statusMeta[ExecStatus], Comment });
+
 	},
 	onParseError: function (data) {
-		console.group('SPJS -ParseError-');
-		console.warn(`Msg: ${data}`);
-		// Ex. {"Error" : "Problem decoding json. giving up. json: {"P":"COM11","Data":[{"D":"Hi ","Id":"mdi-com11log0"}]}, err:invalid character '\n' in string literal"}
+		// Ex. { "Error" : "Problem decoding json. giving up. json: {"P":"COM11","Data":[{"D":"Hi ","Id":"mdi-com11log0"}]}, err:invalid character '\n' in string literal" }
+
+		console.group(`SPJS -ParseError-\n  Error: ${Error}`);
 
 		if (data.includes('Problem decoding json. giving up. json: ') && data.includes(', err:')) {
+
 			let a = data.indexOf('json: ') + 6;
 			let b = data.indexOf(', err:');
 
@@ -2795,21 +2936,43 @@ return {
 			console.log(`refMsg: ${refMsg}`);
 
 			if (!this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'JSON Error' })) {
+
 				console.log('Match not found.\nTrying to get Id from error report.');
 
 				if (data.includes('"Id":"') && (/\"[\}\]]+,/).test(data)) {
+
 					let a = data.indexOf('"Id":"') + 6;
 					let b = data.indexOf(data.match(/\"[\}\]]+,/)[0]);
+
 					// console.log(`match: ${data.match(/\"[\}\]]+,/)}\nStartIndex: ${a}\nEndIndex: ${b}`);
 
 					const refId = data.substring(a, b);
 					console.log(`refId: ${refId}`);
 
 					this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Error', Comment: 'JSON Error' });
+
 				}
+
 			}
+
 		}
+
 		console.groupEnd();
+
+	},
+	makePortSafe(unsafePortName) {
+		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
+
+		let safePortName = unsafePortName.replace(/^\//g, 'fs-').replace(/\//g, '-fs-');
+
+		return safePortName;
+	},
+	makePortUnSafe(safePortName) {
+		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
+
+		let unsafePortName = safePortName.replace(/fs-|-fs-/g, '/');
+
+		return unsafePortName;
 	},
 
 	newspjsSend: function ({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [] }) {
@@ -2869,7 +3032,8 @@ return {
 		// If the id argument was omitted, the appendMsg method will make one up.
 		const { cmdId } = this.consoleLog.appendMsg(port, { Msg, IdPrefix, Type, Status, Comment, Meta });
 
-		const cmd = `send ${port} ${Msg}`;
+		const unsafePort = this.makePortUnSafe(port);
+		const cmd = `send ${unsafePort} ${Msg}`;
 
 		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
 		if (!this.newspjsSend({ Msg: cmd, Id: cmdId, Status, Comment, Related: port, Meta })) {
@@ -2894,7 +3058,8 @@ return {
 		// If the id argument was omitted, the appendMsg method will make one up.
 		const { cmdId } = this.consoleLog.appendMsg(port, { Msg, IdPrefix, Type, Status, Comment, Meta });
 
-		const cmd = `sendnobuf ${port} ${Msg}`;
+		const unsafePort = this.makePortUnSafe(port);
+		const cmd = `sendnobuf ${unsafePort} ${Msg}`;
 
 		let Related = {
 			Port: port,
@@ -2921,6 +3086,7 @@ return {
 		// 	Ex. [ [msg0,(id0),(pause0)], [msg1,(id1),(pause1)], ..., [msgn,(idn),(pausen)] ]
 		// Arg. Msg [string] - Can be used instead of Data for single line commands.
 		// Arg. Id [string] - If there are multiple msgs and the id ends with a number, the number will be incremented automatically for each msg. Otherwise, a suffix (ie. '-0', '-1', '-2', ... '-n') will be added to the end of each id.
+
 		console.groupCollapsed('newportSendJson');
 
 		// If the Meta argument is not an array, split it into an array.
@@ -2929,8 +3095,6 @@ return {
 			Meta = Meta.split(' ');
 		}
 
-		// Meta.push('portSendJson');
-
 		let cmdBuffer = [];
 		let idBase;
 		let idSuffix;
@@ -2938,12 +3102,14 @@ return {
 		// Msg argument can be used instead of Data argument to pass a single command.
 		if (Data === undefined && Msg !== undefined) {
 			Data = Msg;
+
 		}
 
 		// The data argument is [array[]], parse the data from it.
 		if (Array.isArray(Data)) {
 
 			if (Id) {
+
 				idBase = Id.substring(0, Id.search(/\d+\b/));
 				idSuffix = /\d+\b/.exec();
 
@@ -2952,9 +3118,11 @@ return {
 				}
 
 				console.log(`idBase: ${idBase}\nidSuffix: ${idSuffix}`);
+
 			}
 
 			for (let i = 0; i < Data.length; i++) {
+
 				cmdBuffer.push({ Msg: Data[i], Id, IdPrefix, Pause, Status, Comment, Meta: i < Data.length - 1 ? ['portSendJson'].concat(`${ i + 1 }of${Data.length}`, Meta) : ['portSendJson'].concat(`${ i + 1 }of${Data.length}`, 'final', Meta) });
 				let item = cmdBuffer[i];
 
@@ -2962,6 +3130,7 @@ return {
 				// Eg. Data: [ { Msg:msg0, Id:id0 }, { Msg:msg1, Id:id1 }, ..., { Msg:msgn, Id:idn } ]
 				// Eg. Data: [ { Msg:msg0, Id:id0, Pause:pause0 }, { Msg:msg1, Id:id1, Pause:pause1 }, ..., { Msg:msgn, Id:idn, Pause:pausen } ]
 				if (typeof(Data[i]) === 'object') {
+
 					console.log('Data argument is [array[object[string/int]]]');
 					// Parse item msg.
 					item.Msg = Data[i].Msg;
@@ -3006,6 +3175,7 @@ return {
 		// Data is a single command.
 		// Eg. Data: msg, Id: id, ...etc.
 		} else if (typeof Data === 'string') {
+
 			console.log('Data argument is a string.');
 			// console.error('Id argument was omitted.\n  Id:', Id);
 
@@ -3015,13 +3185,16 @@ return {
 
 		} else {
 			console.error('Did not receive a valid Data argument.\n  Data:', Data);
+
 		}
 
-		let cmd = `sendjson {"P":"${port}","Data":[`;
+		const unsafePort = this.makePortUnSafe(port);
+		let cmd = `sendjson {"P":"${unsafePort}","Data":[`;
 		let cmdIds = [];
 
 		// Build the command string.
 		for (let i = 0; i < cmdBuffer.length; i++) {
+
 			let bufferItem = cmdBuffer[i];
 
 			// Append the command to this port's log and use the returned id as the id for the SPJS log as well.
@@ -3032,6 +3205,7 @@ return {
 			// Do not add a linefeed character to a reset or feedhold command.
 			if (!(/\\n$/).test(bufferItem.Msg) && !(/[%!]/).test(bufferItem.Msg)) {
 				bufferItem.Msg += '\\n';
+
 			}
 
 			cmd += i ? ',' : '';
@@ -3049,17 +3223,43 @@ return {
 			return false;
 		}
 
-		// Return true to indicate that the command was sent successfully.
 		console.groupEnd();
+
+		// Return true to indicate that the command was sent successfully.
 		return spjsId;
 	},
 	mdiSend: function (port, { Msg }) {
+
+		const that = this;
 
 		// If there is space before the message, remove it.
 		Msg = /^\s+\S/.test(Msg) ? Msg.replace(/^\s+/, '') : Msg;
 
 		if (port === 'SPJS') {
-			this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
+
+			// Ex. Msg: 'sendnobuf COM5 helloworld'
+			let [ msgOperation, msgPort, ...msg ] = Msg.split(' ');
+			msg = msg.join(' ');
+			const safeMsgPort = this.makePortSafe(msgPort);
+
+			console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
+
+			// If the message relates to a port, put the message in the port's log.
+			// TODO: Make this work for sendjson messages as well.
+			if (msgOperation === 'sendnobuf' && msg !== undefined && this.consoleLog.openLogs.includes(this.makePortSafe())) {
+
+				const { cmdId } = this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand', Related: safeMsgPort });
+
+				// Add the command to the respective port's log with the same id as the message in the SPJS log.
+				if (cmdId) {
+					this.consoleLog.appendMsg(safeMsgPort, { Msg: msg, Id: cmdId, Type: 'MdiCommand', Meta: [ 'portSendNoBuf' ], Status: 'Sent' });
+
+				}
+
+			} else {
+				this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
+
+			}
 
 		// If a message contains only characters like '!' or '%', send to device without buffering.
 		} else if (/\W/.test(Msg) && !/ |\w|\?/.test(Msg)) {
@@ -3072,6 +3272,7 @@ return {
 
 	},
 
+	// Deprecated Jan. 07, 2017:
 	spjsSend: function (cmd, id, Related, Status, Comment, Meta) {
 		console.log("SPJS Send:\n  " + cmd);
 
