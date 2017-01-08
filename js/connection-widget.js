@@ -1354,7 +1354,7 @@ return {
 
 		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
 
-			terminal = spawn('cd Strippit-gui/Strippit-Gui-Scripts && git pull');
+			terminal = spawn('cd Strippit-Gui-Scripts && git pull');
 
 			terminal.stdout.on('data', (data) => {
 				console.log(`Git pull stdout: ${data}`);
