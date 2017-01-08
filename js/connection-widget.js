@@ -1793,8 +1793,18 @@ return {
 			dataObj[safePort] = {};
 
 			for (let x in data[i]) {
-				if (x === 'Name') continue;
-				dataObj[safePort][x] = data[i][x];
+
+				if (x === 'Name') {
+					continue;
+
+				} else if (x === 'RelatedNames') {
+					dataObj[safePort][x] = this.makePortSafe(data[i][x]);
+
+				} else {
+					dataObj[safePort][x] = data[i][x];
+
+				}
+
 			}
 		}
 
