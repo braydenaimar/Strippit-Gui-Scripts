@@ -2639,13 +2639,25 @@ return {
 		// Ex. { "Error": "You did not specify a port and baud rate in your open cmd" }
 		// Ex. { "Error": "Could not understand command." }
 		// Ex. { "Error": "Could not parse send command: sendNoBuf" }
+		// Ex. { "Error": "We could not find the serial port /dev/ttyAMA0 that you were trying to apply the feedrate override to. This error is ok actually because it just means you have not opened the serial port yet." }
 
 		console.log(`SPJS -ErrorText-\n  Error: ${Error}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
-		const refMsg = Error.includes(':') ? Error.substring(Error.indexOf(':') + 2) : null;
+		const refMsg = '';
+
+		if (Error.includes(':')) {
+			refMsg = Error.substring(Error.indexOf(':') + 2);
+
+		} else if (Error.includes('serial port') && Error.includes('that you were trying')) {
+			let a = Error.indexOf('serial port') + 12;
+			let b = Error.indexOf('that you were trying') - 1;
+
+			refMsg = Error.substring(a, b);
+
+		}
 
 		console.log(`refMsg: '${refMsg}'`);
 
