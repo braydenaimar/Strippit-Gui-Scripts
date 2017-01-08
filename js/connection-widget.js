@@ -826,16 +826,19 @@ return {
 			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
 			console.log(CSON.stringify(arguments));
 
+			const cmdMap = this[port].cmdMap;
+			const verifyMap = this[port].verifyMap;
+
 			// Use verifyMap if doing a status update other than warning or error.
 			if (IndexMap === undefined && Status && Status !== 'Warning' && Status !== 'Error') {
-				IndexMap = this[port].verifyMap;
+				IndexMap = verifyMap;
 
 			} else if (IndexMap === undefined) {
-				IndexMap = this[port].cmdMap;
+				IndexMap = cmdMap;
 			}
 
 			if (SearchFrom === undefined && (Status === 'Warning' || Status === 'Error')) {
-				SearchFrom = this[port].cmdMap[this[port].cmdMap.length - 1] * -1;
+				SearchFrom = 1 - cmdMap.length;
 
 			} else if (SearchFrom === undefined) {
 				SearchFrom = 0;
@@ -2431,7 +2434,7 @@ return {
 			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
 			const refId = Data[i].Id.split('-part')[0];
 
-			if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+			if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
 
 			if (this.consoleLog.updateCmd(safePort, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
 
@@ -2450,7 +2453,7 @@ return {
 		const { Cmd, QCnt, Ids, D, Port } = data;
 		// Ex. { "Cmd": "Queued", "QCnt": 2, "Ids": [ "" ], "D": [ "!" ], "Port": "COM5" }
 
-		console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
+		console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -2462,7 +2465,8 @@ return {
 			// If a command was sent in one line that the device parses as two lines, it will add a suffix to the command's id like: 'com10n7' -> 'com10n7-part-1-2' and 'com10n7-part-1-2'.
 			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
 			const refId = Ids[i].split('-part')[0];
-			if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+
+			if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
 
 			if (this.consoleLog.updateCmd(safePort, { Msg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
 
@@ -2517,14 +2521,20 @@ return {
 		const safePort = this.makePortSafe(P);
 		const refId = Id.split('-part')[0];
 
-		if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true })) return;
-		if (this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' })) return;
+		if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true })) return;
+		if (refId && this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' })) return;
 
 		// The message could be from a recent sendNoBuf command.
 		const refMsg = `sendnobuf ${P}`;
-		const cmdMap = this.consoleLog[safePort].cmdMap;
 
-		if (!Id && this.consoleLog[safePort].cmdMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - this.consoleLog[safePort].cmdMap.length })) return;
+		const cmdMap = this.consoleLog.SPJS.cmdMap;
+		const verifyMap = this.consoleLog.SPJS.verifyMap;
+
+		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
+
+		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - verifyMap.length, IndexMap: verifyMap })) return;
+
+		console.log(`No match was found for Id: '${Id}'`);
 
 	},
 	onCompleteJson: function (data) {
@@ -2558,14 +2568,20 @@ return {
 		const safePort = this.makePortSafe(P);
 		const refId = Id.split('-part')[0];
 
-		if (this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Completed', UpdateRelated: true })) return;
-		if (this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' })) return;
+		if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Completed', UpdateRelated: true })) return;
+		if (refId && this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' })) return;
 
 		// The message could be from a recent sendNoBuf command.
 		const refMsg = `sendnobuf ${P}`;
-		const cmdMap = this.consoleLog[safePort].cmdMap;
 
-		if (!Id && this.consoleLog[safePort].cmdMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - this.consoleLog[safePort].cmdMap.length })) return;
+		const cmdMap = this.consoleLog.SPJS.cmdMap;
+		const verifyMap = this.consoleLog.SPJS.verifyMap;
+
+		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
+
+		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - verifyMap.length, IndexMap: verifyMap })) return;
+
+		console.log(`No match was found for Id: '${Id}'`);
 
 	},
 	onErrorText: function (data) {
@@ -2583,9 +2599,13 @@ return {
 
 		const refMsg = Error.includes(':') ? Error.substring(Error.indexOf(':') + 2) : null;
 
-		if (!refMsg || (refMsg && !this.consoleog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' }))) {
+		console.log(`refMsg: '${refMsg}'`);
+
+		if (!refMsg || (refMsg && !this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' }))) {
+
 			// If the verifyBuffer has anything in it, make the most recent command have a status of error.
 			const verifyMap = this.consoleLog.SPJS.verifyMap;
+
 			verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
 
 		}
@@ -2963,14 +2983,14 @@ return {
 	makePortSafe(unsafePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
-		let safePortName = unsafePortName.replace(/^\//g, 'fs-').replace(/\//g, '-fs-');
+		let safePortName = unsafePortName ? unsafePortName.replace(/^\//g, 'fs-').replace(/\//g, '-fs-') : unsafePortName;
 
 		return safePortName;
 	},
 	makePortUnSafe(safePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
-		let unsafePortName = safePortName.replace(/fs-|-fs-/g, '/');
+		let unsafePortName = safePortName ? safePortName.replace(/fs-|-fs-/g, '/') : safePortName;
 
 		return unsafePortName;
 	},
@@ -3016,7 +3036,7 @@ return {
 		}
 
 		// Return the command id to indicate that the command was sent successfully.
-		return cmdId;
+		return { cmdId };
 	},
 	newportSend: function (port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
 
@@ -3041,7 +3061,7 @@ return {
 		}
 
 		// Return true to indicate that the command was sent successfully.
-		return true;
+		return cmdId;
 	},
 	newportSendNoBuf: function (port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
 		// To reset tinyg board, send it a '\u0018\n' command.
@@ -3237,23 +3257,33 @@ return {
 
 		if (port === 'SPJS') {
 
-			// Ex. Msg: 'sendnobuf COM5 helloworld'
-			let [ msgOperation, msgPort, ...msg ] = Msg.split(' ');
-			msg = msg.join(' ');
-			const safeMsgPort = this.makePortSafe(msgPort);
-
-			console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
-
 			// If the message relates to a port, put the message in the port's log.
 			// TODO: Make this work for sendjson messages as well.
-			if (msgOperation === 'sendnobuf' && msg !== undefined && this.consoleLog.openLogs.includes(this.makePortSafe())) {
+			// Ex. Msg: 'sendnobuf COM5 helloworld'
+			if (Msg.includes('sendnobuf')) {
+
+				let [ msgOperation, msgPort, ...msg ] = Msg.split(' ');
+				msg = msg.join(' ');
+
+				console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
+
+				const safeMsgPort = msgPort ? this.makePortSafe(msgPort): msgPort;
 
 				const { cmdId } = this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand', Related: safeMsgPort });
 
 				// Add the command to the respective port's log with the same id as the message in the SPJS log.
-				if (cmdId) {
+				if (cmdId && msg && safeMsgPort && this.consoleLog.openLogs.includes(safeMsgPort)) {
 					this.consoleLog.appendMsg(safeMsgPort, { Msg: msg, Id: cmdId, Type: 'MdiCommand', Meta: [ 'portSendNoBuf' ], Status: 'Sent' });
+					console.log('Added message to related port.');
 
+				} else if (!cmdId) {
+					console.log('1');
+				} else if (!msg) {
+					console.log('2');
+				} else if (!safeMsgPort) {
+					console.log('3');
+				} else if (!this.consoleLog.openLogs.includes(safeMsgPort)) {
+					console.log('4');
 				}
 
 			} else {
