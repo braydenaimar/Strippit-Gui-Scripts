@@ -2661,7 +2661,9 @@ return {
 
 		console.log(`refMsg: '${refMsg}'`);
 
-		if (!refMsg || (refMsg && !this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' }))) {
+		refMsg && this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
+
+		if (!refMsg) {
 
 			// If the verifyBuffer has anything in it, make the most recent command have a status of error.
 			const verifyMap = this.consoleLog.SPJS.verifyMap;
