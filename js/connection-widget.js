@@ -460,10 +460,10 @@ return {
 
 				// Make the id.
 				if (IdPrefix) {
-					Id = `${IdPrefix}-${port.toLowerCase().replace('com', 'p')}n${Line}`
+					Id = `${IdPrefix}-${port.toLowerCase().replace(/com/i, 'p').replace(/fs-dev-fs-tty/i, '')}n${Line}`
 
 				} else {
-					Id = Id ? Id : `${port.toLowerCase().replace('com', 'p')}n${Line}`;
+					Id = Id ? Id : `${port.toLowerCase().replace(/com/i, 'p').replace(/fs-dev-fs-tty/i, '')}n${Line}`;
 				}
 
 				if (this.commentCmdId) {
