@@ -1402,7 +1402,7 @@ return {
 		// Launch the SPJS in max garbage collection mode.
 		// If on a Raspberry Pi.
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
-			this.SPJS.go = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: false });
+			this.SPJS.go = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 		} else {
 			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
@@ -2646,7 +2646,7 @@ return {
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
-		let refMsg = '';
+		const refMsg = '';
 
 		if (Error.includes(':')) {
 			refMsg = Error.substring(Error.indexOf(':') + 2);
