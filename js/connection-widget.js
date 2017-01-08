@@ -664,8 +664,6 @@ return {
 
 				}
 
-
-
 				for (let i = SearchFrom; i < IndexMap.length; i++) {
 
 					const logIndex = IndexMap[i];
@@ -1371,41 +1369,6 @@ return {
 		this.SPJS.ws.onclose = function () {
 			that.onSpjsClose();
 		};
-
-		let terminal = null;
-
-		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
-
-			terminal = spawn('cd Strippit-Gui-Scripts && git pull', [], { shell: true });
-
-			terminal.stdout.on('data', (data) => {
-				console.log(`Git pull stdout: ${data}`);
-
-				let msg = `${data}`;
-				let msgBuffer = msg.split('\n');
-
-				for (let i = 0; i < msgBuffer.length; i++) {
-					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
-				}
-
-			});
-
-			terminal.stderr.on('data', (data) => {
-				console.log(`Git pull stderr: ${data}`);
-				let msg = `${data}`;
-				let msgBuffer = msg.split('\n');
-
-				for (let i = 0; i < msgBuffer.length; i++) {
-					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
-				}
-
-			});
-
-			terminal.on('close', (code) => {
-				console.log(`Child precess exited with the code: ${code}`);
-			});
-
-		}
 
 	},
 	launchSpjs: function () {
@@ -2677,7 +2640,7 @@ return {
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
-		const refMsg = '';
+		let refMsg = '';
 
 		if (Error.includes(':')) {
 			refMsg = Error.substring(Error.indexOf(':') + 2);

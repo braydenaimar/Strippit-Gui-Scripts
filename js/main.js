@@ -327,12 +327,47 @@ define(['jquery','gui','amplify'], function ($) {
 		let terminal = null;
 
 		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
-			
+
 			console.log('Pulling latest repo from GitHub.');
 
-			// terminal = spawn('cd Strippit-gui/Strippit-Gui-Scripts && git pull');
+			terminal = spawn('cd Strippit-Gui-Scripts && git pull', [], { shell: true });
+
+			terminal.stdout.on('data', (data) => {
+				console.log(`Git pull stdout: ${data}`);
+
+				if (data !== 'Already up-to-date.') {
+					console.log('Repository was updated.');
+
+					// window.location.reload(true);
+				}
+
+				// let msg = `${data}`;
+				// let msgBuffer = msg.split('\n');
+				//
+				// for (let i = 0; i < msgBuffer.length; i++) {
+				// 	msgBuffer[i] && console.log();;
+				// }
+
+			});
+
+			terminal.stderr.on('data', (data) => {
+				console.log(`Git pull stderr: ${data}`);
+
+				// let msg = `${data}`;
+				// let msgBuffer = msg.split('\n');
+				//
+				// for (let i = 0; i < msgBuffer.length; i++) {
+				// 	msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
+				// }
+
+			});
+
+			terminal.on('close', (code) => {
+				console.log(`Git pull.\nChild precess exited with the code: ${code}.`);
+			});
 
 		}
+
 	};
 	// initSidebarBtnEvts = function() {
 		// This has to be called after the sidebar DOM buttons have been created.
