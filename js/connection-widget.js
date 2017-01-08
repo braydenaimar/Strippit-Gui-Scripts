@@ -1145,14 +1145,15 @@ return {
 			const unsafePort = that.makePortUnSafe(port);
 
 			if (that.SPJS.openPorts.indexOf(port) == -1) {
-
 				console.log("Port " + unsafePort + " selected.\n  ...opening port.");
+
 				Msg = "open " + unsafePort + " " + portMeta[port].Baud + " " + portMeta[port].Buffer;
 
 			} else {
-
 				console.log("Port " + unsafePort + " selected.\n  ...closing port.");
+
 				Msg = "close " + unsafePort;
+
 				that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
 
 			}
@@ -1372,7 +1373,7 @@ return {
 				let msgBuffer = msg.split('\n');
 
 				for (let i = 0; i < msgBuffer.length; i++) {
-					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'default' });
+					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
 				}
 
 			});
@@ -1383,7 +1384,7 @@ return {
 				let msgBuffer = msg.split('\n');
 
 				for (let i = 0; i < msgBuffer.length; i++) {
-					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'default' });
+					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
 				}
 
 			});
@@ -2073,7 +2074,7 @@ return {
 			let classItem = ((listHtml == '<tbody>') ? ' first-item':'') + (portMeta[port].portMuted ? ' text-muted':'');
 			let portHtml = '<tr evt-data="' + port + '" class="port-list-item port-' + port + classItem + ((portList[port].IsOpen) ? ' success':'') + '">';
 			portHtml += '<td class="port-toggle-btn"><span class="fa fa-toggle-' + ((portList[port].IsOpen) ? 'on':'off') + '"></span></td>';
-			portHtml += '<td class="port-name">' + port + '</td>';
+			portHtml += '<td class="port-name">' + this.makePortUnSafe(port) + '</td>';
 			portHtml += '<td class="port-friendly">' + portMeta[port].Friendly + '</td>';
 			portHtml += '<td class="port-baud">' + portMeta[port].Baud + '</td>';
 			portHtml += '<td class="port-buffer">' + portMeta[port].Buffer + '</td>';
