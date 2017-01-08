@@ -2216,7 +2216,7 @@ return {
 			// HTML for the console log tab.
 			let consoleLogTabHtml = '';
 			consoleLogTabHtml += '<li role="presentation" class="list-tab-' + port + '">';
-			consoleLogTabHtml += '<span evt-data="' + port + '" class="console-log-tab">' + port + '</span></li>';
+			consoleLogTabHtml += '<span evt-data="' + port + '" class="console-log-tab">' + this.makePortUnSafe(port) + '</span></li>';
 
 			// HTML for the console log panel.
 			let consoleLogOutputHtml = '<div class="console-log-output log-' + port + ' hidden"></div>';
@@ -2224,7 +2224,7 @@ return {
 			// Build the console log DOM based on the openLogs array.
 			for(let i = this.consoleLog.openLogs.indexOf(port) + 1; i < this.consoleLog.openLogs.length; i++) {
 				// console.log("openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
-				publish('/statusbar-widget/add', port, port, "success", that.consoleLog.openLogs[i]);
+				publish('/statusbar-widget/add', port, this.makePortUnSafe(port), "success", that.consoleLog.openLogs[i]);
 				$('#' + that.id + ' .console-log-panel .nav-tabs .list-tab-' + that.consoleLog.openLogs[i]).before(consoleLogTabHtml);
 				$('#' + that.id + ' .console-log-panel .panel-body .log-' + that.consoleLog.openLogs[i]).before(consoleLogOutputHtml);
 				break;
@@ -2242,6 +2242,7 @@ return {
 			// If this port's raw data buffer is already defined, call onRawPortData method to add the raw data to this port's log.
 			} else {
 				this.parseRawPortData(port);
+
 			}
 
 			// If the temporary data buffer was used to buffer data until the port officially opened, transfer that data to the dataRecvBuffer object.

@@ -344,7 +344,7 @@ define(['jquery','gui','amplify'], function ($) {
 					if (msgBuffer[i].includes('Updating')) {
 						console.log('Repository was updated.');
 
-						// window.location.reload(true);
+						window.location.reload(true);
 					}
 
 				}
