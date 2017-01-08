@@ -1337,18 +1337,54 @@ return {
 		this.SPJS.ws = new WebSocket(socketUrl);
 
 		let that = this;
-		this.SPJS.ws.onopen = function() {
+		this.SPJS.ws.onopen = function () {
 			that.onSpjsOpen();
 		};
-		this.SPJS.ws.onmessage = function(evt) {
+		this.SPJS.ws.onmessage = function (evt) {
 			that.onSpjsMessage(evt.data);
 		};
-		this.SPJS.ws.onerror = function(error) {
+		this.SPJS.ws.onerror = function (error) {
 			that.onSpjsError(error);
 		};
-		this.SPJS.ws.onclose = function() {
+		this.SPJS.ws.onclose = function () {
 			that.onSpjsClose();
 		};
+
+		let terminal = null;
+
+		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
+
+			terminal = spawn('cd Strippit-gui/Strippit-Gui-Scripts && git pull');
+
+			terminal.stdout.on('data', (data) => {
+				console.log(`Git pull stdout: ${data}`);
+
+				let msg = `${data}`;
+				let msgBuffer = msg.split('\n');
+
+				for (let i = 0; i < msgBuffer.length; i++) {
+					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'default' });
+				}
+
+			});
+
+			terminal.stderr.on('data', (data) => {
+				console.log(`Git pull stderr: ${data}`);
+				let msg = `${data}`;
+				let msgBuffer = msg.split('\n');
+
+				for (let i = 0; i < msgBuffer.length; i++) {
+					msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'default' });
+				}
+
+			});
+
+			terminal.on('close', (code) => {
+				console.log(`Child precess exited with the code: ${code}`);
+			});
+
+		}
+
 	},
 	launchSpjs: function () {
 		console.log('Launching a new SPJS.');
@@ -1392,6 +1428,7 @@ return {
 		this.SPJS.go.on('close', (code) => {
 			console.log(`Child precess exited with the code: ${code}`);
 		});
+
 	},
 	onSpjsOpen: function () {
 		// If the SPJS is already in an 'open' state, skip DOM updates.
@@ -2522,6 +2559,7 @@ return {
 		const refId = Id.split('-part')[0];
 
 		if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true })) return;
+
 		if (refId && this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' })) return;
 
 		// The message could be from a recent sendNoBuf command.

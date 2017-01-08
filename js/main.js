@@ -178,7 +178,7 @@ define(['jquery','gui','amplify'], function ($) {
 			publish('/main/window-resize');
 		});
 
-		widgetLoadCheck = setTimeout(function() {
+		widgetLoadCheck = setTimeout(function () {
 			console.log("widgetLoadCheck timeout function running");
 			if (wgtLoaded.indexOf(false) != -1) {
 				var that = this;
@@ -194,7 +194,7 @@ define(['jquery','gui','amplify'], function ($) {
 		}, 2000);
 
 		// This gets published at the end of each widget's initBody() function.
-		subscribe('/' + this.ws.id + '/widget-loaded', this, function(wgt) {
+		subscribe('/' + this.ws.id + '/widget-loaded', this, function (wgt) {
 			console.groupEnd();
 			// If this is the first time being called, set timer to check that all widgets are loaded within a given timeframe. If any widgets have not loaded after that time has elapsed, create an alert and log event listing the widget(s) that did not load.
 			// if (wgtLoaded.indexOf(true) == -1) {
@@ -212,12 +212,14 @@ define(['jquery','gui','amplify'], function ($) {
 			}
 		});
 
+		subscribe('/' + this.ws.id + '/all-widgets-loaded', this, updateGitRepo.bind(this));
+
 		// Tells widgets that visibility has been changed so they can stop/resume dom updates if required
 		subscribe('/' + this.ws.id + '/make-widget-visible', this, makeWidgetVisible.bind(this));
 
 		// Entry point for loading all widgets
 		// Load each widget in the order they appear in the widget object
-		$.each(widget, function(wgt, wgtItem) {
+		$.each(widget, function (wgt, wgtItem) {
 			console.log("Loading " + wgt);
 			if (wgtItem.loadHtml) {
 				createWidgetContainer(wgt);
@@ -235,7 +237,7 @@ define(['jquery','gui','amplify'], function ($) {
 		console.groupEnd(); // Main Setup
 	};
 
-	createWidgetContainer = function(wgt) {
+	createWidgetContainer = function (wgt) {
 		// append a div container to dom body
 		console.log("  Creating widget DOM container");
 
@@ -243,10 +245,10 @@ define(['jquery','gui','amplify'], function ($) {
 		$('body').append(containerHtml);
 
 	};
-	loadHtmlWidget = function(wgt) {
+	loadHtmlWidget = function (wgt) {
 		console.log("  Loading HTML & JS");
 
-		$('#' + wgt).load(wgt + '.html', '', function() {
+		$('#' + wgt).load(wgt + '.html', '', function () {
 
 			requirejs([wgt], function(ref) {
 				ref.loadHtml = widget[wgt].loadHtml;
@@ -259,10 +261,10 @@ define(['jquery','gui','amplify'], function ($) {
 		});
 
 	};
-	loadJsWidget = function(wgt) {
+	loadJsWidget = function (wgt) {
 		console.log("  Loading JS");
 
-		requirejs([wgt], function(ref) {
+		requirejs([wgt], function (ref) {
 			ref.loadHtml = widget[wgt].loadHtml;
 			ref.sidebarBtn = widget[wgt].sidebarBtn;
 			widget[wgt] = ref;
@@ -271,7 +273,7 @@ define(['jquery','gui','amplify'], function ($) {
 		});
 
 	};
-	createSidebarBtns = function(wgt) {
+	createSidebarBtns = function (wgt) {
 		console.log("Creating Sidebar Buttons");
 		$.each(widget, function(widgetIndex, widgetItem) {
 			// Check if the respective widget wants a sidebar button made
@@ -290,7 +292,7 @@ define(['jquery','gui','amplify'], function ($) {
 			}
 		});
 	};
-	initWidgetVisible = function() {
+	initWidgetVisible = function () {
 		// Show the initial widget.
 		console.log("Show wgt: " + wgtVisible);
 		$('#' + wgtVisible).removeClass('hidden');
@@ -300,7 +302,7 @@ define(['jquery','gui','amplify'], function ($) {
 		$('#header-widget-icon').addClass(widget[wgtVisible].icon); // Set header bar icon.
 		publish('/' + this.ws.id + '/widget-visible', wgtVisible, null);
 	};
-	makeWidgetVisible = function(wgt) {
+	makeWidgetVisible = function (wgt) {
 		console.log("Widget visible: " + wgt);
 		// If wgt is already visible, do nothing.
 		if (wgt == wgtVisible) return;
@@ -319,6 +321,18 @@ define(['jquery','gui','amplify'], function ($) {
 		$('#header-widget-icon').addClass(widget[wgt].icon); // Set header bar icon.
 		publish('/' + this.ws.id + '/widget-visible', wgt, wgtVisible);
 		wgtVisible = wgt;
+	};
+	updateGitRepo = function () {
+
+		let terminal = null;
+
+		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
+			
+			console.log('Pulling latest repo from GitHub.');
+
+			// terminal = spawn('cd Strippit-gui/Strippit-Gui-Scripts && git pull');
+
+		}
 	};
 	// initSidebarBtnEvts = function() {
 		// This has to be called after the sidebar DOM buttons have been created.
