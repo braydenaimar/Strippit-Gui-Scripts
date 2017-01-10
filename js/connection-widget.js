@@ -47,7 +47,7 @@ return {
 	// Stores information required to connect to and communicate with the SPJS WebSocket.
 	// IDEA: Restructure the shit outta this stuff.
 	SPJS: {
-		// Stores the WebSocket connection to the JSON Server.
+		// Stores the WebSocket connection to the Serial Port JSON Server.
 		go: null,
 		// Stores the WebSocket connection to the GPIO JSON Server.
 		gpio: null,
@@ -1385,11 +1385,11 @@ return {
 		// If on a Raspberry Pi.
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
 
-			this.SPJS.go = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+			this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (this.SPJS.launchGpioServerOnLinux) {
 
-				this.SPJS.gpio = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/gpio-json-server"`, [], { shell: true });
+				this.SPJS.gpio = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/gpio-json-server"`, [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 					console.log(`GPIO Server. stdout: ${data}`);
