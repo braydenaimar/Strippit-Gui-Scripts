@@ -75,6 +75,8 @@ return {
 		// If wsPollReconnect has a value of 'null', no auto reconnection attempts will be made.
 		// NOTE: Loaded by cson file.
 		wsReconnectDelay: 2000,
+		// Sets if a new spjs is launched after an exit command is issued to the current spjs. If false, a new spjs may be launched based on the setting of wsReconnectDelay.
+		wsReconnectOnExitCmd: true,
 		// Sets the time (msec) that the program will wait between getting the port list when there are no available ports.
 		// If requestListDelay has a value of 'null', no automatic list requests will be sent.
 		// Use a value greater than approx 500ms to ensure the stability of the program.
@@ -1613,7 +1615,8 @@ return {
 		// } else if (this.logCmdStatus('SPJS', {Cmd: 'restart'}, 'Executed')) {
 		// 	console.log('SPJS was shut down because of a \'restart\' command.');
 		// }
-		if (this.consoleLog.updateCmd('SPJS', { Msg: 'exit', Status: 'Executed' })) {
+
+		if (this.consoleLog.updateCmd('SPJS', { Msg: 'exit', Status: 'Executed' }) && this.SPJS.wsReconnectOnExitCmd) {
 			console.log('SPJS was shut down because of a \'exit\' command.');
 			this.launchSpjs();
 
