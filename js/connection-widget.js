@@ -2662,19 +2662,18 @@ return {
 
 		if (Error.includes(':')) {
 			refMsg = Error.substring(Error.indexOf(':') + 2);
+			console.log(`refMsg: '${refMsg}'`);
+
+			this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
 		} else if (Error.includes('serial port') && Error.includes('that you were trying')) {
 			let a = Error.indexOf('serial port') + 12;
 			let b = Error.indexOf('that you were trying') - 1;
 
 			refMsg = Error.substring(a, b);
+			console.log(`refMsg: '${refMsg}'`);
 
-		}
-
-		console.log(`refMsg: '${refMsg}'`);
-
-		if (refMsg) {
-			this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
+			this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
 		} else {
 
