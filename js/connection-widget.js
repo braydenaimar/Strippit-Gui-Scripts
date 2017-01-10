@@ -47,8 +47,10 @@ return {
 	// Stores information required to connect to and communicate with the SPJS WebSocket.
 	// IDEA: Restructure the shit outta this stuff.
 	SPJS: {
-		// Stores the child process connection.
+		// Stores the WebSocket connection to the JSON Server.
 		go: null,
+		// Stores the WebSocket connection to the GPIO JSON Server.
+		gpio: null,
 		// Stores the WebSocket object.
 		ws: null,
 		// Stores the current state of the WebSocket to prevent unnecessary DOM updates.
@@ -71,6 +73,7 @@ return {
 		// The openPorts object stores the names of the ports that are open.
 		// Ex. ["COM5", "COM10"]
 		openPorts: [],
+		launchGpioServerOnLinux: true,
 		// Sets the time (msec) that the program will wait between attempting to connect to the WebSocket.
 		// If wsPollReconnect has a value of 'null', no auto reconnection attempts will be made.
 		// NOTE: Loaded by cson file.
@@ -1381,7 +1384,45 @@ return {
 		// Launch the SPJS in max garbage collection mode.
 		// If on a Raspberry Pi.
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
+
 			this.SPJS.go = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+
+			if (this.SPJS.launchGpioServerOnLinux) {
+
+				this.SPJS.gpio = spawn(`lxterminal --command "serial-port-json-server-1.92_linux_arm/gpio-json-server"`, [], { shell: true });
+
+				this.SPJS.gpio.stdout.on('data', (data) => {
+					console.log(`GPIO Server. stdout: ${data}`);
+
+					let msg = `${data}`;
+					let msgBuffer = msg.split('\n');
+
+					for (let i = 0; i < msgBuffer.length; i++) {
+						msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
+
+					}
+
+				});
+
+				this.SPJS.gpio.stderr.on('data', (data) => {
+					console.log(`GPIO Server. stderr: ${data}`);
+
+					let msg = `${data}`;
+					let msgBuffer = msg.split('\n');
+
+					for (let i = 0; i < msgBuffer.length; i++) {
+						msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
+
+					}
+
+				});
+
+				this.SPJS.gpio.on('close', (code) => {
+					console.log(`GPIO Server. Child precess exited with the code: ${code}`);
+
+				});
+
+			}
 
 		} else {
 			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
@@ -1392,30 +1433,34 @@ return {
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-v'], { shell: true });
 
 		this.SPJS.go.stdout.on('data', (data) => {
-			console.log(`stdout: ${data}`);
+			console.log(`SPJS. stdout: ${data}`);
 
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 				msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
+
 			}
 
 		});
 
 		this.SPJS.go.stderr.on('data', (data) => {
-			console.log(`stderr: ${data}`);
+			console.log(`SPJS. stderr: ${data}`);
+
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 				msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
+
 			}
 
 		});
 
 		this.SPJS.go.on('close', (code) => {
-			console.log(`Child precess exited with the code: ${code}`);
+			console.log(`SPJS. Child precess exited with the code: ${code}`);
+
 		});
 
 	},
@@ -1755,7 +1800,8 @@ return {
 		// This method parses the port list data received from the SPJS.
 
 		// Add the message to the SPJS log.
-		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'SerialPorts' });
+		let Msg = JSON.stringify(data, null, ' ').replace(/\}$/, ' \}').replace('"AvailableBufferAlgorithms": [ "default", "timed", "nodemcu", "tinyg", "tinyg_old", "tinyg_linemode", "tinyg_tidmode", "tinygg2", "grbl", "marlin" ], ');
+		this.consoleLog.appendMsg('SPJS', { Msg, Type: 'SerialPorts' });
 
 	 	const that = this;
 
