@@ -652,6 +652,7 @@ return {
 
 				// Debugging purposes only.
 				if (SearchFrom == IndexMap.length) {
+					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
 					console.groupEnd();
 
 					return false;
@@ -674,7 +675,7 @@ return {
 					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
+					if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
 					if (Length !== undefined && logItem.Msg.length !== Length) continue;
 					if (Id !== undefined && logItem.Id !== Id) continue;
 					if (Line !== undefined && logItem.Line !== Line) continue;
@@ -717,6 +718,7 @@ return {
 
 				// Debugging purposes only.
 				if (SearchFrom * -1 == IndexMap.length) {
+					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
 					console.groupEnd();
 
 					return false;
@@ -739,7 +741,7 @@ return {
 					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
 
 					if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					if (PartMsg !== undefined && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
+					if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
 					if (Length !== undefined && logItem.Msg.length !== Length) continue;
 					if (Id !== undefined && logItem.Id !== Id) continue;
 					if (Line !== undefined && logItem.Line !== Line) continue;
@@ -937,7 +939,7 @@ return {
 				} else if (Status !== 'Warning' && Status !== 'Error' && matchIndexMap.indexOf(matchIndex) < matchIndexMap.length - 1) {
 					console.groupEnd();
 
-					console.warn(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndexMap.indexOf(matchIndex) + 1}`);
+					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndexMap.indexOf(matchIndex) + 1}`);
 
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndexMap.indexOf(matchIndex) + 1, Status, Comment, PrevComment, UpdateRelated });
 
@@ -2225,7 +2227,7 @@ return {
 				cmdCount: 0,
 				history: [],
 				historyRecallIndex: null,
-				placeholder: "GCode " + port,
+				placeholder: `GCode ${this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, ''))}`,
 				verifyBuffer: [],
 				msgShow: Object.assign({}, msgShowDefault)
 			};
@@ -2868,6 +2870,7 @@ return {
 						}
 
 					} else if (lineObj.r && typeof lineObj.r === 'string') {
+
 						console.log(`lineObj.r is a string\n  r: ${lineObj.r}`);
 
 						const refMsg = lineObj.r;
@@ -2883,23 +2886,15 @@ return {
 
 						}
 
-					} else if (lineObj.r === undefined) {
+					} else if (typeof lineObj.r === 'object' && Object.keys(lineObj.r).length == 0) {
+
 						console.log(`lineObj.r is an empty object.`);
 
-						let refStr = '\s{' + rx + '}|\S{' + rx + '}';
-						console.log('  refMsg:', refStr, String.raw(refStr));
+						this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true });
 
-						const refMsg = new RegExp(refStr);
 
-						if (!this.consoleLog.updateCmd(port, { PartMsg: refMsg, Status: 'Warning', Comment: `${Label} regExp`, UpdateRelated: true })) {
+					} else if (typeof lineObj.r === 'object'){
 
-							console.log('  Found no match. Search for a match using line length.');
-
-							this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: `${Label} length`, UpdateRelated: true });
-
-						}
-
-					} else {
 						console.log('lineObj.r is an object.');
 
 						let rStr = JSON.stringify(lineObj.r);
@@ -2919,6 +2914,9 @@ return {
 						// if (!matchId || matchMsg.length != rx) {
 						// 	this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: `${Label} length`, UpdateRelated: true });
 						// }
+
+					} else {
+						console.log('lineObj.r is unrecognized.');
 
 					}
 
@@ -3088,7 +3086,7 @@ return {
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
 
 			} else if (matchTime) {
-				console.warn("The SPJS is already processing a request for the portList.\nRequest for list terminated.");
+				console.log("The SPJS is already processing a request for the portList.\nRequest for list terminated.");
 				return false;
 
 			}
