@@ -2884,7 +2884,7 @@ return {
 				// If the device only uses text output (such as the arduino uno).
 				} else if (/error: /.test(line)) {
 
-					conts cmdMap = this.consoleLog.cmdMap;
+					const cmdMap = this.consoleLog[port].cmdMap;
 
 					cmdMap.length && this.consoleLog.updateCmd(port, { Index: cmdMap[cmdMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
 
