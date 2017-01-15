@@ -2880,6 +2880,14 @@ return {
 					} else {
 						this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 					}
+
+				// If the device only uses text output (such as the arduino uno).
+				} else if (/error: /.test(line)) {
+
+					conts cmdMap = this.consoleLog.cmdMap;
+
+					cmdMap.length && this.consoleLog.updateCmd(port, { Index: cmdMap[cmdMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
+
 				}
 			}
 
