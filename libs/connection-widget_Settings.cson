@@ -285,14 +285,14 @@ defaultMetaIndex: 3
 
 # Conditions: Friendly, Baud, Buffer, SerialNumber
 initScripts: [
-    {
+    {   # Arduino Uno (GRBL Board)
         "SerialNumber": "USB\\VID_2341&PID_0043\\5533031373535160F0B2",
         "script": [
             "{sn:n}",
-            "{jfb:n}"
+            "{fb:n}"
         ],
         "pause": 100
-    },
+    }
     {   # Arduino Due
         "Buffer": "tinygg2",
         "script": [
@@ -305,15 +305,15 @@ initScripts: [
             "{sr:n}",
             "{qr:n}"
         ],
-        "pause": 1000
-    },
+        "pause": 1000 # Using long pause for debugging purposes.
+    }
     {
         "Buffer": "tinyg",
         "script": [
             "{sr:n}"
         ],
         "pause": 100
-    },
+    }
     {
         "Buffer": "default",
         "script": [

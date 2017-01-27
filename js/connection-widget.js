@@ -91,6 +91,7 @@ return {
 	},
 
 	// NOTE: Loaded by cson file.
+	// TODO: Change this from an array to an object and create a meta called 'default' rather than using the empty string for Vid/Pids convention.
 	deviceMeta: [
 		{ Friendly: 'TinyG G2 Native',
 			Baud: 115200,
@@ -195,6 +196,7 @@ return {
 			useReceivedFriendly: true,
 			autoConnectPort: false,
 			portMuted: false,
+			lineEnding: 'CRLF',
 			VidPids: [
 				{ Vid: '2047', Pid: '0013' }
 			]
@@ -212,6 +214,7 @@ return {
 	],
 	// If VidPids does not match portVid and portPid, assume serial device is a TinyG v8 board.
 	// NOTE: Loaded by cson file.
+	// TODO: Deprecate this cuz the default deviceMeta is the one with Vid/Pids as an empty string.
 	defaultMetaIndex: 3,
 
 	// Specify Friendly, Buffer, Baud, SerialNumber.
@@ -244,7 +247,7 @@ return {
 		activeLog: 'SPJS',
 		// The openLogs object stores the names of the console logs that are open. Ports are sorted smallest -> largest port number with the SPJS log at the end of the list.
 		// Ex. ["COM7", "COM10", "SPJS"]
-		openLogs: ['SPJS'],
+		openLogs: [ 'SPJS' ],
 		// Specifies the maximum number of lines to be displayed in the console log.
 		// NOTE: Loaded by cson file.
 		maxLineLimit: 500,
@@ -270,6 +273,18 @@ return {
 		commentTimeToVerify: true,
 		// Add a comment to every command to show it's id. Very useful for debugging.
 		commentCmdId: true,
+		// Set the default line ending to be used for messages sent to ports on the SPJS. This is over-ridden by lineEnding inside each port's respective deviceMeta object.
+		//  NONE: No line ending characters are added to port messages.
+		//  CR: Add a carriage-return character '\r'.
+		//  LF: Add a line-feed character '\n'.
+		//  CRLF: Add a carriage-return and line-feed character '\r\n'.
+		defaultLineEnding: 'LF',
+		lineEndings: {
+			NONE: '',
+			CR: '\\r',
+			LF: '\\n',
+			CRLF: '\\r\\n'
+		},
 		SPJS: {
 			// The logData object stores all the messages and commands added to the console log.
 			// A message would be { msg: '', type: '', line: '' }
@@ -613,6 +628,7 @@ return {
 
 			}
 
+			let matchFound = false;
 			let matchIndex = Index;
 			const dataRef = Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))));
 			const data = arguments[1][dataRef];
@@ -658,7 +674,7 @@ return {
 					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
 					console.groupEnd();
 
-					return false;
+					return { matchFound };
 
 				} else if (SearchFrom > IndexMap.length) {
 
@@ -688,12 +704,11 @@ return {
 
 						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
 
-							this.updateCmd(port, { Index: logIndex, Status: 'Error', Comment: 'Stale', UpdateRelated: true });
-							throw 'Stale! Stale! Stale! Command is stale.'
+							this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
 						}
 
-						console.log('Over max age.');
+						console.log('Found stale command.');
 
 						continue;
 					}
@@ -710,6 +725,7 @@ return {
 					}
 
 					console.log('  ...got a match.');
+					matchFound = true;
 					matchIndex = logIndex;
 
 					break;
@@ -724,7 +740,7 @@ return {
 					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
 					console.groupEnd();
 
-					return false;
+					return { matchFound };
 
 				} else if (SearchFrom * -1 > IndexMap.length) {
 
@@ -754,12 +770,11 @@ return {
 
 						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
 
-							this.updateCmd(port, { Index: logIndex, Status: 'Error', Comment: 'Stale', UpdateRelated: true });
-							throw 'Stale! Stale! Stale! Command is stale.'
+							this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
 						}
 
-						console.log('Over max age.');
+						console.log('Found stale command');
 
 						continue;
 					}
@@ -769,6 +784,7 @@ return {
 
 						for (let x = 0; x < Meta.length; x++) {
 							if (logItem.Meta.includes(Meta[x])) matchCount++;
+
 						}
 
 						if (matchCount == Meta.length) continue;
@@ -776,7 +792,9 @@ return {
 					}
 
 					console.log('  ...got a match.');
+					matchFound = true;
 					matchIndex = logIndex;
+
 					break;
 
 					// if ((Length !== undefined && PartMsg === undefined && logItem.Msg.length == Length) || (PartMsg !== undefined && Length === undefined && refMsg.test(msgData)) || (Length !== undefined && PartMsg !== undefined && logItem.Msg.length == Length && refMsg.test(msgData)) || (Length === undefined && PartMsg === undefined && logItem[dataRef] === data)) {
@@ -792,13 +810,14 @@ return {
 			}
 
 			// If a match was found in this port's console log, return the object data.
-			if (matchIndex !== undefined) {
+			if (matchFound) {
 				const matchItem = this[port].logData[matchIndex];
 				console.log('Found match in log:', matchItem);
 
 				console.groupEnd();
 
 				return {
+					matchFound,
 					matchIndex,
 					matchMsg: matchItem.Msg,
 					matchId: matchItem.Id,
@@ -816,7 +835,7 @@ return {
 			console.log(`No match found in '${port}' log for ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))))}: ${data}`);
 			console.groupEnd();
 
-			return false;
+			return { matchFound };
 		},
 		updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, Status, Comment, PrevComment = 'left', UpdateRelated }) {
 			// This method updates the status of commands in the SPJS console log.
@@ -836,7 +855,7 @@ return {
 			if (!Status && Comment === undefined) {
 				console.warn('No Update Requested. Aborting update');
 				// console.groupEnd();
-				return false;
+				return { matchFound: false };
 			}
 
 			console.groupCollapsed(`${port}${ Comment ? ` - Comment: '${Comment}'` : '' }${ Status ? ` - Status: ${Status}` : '' } - ${ Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`))))) }`);
@@ -870,14 +889,14 @@ return {
 
 			// Check if command is in this port's verify buffer.
 			// const matchItem = this.findItem(port, { Msg, PartMsg, Id, Index, IndexMap: this[port].verifyMap });
-			let { matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom });
+			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom });
 
-			console.log('matchIndex:', matchIndex,'\nmatchMsg:', matchMsg,'\nmatchId:', matchId,'\nmatchLine:', matchLine,'\nmatchType:', matchType,'\nmatchStatus:', matchStatus,'\nmatchComment:', matchComment,'\nmatchRelated:', matchRelated,'\nmatchMeta:', matchMeta,'\nmatchTime:', matchTime);
+			console.log('matchFound:', matchFound, '\nmatchIndex:', matchIndex,'\nmatchMsg:', matchMsg,'\nmatchId:', matchId,'\nmatchLine:', matchLine,'\nmatchType:', matchType,'\nmatchStatus:', matchStatus,'\nmatchComment:', matchComment,'\nmatchRelated:', matchRelated,'\nmatchMeta:', matchMeta,'\nmatchTime:', matchTime);
 
 			if (matchIndex === undefined) {
 				console.log('No Match Found. Aborting update.');
 				console.groupEnd();
-				return false;
+				return { matchFound };
 			}
 
 			if (Status && this.verifyPrecidence.indexOf(matchStatus) < this.verifyPrecidence.indexOf(Status)) {
@@ -1016,6 +1035,7 @@ return {
 			console.groupEnd();
 
 			return {
+				matchFound,
 				matchIndex,
 				matchMsg: matchItem.Msg,
 				matchId: matchItem.Id,
@@ -1161,17 +1181,21 @@ return {
 
 			const unsafePort = that.makePortUnSafe(port);
 
-			if (that.SPJS.openPorts.indexOf(port) == -1) {
-				console.log("Port " + unsafePort + " selected.\n  ...opening port.");
-
-				Msg = "open " + unsafePort + " " + portMeta[port].Baud + " " + portMeta[port].Buffer;
-
-			} else {
+			if (that.consoleLog.openLogs.includes(port)) {
 				console.log("Port " + unsafePort + " selected.\n  ...closing port.");
 
-				Msg = "close " + unsafePort;
-
+				// Prevent the port from autoconnecting again.
 				that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
+
+				Msg = `close ${unsafePort}`;
+
+			} else {
+				console.log("Port " + unsafePort + " selected.\n  ...opening port.");
+
+				// Allow the port to autoconnecting again if it was dissabled by a manual port close.
+				// that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
+
+				Msg = `open ${unsafePort} ${portMeta[port].Baud} ${portMeta[port].Buffer}`;
 
 			}
 
@@ -1800,7 +1824,9 @@ return {
 		// This method parses the port list data received from the SPJS.
 
 		// Add the message to the SPJS log.
-		let Msg = JSON.stringify(data, null, ' ').replace(/\}$/, ' \}').replace('"AvailableBufferAlgorithms": [ "default", "timed", "nodemcu", "tinyg", "tinyg_old", "tinyg_linemode", "tinyg_tidmode", "tinygg2", "grbl", "marlin" ], ');
+		// let Msg = JSON.stringify(data, null, ' ').replace(/\}$/, ' \}').replace('"AvailableBufferAlgorithms": [ "default", "timed", "nodemcu", "tinyg", "tinyg_old", "tinyg_linemode", "tinyg_tidmode", "tinygg2", "grbl", "marlin" ], ', '');
+		let Msg = JSON.stringify(data, null, ' ').replace(/\}$/, ' \}').replace('"AvailableBufferAlgorithms": [\n    "default",\n    "timed",\n    "nodemcu",\n    "tinyg",\n    "tinyg_old",\n    "tinyg_linemode",\n    "tinyg_tidmode",\n    "tinygg2",\n    "grbl",\n    "marlin"\n   ],\n   ', '');
+
 		this.consoleLog.appendMsg('SPJS', { Msg, Type: 'SerialPorts' });
 
 	 	const that = this;
@@ -2041,7 +2067,7 @@ return {
 	},
 	buildPortMeta: function () {
 		// console.group("building portMeta");
-		console.groupCollapsed("building portMeta");
+		console.groupCollapsed("Building portMeta");
 		// Builds the portMeta object based on the portList object and using information from the deviceMeta object.
 		// The portMeta object is used to determine which port to automatically connect to, and is used with portList to build the serial port list in the DOM.
 		const that = this;
@@ -2053,13 +2079,19 @@ return {
 		let matchIndex = 0;
 		let portListUpdate = false;
 
+		// Loop through each port object in the received serial ports object.
 		for (let port in portList) {
-			console.log("Port " + port);
+			console.log(`Port ${port}`);
 
+			// Loop through each meta in the deviceMeta object and check if it matches the current port in the serial ports list.
 			metaLoop: for (let i = 0; i < deviceMeta.length; i++) {
 				console.log("  i: " + i);
+
+				// Loop through each Vid/Pid in the current deviceMeta and check for match against Vid/Pid in received port data.
 				for (let x = 0; x < deviceMeta[i].VidPids.length; x++) {
 					console.log("    x: " + x);
+
+					// If the Vid/Pids from the deviceMeta match the received port's Vid/Pids.
 					if (deviceMeta[i].VidPids[x].Vid.toLowerCase() == portList[port].UsbVid.toLowerCase() && deviceMeta[i].VidPids[x].Pid.toLowerCase() == portList[port].UsbPid.toLowerCase()) {
 
 						matchIndex = i;
@@ -2078,25 +2110,35 @@ return {
 								console.log(`      ++i: ${matchIndex}`);
 							}
 						}
+
 						console.log(`      break. [${deviceMeta[matchIndex].Friendly}]`);
 						console.log(`index: ${matchIndex}\ndeviceMeta: `, deviceMeta[matchIndex]);
+
+						// Exit the search for meta data becuase a match was found.
 						break metaLoop;
 
+					// If the Vid/Pid are empty strings, set the meta as the default meta data.
 					} else if (deviceMeta[i].VidPids[x].Vid === '' && deviceMeta[i].VidPids[x].Pid === '') {
 						matchIndex = i;
 						console.log("      default. [" + deviceMeta[matchIndex].Friendly + "]");
 					}
 				}
 			}
+
 			const matchItem = deviceMeta[matchIndex];
 			const matchFriendly = matchItem.useReceivedFriendly ? portList[port].Friendly.split('(COM')[0] : matchItem.Friendly;
 			// console.log(`useReceivedFriendly: ${matchItem.useReceivedFriendly}\nmatchFriendly: ${matchFriendly}`);
 			const matchBaud = portList[port].Baud || matchItem.Baud;
 			const matchBuffer = portList[port].Buffer || matchItem.Buffer;
 
+			// If the info in the portMeta object has changed, perform a DOM update on the serial ports list.
 			if (portMeta[port] && (matchBaud !== portMeta[port].Baud || matchBuffer !== portMeta[port].Buffer)) {
 				portListUpdate = true;
+				console.log('Will update port list DOM.');
 			}
+
+			const lineEndings = this.consoleLog.lineEndings;
+			const defaultLineEnding = this.consoleLog.defaultLineEnding;
 
 			portMetaObj[port] = {
 				metaIndex: matchIndex,
@@ -2104,44 +2146,58 @@ return {
 				Baud: matchBaud,
 				Buffer: matchBuffer,
 				autoConnectPort: matchItem.autoConnectPort,
-				portMuted: matchItem.portMuted
+				portMuted: matchItem.portMuted,
+				lineEnding: matchItem.lineEnding ? lineEndings[matchItem.lineEnding] : lineEndings[defaultLineEnding]
 			};
+
 		}
+
+		this.SPJS.portMeta = portMetaObj;
 
 		portListUpdate && this.portListDomUpdate();
 
-		this.SPJS.portMeta = portMetaObj;
 		console.log("Built -portMeta-" + gui.parseObject(this.SPJS.portMeta, 2));
-
 		console.groupEnd();
+
 	},
 	portListDomUpdate: function () {
 		// TODO: Make portListDomUpdate accept arguments to make updates more efficient. (aka. only update what is needing to be changed rather that rebuilding the entire DOM list everytime.)
-		console.groupCollapsed("Updating port list DOM");
+		console.groupCollapsed('Updating port list DOM');
+
 		const that = this;
 		const portList = this.SPJS.portList;
 		const portMeta = this.SPJS.portMeta;
+
 		let listHtml = '<tbody>';
 
+		// Build the new DOM code.
 		for (let port in portList) {
-			let classItem = ((listHtml == '<tbody>') ? ' first-item':'') + (portMeta[port].portMuted ? ' text-muted':'');
-			let portHtml = '<tr evt-data="' + port + '" class="port-list-item port-' + port + classItem + ((portList[port].IsOpen) ? ' success':'') + '">';
-			portHtml += '<td class="port-toggle-btn"><span class="fa fa-toggle-' + ((portList[port].IsOpen) ? 'on':'off') + '"></span></td>';
-			portHtml += '<td class="port-name">' + this.makePortUnSafe(port) + '</td>';
-			portHtml += '<td class="port-friendly">' + portMeta[port].Friendly + '</td>';
-			portHtml += '<td class="port-baud">' + portMeta[port].Baud + '</td>';
-			portHtml += '<td class="port-buffer">' + portMeta[port].Buffer + '</td>';
+
+			let classItem = `${listHtml == '<tbody>' ? ' first-item' : ''}${portMeta[port].portMuted ? ' text-muted' : ''}`;
+			let portHtml = `<tr evt-data="${port}" class="port-list-item port-${port}${classItem}${portList[port].IsOpen ? ' success' : ''}">`;
+
+			portHtml += `<td class="port-toggle-btn"><span class="fa fa-toggle-${portList[port].IsOpen ? 'on' : 'off'}"></span></td>`;
+			portHtml += `<td class="port-name">${this.makePortUnSafe(port)}</td>`;
+			portHtml += `<td class="port-friendly">${portMeta[port].Friendly}</td>`;
+			portHtml += `<td class="port-baud">${portMeta[port].Baud}</td>`;
+			portHtml += `<td class="port-buffer">${portMeta[port].Buffer}</td>`;
 			// portHtml += '<td class="">' + portMetaItem.Buffer + '</td>';
 			portHtml += '</tr>';
 
 			listHtml += portHtml;
-			console.log("Port " + portList[port].Name + ((portMeta[port].portMuted) ? " [muted]":""), portHtml);
+
+			console.log(`Port ${port}${(portMeta[port].portMuted ? ' [muted]' : '')}:`, portHtml);
+
 		}
+
 		listHtml += '</tbody>';
 
-		$('#' + this.id + ' .serial-port-list').html(listHtml);
+		// Update the DOM.
+		$(`#${this.id} .serial-port-list`).html(listHtml);
 		this.resizeWidgetDom();
+
 		console.groupEnd();
+
 	},
 	autoConnectPorts: function () {
 		console.groupCollapsed("Auto-Connect Ports");
@@ -2172,24 +2228,36 @@ return {
 
 		console.groupEnd();
 	},
+	// TODO: Update portList object, portMeta object, and serial port list DOM.
 	onPortOpen: function (data) {
-		const { Cmd, Port, IsPrimary, Baud, BufferType, Desc } = data;
-		// Ex. {Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2"}
-		console.log("SPJS -PortOpen-" + gui.parseObject(data, 2));
+		const { Cmd, Desc, Port, IsPrimary, Baud, BufferType } = data;
+		// Ex. { Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2" }
+
+		console.log(`SPJS -PortOpen-${gui.parseObject(data, 2)}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
 		const that = this;
+		const portMeta = this.SPJS.portMeta;
 		const safePort = this.makePortSafe(Port);
 
-		// If this was caused by an 'open' command in the SPJS, set the status of that command to 'Executed'.
-		let refCmd = `open ${Port} ${Baud} ${BufferType}`;
+		let refCmd = `open ${Port} ${Baud}${BufferType ? ` ${BufferType}` : ''}`;
 
+		// If this was caused by an 'open' command in the SPJS, set the status of that command to 'Executed'.
 		if (!this.consoleLog.updateCmd('SPJS', { Msg: refCmd, Status: 'Executed' })) {
 
-			refCmd = `open ${Port}`;
-			this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' });
+			this.consoleLog.updateCmd('SPJS', { PartMsg: `open ${Port}`, Status: 'Executed' });
+
+		}
+
+		// If the port was opened with different settings from the deviceMeta data, update the serial ports list DOM.
+		if (Baud !== portMeta[safePort].Baud || BufferType !== portMeta[safePort].Buffer) {
+
+			portMeta[safePort].Baud = Baud || portMeta[safePort].Baud;
+			portMeta[safePort].Buffer = BufferType || portMeta[safePort].Buffer;
+
+			this.portListDomUpdate();
 
 		}
 
@@ -2202,7 +2270,9 @@ return {
 		// Use a delay to avoid getting corrupted port list data.
 		setTimeout(function() {
 			that.newspjsSend({ Msg: 'list' });
+
 		}, 250);
+
 	},
 	portConnected: function (port) {
 		// The portConnected method handles all the DOM and object updates required whenever a port is connected.
@@ -2405,7 +2475,7 @@ return {
 
 		// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
 		const refCmd = `open ${Port}`;
-		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Error' });
+		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: this.consoleLog.verifyMap, Status: 'Error' });
 
 		this.portDisconnected(safePort);
 
@@ -2430,17 +2500,25 @@ return {
 
 		const refCmd = `close ${Port}`;
 
-		// If the port closed because of a SPJS command, prevent the port from autoconnecting again.
-		if (this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' })) {
+		const { matchFound, matchType } = this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Type: 'MdiCommand', Status: 'Executed' });
+
+		// If the port closed because of a SPJS mdi command, prevent the port from autoconnecting again.
+		if (matchFound) {
 			// FIXME: Fix this.
 			// FIXME: This is weird, the port doesnt autoconnect even though there is no code here.
-			// this.deviceMeta[this.SPJS.portMeta[].metaIndex].autoConnectPort = false;
+			this.deviceMeta[this.SPJS.portMeta[safePort].metaIndex].autoConnectPort = false;
+			console.log('Clearing auto-connect');
+
+		// If the port closed because of a SPJS command.
+		} else if (this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' })) {
+
 
 		// If the port did not close because of a SPJS command, we know that the port disconnected unexpectedly.
 		} else {
 			// console.warn(`Port ${port} disconnected unexpectedly.`);
 
 			// IDEA: Publish the unexpected port close event so that other widgets can respond accordingly.
+
 		}
 
 		this.portDisconnected(safePort);
@@ -2556,6 +2634,7 @@ return {
 
 	},
 	// FIXME: Make this work for multiple commands at a time (when a list of data and ids are received).
+	// TODO: Test that it works when receiving multiple commands at a time (see comment above).
 	onQueuedText: function (data) {
 		const { Cmd, QCnt, Ids, D, Port } = data;
 		// Ex. { "Cmd": "Queued", "QCnt": 2, "Ids": [ "" ], "D": [ "!" ], "Port": "COM5" }
@@ -2708,12 +2787,14 @@ return {
 
 		let refMsg = '';
 
+		// If the error message has a colon in it, then it has the origional message in it, use that to find the origional message in the console log.
 		if (Error.includes(':')) {
 			refMsg = Error.substring(Error.indexOf(':') + 2);
 			console.log(`refMsg: '${refMsg}'`);
 
 			this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
+		// If the message is in response to a non existent port, the message has the port name in it, use that to find the origional message in the console log.
 		} else if (Error.includes('serial port') && Error.includes('that you were trying')) {
 			let a = Error.indexOf('serial port') + 12;
 			let b = Error.indexOf('that you were trying') - 1;
@@ -2728,7 +2809,8 @@ return {
 			// If the verifyBuffer has anything in it, make the most recent command have a status of error.
 			const verifyMap = this.consoleLog.SPJS.verifyMap;
 
-			verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
+			// TODO: Test to make sure this does not error.
+			verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], IndexMap: varifyMap, Status: 'Error', Comment: 'Syntax Error' });
 
 		}
 
@@ -3109,7 +3191,27 @@ return {
 	makePortSafe(unsafePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
+		const portList = this.SPJS.portList;
+
 		let safePortName = unsafePortName ? unsafePortName.replace(/^\//g, 'fs-').replace(/\//g, '-fs-') : unsafePortName;
+
+		// If the port is not in the portList object, try to find a match.
+		if (safePortName && !portList[safePortName]) {
+			// console.log(`The safePortName: '${safePortName}' not found in the serial ports list.`);
+
+			// Loop through each port in the portList object.
+			for (let port in portList) {
+
+				// If the ports match case-insensitive.
+				if (port.toLowerCase() === safePortName.toLowerCase()) {
+					safePortName = port;
+					// console.log(`The safePortName: '${safePortName}' not found in the serial ports list.\nChanged safePortName to: '${safePortName}'.`);
+
+					break;
+				}
+
+			}
+		}
 
 		return safePortName;
 	},
@@ -3241,6 +3343,8 @@ return {
 			Meta = Meta.split(' ');
 		}
 
+		const portMeta = this.SPJS.portMeta;
+
 		let cmdBuffer = [];
 		let idBase;
 		let idSuffix;
@@ -3350,7 +3454,8 @@ return {
 
 			// Do not add a linefeed character to a reset or feedhold command.
 			if (!(/\\n$/).test(bufferItem.Msg) && !(/[%!]/).test(bufferItem.Msg)) {
-				bufferItem.Msg += '\\n';
+				// bufferItem.Msg += '\\n';
+				bufferItem.Msg += portMeta[port].lineEnding;
 
 			}
 
@@ -3383,35 +3488,38 @@ return {
 
 		if (port === 'SPJS') {
 
-			// If the message relates to a port, put the message in the port's log.
+			// If the message is related to a specific port, put the message in the port's log.
+			// If the message is not a 'sendnobuf' command, check if it relates to a port so it can be added to the port's console log.
 			// TODO: Make this work for sendjson messages as well.
-			// Ex. Msg: 'sendnobuf COM5 helloworld'
 			if (Msg.includes('sendnobuf')) {
 
+				// Ex. Msg: 'sendnobuf COM5 helloworld'
 				let [ msgOperation, msgPort, ...msg ] = Msg.split(' ');
 				msg = msg.join(' ');
 
 				console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
 
-				const safeMsgPort = msgPort ? this.makePortSafe(msgPort): msgPort;
+				const safeMsgPort = msgPort ? this.makePortSafe(msgPort) : undefined;
 
+				// Send the message to the SPJS.
 				const { cmdId } = this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand', Related: safeMsgPort });
 
 				// Add the command to the respective port's log with the same id as the message in the SPJS log.
 				if (cmdId && msg && safeMsgPort && this.consoleLog.openLogs.includes(safeMsgPort)) {
 					this.consoleLog.appendMsg(safeMsgPort, { Msg: msg, Id: cmdId, Type: 'MdiCommand', Meta: [ 'portSendNoBuf' ], Status: 'Sent' });
+
 					console.log('Added message to related port.');
 
-				} else if (!cmdId) {
-					console.log('1');
-				} else if (!msg) {
-					console.log('2');
-				} else if (!safeMsgPort) {
-					console.log('3');
-				} else if (!this.consoleLog.openLogs.includes(safeMsgPort)) {
-					console.log('4');
+				// NOTE: The following are intended for debugging purposes only.
+				} else {
+					cmdId || console.log('!cmdId', cmdId);
+					msg || console.log('!msg', msg);
+					safeMsgPort || console.log('!safeMsgPort', safeMsgPort);
+					this.consoleLog.openLogs.includes(safeMsgPort) || console.log('!this.consoleLog.openLogs.includes(safeMsgPort)', this.consoleLog.openLogs.includes(safeMsgPort));
+
 				}
 
+			// If the message is not a 'sendnobuf' command.
 			} else {
 				this.newspjsSend({ Msg, IdPrefix: 'mdi', Type: 'MdiCommand' });
 
