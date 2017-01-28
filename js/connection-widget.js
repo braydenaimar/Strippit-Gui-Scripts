@@ -87,9 +87,16 @@ return {
 		requestListDelay: null,
 		// requestListDelay: 10000,
 		// NOTE: Loaded by cson file.
-		exitUntrustedSpjs: true
+		exitUntrustedSpjs: true,
+		// Keep track of how many commands are in the SPJS queue.
+		queueCount: 0,
+		pauseOnQueueCount: 1000,
+		resumeOnQueueCount: 700,
+		maxLinesAtATime: 100
 	},
 
+	// TODO: Restructure the deviceMeta object.
+	newdeviceMeta: {},
 	// NOTE: Loaded by cson file.
 	// TODO: Change this from an array to an object and create a meta called 'default' rather than using the empty string for Vid/Pids convention.
 	deviceMeta: [
@@ -222,11 +229,9 @@ return {
 	// NOTE: Loaded by cson file.
 	initScripts: [],
 
+	// Stores the label and description for each status code for the tinyG controller.
 	// Built on program load from the 'TinyG_Status_Codes.cson' file.
 	tinygStatusMeta: {},
-
-	// Keep track of how many commands are in the SPJS queue.
-	queueCount: 0,
 
 	// Use this to receive raw port data for a port before we get a port's 'open' message. This data gets transfered over to the port's dataRecvBuffer and this buffer is cleared once the port is officially opened.
 	// Ex. { COM5: "...", COM10: "..." }
@@ -236,8 +241,6 @@ return {
 	// IDEA: Move the dataRecvBuffer object into each port's object.
 	dataRecvBuffer: {},
 
-	pauseOnQueueCount: 1000,
-	resumeOnQueueCount: 700,
 	// New data gets pushed onto the buffer and shift out items to send.
 	dataSendBuffer: {},
 
@@ -612,7 +615,6 @@ return {
 			console.log(`safeString: ${safeString}`);
 
 			return safeString;
-
 		},
 		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0 }) {
 			// Return logData item of matched command within the specified search space.
@@ -648,7 +650,7 @@ return {
 				// Replace the square brackets with text because the square brackets mess with the RegExp and match method.
 				// Note that any '\' character in the buffer is a text item but in the RegExp it becomes a modifier.
 				// refMsg = PartMsg.toLowerCase().replace(/\[/g, 'sqOpBk').replace(/\]/g, 'sqClBk').replace(/\\n/g, 'newline').replace(/\\r/g, 'returnline').replace(/\\/g, '\\\\');
-				refMsg = new RegExp(this.makeRegExpSafe(PartMsg), "i");
+				refMsg = new RegExp(this.makeRegExpSafe(PartMsg), 'i');
 
 				console.log(`Got PartMsg as a string. refMsg: ${refMsg}`);
 
@@ -752,6 +754,7 @@ return {
 
 				}
 
+				// Search backwards through the console log for a match (ie. new -> old).
 				for (let i = SearchFrom * -1; i >= 0; i--) {
 
 					const logIndex = IndexMap[i];
@@ -804,8 +807,11 @@ return {
 					// }
 				}
 
-			} else {
+			// If the Index argument was provided.
+			} else if (Index !== undefined) {
 				console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
+
+				matchFound = true;
 
 			}
 
@@ -2228,7 +2234,6 @@ return {
 
 		console.groupEnd();
 	},
-	// TODO: Update portList object, portMeta object, and serial port list DOM.
 	onPortOpen: function (data) {
 		const { Cmd, Desc, Port, IsPrimary, Baud, BufferType } = data;
 		// Ex. { Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2" }
@@ -2254,6 +2259,7 @@ return {
 		// If the port was opened with different settings from the deviceMeta data, update the serial ports list DOM.
 		if (Baud !== portMeta[safePort].Baud || BufferType !== portMeta[safePort].Buffer) {
 
+			// If a Baud value was given, update the device's portMeta object.
 			portMeta[safePort].Baud = Baud || portMeta[safePort].Baud;
 			portMeta[safePort].Buffer = BufferType || portMeta[safePort].Buffer;
 
@@ -2464,7 +2470,7 @@ return {
 	},
 	onPortOpenFail: function (data) {
 		const { Cmd, Port, Baud, Desc } = data;
-		// Ex. {Cmd: "OpenFail", Desc: "Error opening port. The system cannot find the file specified.", Port: "COM99", Baud: 115200}
+		// Ex. { Cmd: "OpenFail", Desc: "Error opening port. The system cannot find the file specified.", Port: "COM69", Baud: 115200 }
 		console.log(`SPJS -PortOpenFail-\n  Cmd: ${Cmd}\n  Port: ${Port}\n  Baud: ${Baud}\n  Desc: ${Desc}`);
 
 		// Add the message to the SPJS log.
@@ -2472,23 +2478,26 @@ return {
 
 		const that = this;
 		const safePort = this.makePortSafe(Port);
+		const verifyMap = this.consoleLog[safePort].verifyMap;
 
 		// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
 		const refCmd = `open ${Port}`;
-		this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: this.consoleLog.verifyMap, Status: 'Error' });
+		verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: verifyMap, Status: 'Error' });
 
 		this.portDisconnected(safePort);
 
 		// Repeatedly attempt to connect to a port.
 		if (this.SPJS.requestListDelay !== null) {
+
 			setTimeout(function() {
 				that.newspjsSend({ Msg: 'list' });
+
 			}, this.SPJS.requestListDelay);
 		}
 
 	},
 	onPortClose: function (data) {
-		const { Cmd, Port, Baud, Desc } = data;
+		const { Cmd, Desc, Port, Baud } = data;
 		// Ex. {Cmd: "Close", Desc: "Got unregister/close on port.", Port: "COM10", Baud: 115200}
 		console.log("SPJS -PortClose-\n  Cmd: " + data.Cmd + "\n  Port: " + data.Port + "\n  Baud: " + data.Baud + "\n  Desc: " + data.Desc);
 
@@ -2507,7 +2516,7 @@ return {
 			// FIXME: Fix this.
 			// FIXME: This is weird, the port doesnt autoconnect even though there is no code here.
 			this.deviceMeta[this.SPJS.portMeta[safePort].metaIndex].autoConnectPort = false;
-			console.log('Clearing auto-connect');
+			console.log(`Clearing auto-connect on: ${Port}`);
 
 		// If the port closed because of a SPJS command.
 		} else if (this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' })) {
@@ -3072,7 +3081,7 @@ return {
 
 		console.log(`SPJS -QueueCnt-\n  QCnt: ${QCnt}`);
 
-		this.queueCount = Number(QCnt);
+		this.SPJS.queueCount = Number(QCnt);
 
 	},
 	onGarbageCollection: function (data) {
@@ -3479,14 +3488,47 @@ return {
 		// Return true to indicate that the command was sent successfully.
 		return spjsId;
 	},
+	sendBuffered: function ({ Data }) {
+		// Receive message data the same way as the portSendJson method.
+		// Add message data to the buffer object.
+
+		// If the SPJS has fewer messages in the queue than the pauseOnQueueCount setting, send messages.
+
+
+		// Approach #1:
+		// If there are messages in the sendBuffer, set a periodic interval timer to check if messages can be sent.
+		// 	-If messages can be sent, send the number of messages that can be sent to fill the queue.
+		// If the sendBuffer is empty, cancel the periodic interval timer.
+
+		// Approach #2: (the chilipeppr method)
+		// If queueCount < pauseOnQueueCount and sending is not paused, send a fixed number of lines.
+		// If queueCount > pauseOnQueueCount and sending is not paused, pause sending.
+		// If queueCount < resumeOnQueueCount, resume sending and send a fixed number of lines.
+
+	},
+	// TODO: Parse port names to make sure that they are the correct case.
 	mdiSend: function (port, { Msg }) {
 
 		const that = this;
+		const portList = this.SPJS.portList;
 
 		// If there is space before the message, remove it.
 		Msg = /^\s+\S/.test(Msg) ? Msg.replace(/^\s+/, '') : Msg;
 
 		if (port === 'SPJS') {
+
+			// Correct any character upper/lower case mistakes for port names. Nothing should break if port is not entered with correct cases but it is just allot better.
+			// Ex. 'close com4' is changed to 'close COM4'.
+			for (let portName in portList) {
+
+				let unsafePortName = this.makePortUnSafe(portName);
+
+				let refStr = new RegExp(unsafePortName, 'gi');
+				// console.log('refStr:', refStr);
+
+				Msg = Msg.replace(refStr, unsafePortName);
+
+			}
 
 			// If the message is related to a specific port, put the message in the port's log.
 			// If the message is not a 'sendnobuf' command, check if it relates to a port so it can be added to the port's console log.

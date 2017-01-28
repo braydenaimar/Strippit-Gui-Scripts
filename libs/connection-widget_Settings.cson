@@ -305,7 +305,7 @@ initScripts: [
             "{sr:n}",
             "{qr:n}"
         ],
-        "pause": 1000 # Using long pause for debugging purposes.
+        "pause": 1000
     }
     {
         "Buffer": "tinyg",
@@ -314,12 +314,22 @@ initScripts: [
         ],
         "pause": 100
     }
-    {
-        "Buffer": "default",
+    {   # Brayden's MSP430F5529
+        "SerialNumber": "111D871D",
         "script": [
-            "{sr:n}",
-            "{fb:n}"
+            "$G D 0",
+            "$G D 1"
         ],
-        "pause": 100
+        "pause": 1000
     }
+    # {
+    #     "Buffer": "default",
+    #     "script": [
+    #         "{sr:n}",
+    #         "{fb:n}"
+    #     ],
+    #     "pause": 100
+    # }
 ]
+
+# 3B3CC6A6 Vincent's MSP430
