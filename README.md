@@ -73,3 +73,11 @@ Follow these steps to install the Strippit GUI.
 6. Run `npm start` to launch the app.
 
 Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
+
+### Linux
+
+coming soon
+
+### Mac
+
+I've never used a mac so you are on your own on this one.
