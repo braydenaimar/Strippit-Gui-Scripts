@@ -4,7 +4,7 @@ A graphical user interface for the Strippit punch press.
 
 The Application
 -----
-Below a snapshot of the structure of files and folders of the application after installation.
+Below a snapshot of the structure of files and folders of the application after installation on Windows.
 
 ```shell
 Strippit-Gui/
@@ -65,5 +65,7 @@ Follow these steps to install the Strippit GUI.
 
 1. Install npm
 2. Clone this repository to your computer
-3. cd into the repository and run `npm install`
-4. run `npm start` to launch the app
+3. download the SPJS
+    *Windows: put the `json_server` directory inside the repository.
+4. cd into the repository and run `npm install`
+5. run `npm start` to launch the app
