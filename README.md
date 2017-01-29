@@ -65,11 +65,11 @@ Follow these steps to install the Strippit GUI.
 
 ### Windows
 
-1. Install npm
-2. Clone this repository to your computer
-3. download the SPJS
-4. put the `json_server` directory inside the repository
-5. cd into the repository and run `npm install`
-6. run `npm start` to launch the app
+1. Install npm.
+2. Clone this repository to your computer.
+3. Download the SPJS.
+4. Put the `json_server` directory inside the repository.
+5. `cd` into the repository and run `npm install`.
+6. Run `npm start` to launch the app.
 
 Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
