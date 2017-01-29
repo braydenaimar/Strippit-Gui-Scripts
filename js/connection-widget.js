@@ -198,7 +198,7 @@ return {
 			]
 		},
 		{ Friendly: 'TI MSP430',
-			Baud: 9600,
+			Baud: 115200,
 			Buffer: 'default',
 			useReceivedFriendly: true,
 			autoConnectPort: false,
@@ -435,10 +435,11 @@ return {
 
 			// Check that the message argument is valid.
 			if (Msg === '') {
-				console.warn('The append message method got the Msg argument as an empty string.');
+				console.log('The append message method got the Msg argument as an empty string.');
 
 			} else if (Msg === undefined) {
-				console.warn('Aborted the append message method because the Msg argument was omitted.');
+				// console.log('Aborted the append message method because the Msg argument was omitted.');
+				throw 'Aborted the append message method because the Msg argument was omitted.'
 				return false;
 
 			} else if (typeof Msg === 'object') {
@@ -454,7 +455,7 @@ return {
 
 			// Prevent any messages containing '<' or '>' because these can mess with the console log DOM structure.
 			if (/[<>]/.test(Msg)) {
-				if (Type === 'stdout' || Type === 'stderr') console.warn(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
+				if (Type === 'stdout' || Type === 'stderr') console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
 				Msg = Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 			}
 
@@ -616,6 +617,45 @@ return {
 
 			return safeString;
 		},
+		checkMatchItem({ Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem }) {
+
+			console.log(`LogItem: %O`, LogItem);
+
+			if (Msg !== undefined && LogItem.Msg !== Msg) return false;
+			if (PartMsg && !PartMsg.test(this.makeRegExpSafe(LogItem.Msg))) return false;
+			if (Length !== undefined && LogItem.Msg.length !== Length) return false;
+			if (Id !== undefined && LogItem.Id !== Id) return false;
+			if (Line !== undefined && LogItem.Line !== Line) return false;
+			if (Type !== undefined && LogItem.Type !== Type) return false;
+			if (MinAge !== undefined && LogItem.Time - Date.now() < MinAge) return false;
+			if (MaxAge && LogItem.Time - Date.now() > MaxAge) {
+
+				if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+
+					this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
+
+				}
+
+				console.log('Found stale command.');
+
+				return false;
+			}
+
+			// Only counts a match as: all elements of Meta array are in the LogItem.Meta array.
+			if (Meta !== undefined) {
+				let matchCount = 0;
+
+				for (let x = 0; x < Meta.length; x++) {
+					// if (!LogItem.Meta.includes(Meta[x])) matchCount++;
+					if (!LogItem.Meta.includes(Meta[x])) return false;
+
+				}
+
+				// if (matchCount == Meta.length) return false;
+			}
+
+			return true;
+		},
 		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0 }) {
 			// Return logData item of matched command within the specified search space.
 			// Defaults to searching entire logData object, use IndexMap to narrow that search.
@@ -625,7 +665,8 @@ return {
 			const that = this;
 
 			if (IndexMap === undefined && Index === undefined) {
-				console.warn('IndexMap is undefined.');
+				throw 'IndexMap is undefined.'
+				// console.warn('IndexMap is undefined.');
 				IndexMap = this[port].cmdMap;
 
 			}
@@ -634,6 +675,7 @@ return {
 			let matchIndex = Index;
 			const dataRef = Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))));
 			const data = arguments[1][dataRef];
+			const logData = this[port].logData;
 
 			console.groupCollapsed(`Find - ${dataRef}: ${data}`);
 
@@ -665,153 +707,178 @@ return {
 				MaxAge = this.staleCmdLimit;
 			}
 
-			// TODO: Check each match with Type if the Type argument was given.
+			// Make sure that the SearchFrom argument is valid.
+			if (SearchFrom >= logData.length || logData.length + SearchFrom < 0) {
+				throw `Invalid SearchFrom value.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`
+
+			}
+
+			// If the Index argument was given.
+			if (Index !== undefined) {
+				console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
+
+				matchFound = true;
+
 			// If the Index argument was omitted, search the port's console log for a match.
-			if (Index === undefined && SearchFrom >= 0) {
+			} else if (SearchFrom >= 0) {
 
 				console.log('Searching forwards through the log for a match (ie. old to recent).');
 
 				// Debugging purposes only.
-				if (SearchFrom == IndexMap.length) {
-					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
-					console.groupEnd();
+				// if (SearchFrom == IndexMap.length) {
+				// 	console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
+				// 	console.groupEnd();
+				// 	return { matchFound };
+				//
+				// } else if (SearchFrom > IndexMap.length) {
+				// 	for (let i = 0; i < 10; i++) {
+				// 		console.groupEnd();
+				// 	}
+				// 	throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
+				// }
 
-					return { matchFound };
+				let init = 0;
 
-				} else if (SearchFrom > IndexMap.length) {
+				for (let i = 0; i < IndexMap.Length; i++) {
 
-					for (let i = 0; i < 10; i++) {
-						console.groupEnd();
+					if (IndexMap[i] >= SearchFrom) {
+						init = i;
+						break;
+
 					}
-
-					throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
 
 				}
 
-				for (let i = SearchFrom; i < IndexMap.length; i++) {
+				// Search forwards through the console log for a match (ie. old -> new).
+				for (let i = init; i < IndexMap.length; i++) {
 
 					const logIndex = IndexMap[i];
-					const logItem = this[port].logData[logIndex];
+					const LogItem = logData[logIndex];
 
-					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
+					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
-					if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
-					if (Length !== undefined && logItem.Msg.length !== Length) continue;
-					if (Id !== undefined && logItem.Id !== Id) continue;
-					if (Line !== undefined && logItem.Line !== Line) continue;
-					if (Type !== undefined && logItem.Type !== Type) continue;
-					if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
-					if (MaxAge && logItem.Time - Date.now() > MaxAge) {
+					// if (Msg !== undefined && logItem.Msg !== Msg) continue;
+					// if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
+					// if (Length !== undefined && logItem.Msg.length !== Length) continue;
+					// if (Id !== undefined && logItem.Id !== Id) continue;
+					// if (Line !== undefined && logItem.Line !== Line) continue;
+					// if (Type !== undefined && logItem.Type !== Type) continue;
+					// if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
+					// if (MaxAge && logItem.Time - Date.now() > MaxAge) {
+					//
+					// 	if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+					//
+					// 		this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
+					//
+					// 	}
+					//
+					// 	console.log('Found stale command.');
+					//
+					// 	continue;
+					// }
+					//
+					// if (Meta !== undefined) {
+					// 	let matchCount = 0;
+					//
+					// 	for (let x = 0; x < Meta.length; x++) {
+					// 		if (logItem.Meta.includes(Meta[x])) matchCount++;
+					// 	}
+					//
+					// 	if (matchCount == Meta.length) continue;
+					//
+					// }
 
-						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+					// Check to see if found a match.
+					if (this.checkMatchItem({ Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem })) {
+						console.log('  ...got a match.');
+						matchFound = true;
+						matchIndex = logIndex;
 
-							this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
-
-						}
-
-						console.log('Found stale command.');
-
-						continue;
+						break;
 					}
 
-					if (Meta !== undefined) {
-						let matchCount = 0;
-
-						for (let x = 0; x < Meta.length; x++) {
-							if (logItem.Meta.includes(Meta[x])) matchCount++;
-						}
-
-						if (matchCount == Meta.length) continue;
-
-					}
-
-					console.log('  ...got a match.');
-					matchFound = true;
-					matchIndex = logIndex;
-
-					break;
 				}
 
-			} else if (Index === undefined && SearchFrom < 0) {
+			// Search backwards through the log for a match (ie. recent to old).
+			} else if (SearchFrom < 0) {
 
 				console.log('Searching backwards through the log for a match (ie. recent to old).');
 
 				// Debugging purposes only.
-				if (SearchFrom * -1 == IndexMap.length) {
-					console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
-					console.groupEnd();
+				// if (SearchFrom * -1 == IndexMap.length) {
+				// 	console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
+				// 	console.groupEnd();
+				// 	return { matchFound };
+				//
+				// } else if (SearchFrom * -1 > IndexMap.length) {
+				// 	for (let i = 0; i < 10; i++) {
+				// 		console.groupEnd();
+				// 	}
+				// 	throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
+				// }
 
-					return { matchFound };
+				let init = IndexMap.length - 1;
+				let refIndex = logData.length + SearchFrom;
 
-				} else if (SearchFrom * -1 > IndexMap.length) {
+				for (let i = IndexMap.length - 1; i >= 0; i--) {
 
-					for (let i = 0; i < 10; i++) {
-						console.groupEnd();
+					if (IndexMap[i] <= refIndex) {
+						init = i;
+						break;
+
 					}
-
-					throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
 
 				}
 
 				// Search backwards through the console log for a match (ie. new -> old).
-				for (let i = SearchFrom * -1; i >= 0; i--) {
+				for (let i = init; i >= 0; i--) {
 
 					const logIndex = IndexMap[i];
-					const logItem = this[port].logData[logIndex];
+					const LogItem = logData[logIndex];
 
-					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nlogItem: %O`, logItem);
+					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
-					if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
-					if (Length !== undefined && logItem.Msg.length !== Length) continue;
-					if (Id !== undefined && logItem.Id !== Id) continue;
-					if (Line !== undefined && logItem.Line !== Line) continue;
-					if (Type !== undefined && logItem.Type !== Type) continue;
-					if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
-					if (MaxAge && logItem.Time - Date.now() > MaxAge) {
-
-						if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
-
-							this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
-
-						}
-
-						console.log('Found stale command');
-
-						continue;
-					}
-
-					if (Meta !== undefined) {
-						let matchCount = 0;
-
-						for (let x = 0; x < Meta.length; x++) {
-							if (logItem.Meta.includes(Meta[x])) matchCount++;
-
-						}
-
-						if (matchCount == Meta.length) continue;
-
-					}
-
-					console.log('  ...got a match.');
-					matchFound = true;
-					matchIndex = logIndex;
-
-					break;
-
-					// if ((Length !== undefined && PartMsg === undefined && logItem.Msg.length == Length) || (PartMsg !== undefined && Length === undefined && refMsg.test(msgData)) || (Length !== undefined && PartMsg !== undefined && logItem.Msg.length == Length && refMsg.test(msgData)) || (Length === undefined && PartMsg === undefined && logItem[dataRef] === data)) {
-					// 	console.log('  ...got a match');
-					// 	matchIndex = logIndex;
-					// 	break;
+					// if (Msg !== undefined && logItem.Msg !== Msg) continue;
+					// if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
+					// if (Length !== undefined && logItem.Msg.length !== Length) continue;
+					// if (Id !== undefined && logItem.Id !== Id) continue;
+					// if (Line !== undefined && logItem.Line !== Line) continue;
+					// if (Type !== undefined && logItem.Type !== Type) continue;
+					// if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
+					// if (MaxAge && logItem.Time - Date.now() > MaxAge) {
+					//
+					// 	if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+					//
+					// 		this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
+					//
+					// 	}
+					//
+					// 	console.log('Found stale command');
+					//
+					// 	continue;
 					// }
+					//
+					// if (Meta !== undefined) {
+					// 	let matchCount = 0;
+					//
+					// 	for (let x = 0; x < Meta.length; x++) {
+					// 		if (logItem.Meta.includes(Meta[x])) matchCount++;
+					//
+					// 	}
+					//
+					// 	if (matchCount == Meta.length) continue;
+					//
+					// }
+
+					// Check to see if found a match.
+					if (this.checkMatchItem({ Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem })) {
+						console.log('  ...got a match.');
+						matchFound = true;
+						matchIndex = logIndex;
+
+						break;
+					}
 				}
-
-			// If the Index argument was provided.
-			} else if (Index !== undefined) {
-				console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
-
-				matchFound = true;
 
 			}
 
@@ -859,7 +926,8 @@ return {
 			}
 
 			if (!Status && Comment === undefined) {
-				console.warn('No Update Requested. Aborting update');
+				// console.warn('No Update Requested. Aborting update');
+				throw 'No Update Requested. Aborting update'
 				// console.groupEnd();
 				return { matchFound: false };
 			}
@@ -870,6 +938,7 @@ return {
 
 			const cmdMap = this[port].cmdMap;
 			const verifyMap = this[port].verifyMap;
+			const logData = this[port].logData;
 
 			// Use verifyMap if doing a status update other than warning or error.
 			if (IndexMap === undefined && Status && Status !== 'Warning' && Status !== 'Error') {
@@ -919,10 +988,10 @@ return {
 				$(`#connection-widget .console-log-panel .log-${port} span.verify-mark.${matchId}`).removeClass(this.verifyStyle[matchStatus]).addClass(this.verifyStyle[Status]);
 				// console.log(`#connection-widget .console-log-panel .log-${port} span.verify-mark.${matchId}`);
 
-				this[port].logData[matchIndex].Status = Status;
+				logData[matchIndex].Status = Status;
 
 				console.log('Updated status.');
-				console.log(`  Prev status: ${matchStatus}\n  New status: ${this[port].logData[matchIndex].Status}`);
+				console.log(`  Prev status: ${matchStatus}\n  New status: ${logData[matchIndex].Status}`);
 
 				// If removeItem is true, remove the matched command from the verifyBuffer object.
 				if (removeItem && this[port].verifyMap.includes(matchIndex)) {
@@ -946,7 +1015,7 @@ return {
 						console.log('Item was removed from the verifyMap.');
 
 					} else {
-						console.error('Item was not successfully removed from the verifyMap.');
+						throw 'Item was not successfully removed from the verifyMap.'
 
 					}
 
@@ -955,21 +1024,24 @@ return {
 
 				}
 
+			// If this a redundant status update, look for another match in the log incase this is the wrong command in the log.
 			} else if (Status && this.verifyPrecidence.indexOf(matchStatus) >= this.verifyPrecidence.indexOf(Status)) {
 
-				if ((Status === 'Warning' || Status === 'Error') && matchIndexMap.indexOf(matchIndex) > 0) {
+				if ((Status === 'Warning' || Status === 'Error') && matchIndex > 0) {
 					console.groupEnd();
 
-					console.warn(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${1 - matchIndexMap.indexOf(matchIndex)}`);
+					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${1 - matchIndex}`);
 
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: 1 - matchIndexMap.indexOf(matchIndex), Status, Comment, PrevComment, UpdateRelated });
+					// return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: 1 - matchIndexMap.indexOf(matchIndex), Status, Comment, PrevComment, UpdateRelated });
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: 1 - matchIndex, Status, Comment, PrevComment, UpdateRelated });
 
-				} else if (Status !== 'Warning' && Status !== 'Error' && matchIndexMap.indexOf(matchIndex) < matchIndexMap.length - 1) {
+				} else if (Status !== 'Warning' && Status !== 'Error' && SearchFrom < logData.length - 1) {
 					console.groupEnd();
 
-					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndexMap.indexOf(matchIndex) + 1}`);
+					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndex + 1}`);
 
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndexMap.indexOf(matchIndex) + 1, Status, Comment, PrevComment, UpdateRelated });
+					// return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndexMap.indexOf(matchIndex) + 1, Status, Comment, PrevComment, UpdateRelated });
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex + 1, Status, Comment, PrevComment, UpdateRelated });
 
 				} else {
 					console.log('Redundant Status Update.');
@@ -982,16 +1054,19 @@ return {
 				console.log('Comment update.');
 
 				// Get the new value of the comment in case the comment was updated by the status update (ie. time to execute/error was added).
-				matchComment = this[port].logData[matchIndex].Comment;
+				matchComment = logData[matchIndex].Comment;
 
 				let newComment = '';
 
+				// Add the new comment to the right of any previous comments.
 				if (PrevComment === 'left') {
 					newComment = matchComment ? `${matchComment} [${Comment}]` : (Comment ? `[${Comment}]` : '');
 
+				// Add the new comment to the left of any previous comments.
 				} else if (PrevComment === 'right') {
 					newComment = matchComment ? `[${Comment}] ${matchComment}` : (Comment ? `[${Comment}]` : '');
 
+				// Replace any previous comments with the new comment.
 				} else if (PrevComment === 'clear') {
 					newComment = Comment ? `[${Comment}]` : '';
 
@@ -1001,22 +1076,30 @@ return {
 				$(`#connection-widget .console-log-panel .log-${port} ${this.style.CmdComment.includes('samp') ? 'samp' : 'code'}.cmd-comment.${matchId}`).text(`${newComment}`);
 				// console.log(`#connection-widget.console-log-panel .log-${port} ${this.style.CmdComment.includes('samp') ? 'samp' : 'code'}.cmd-comment.${matchId}`);
 
-				this[port].logData[matchIndex].Comment = newComment;
+				logData[matchIndex].Comment = newComment;
 
 				console.log(`New Comment: ${newComment}`);
 
 			} else if (Comment && matchComment.includes(`[${Comment}]`)) {
-				console.warn('Redundant Comment Update.');
+				console.log('Redundant Comment Update.');
+			}
+
+			// Debugging purposes only.
+			// Check that matchRelated has a port.
+			if (matchRelated && !matchRelated.Port) {
+				throw 'matchRelated does not have a port.'
 			}
 
 			// If the command has a related command in a port's log, verify that command using the id from the command in the SPJS log.
-			if (UpdateRelated && matchRelated && this[matchRelated.Port]) {
+			if (UpdateRelated && matchRelated && matchRelated.Port && this[matchRelated.Port]) {
+
 				console.log(`Found related port:\n${CSON.stringify(matchRelated)}`);
 
+				// If there is a match Id, use that.
 				if (matchRelated.Id) {
+
 					// Debugging Purposes Only.
 					if (!Array.isArray(matchRelated.Id)) {
-						gui.escGroup();
 						throw 'matchRelated.Id is not an array.'
 					}
 
@@ -1037,7 +1120,7 @@ return {
 
 			}
 
-			const matchItem = this[port].logData[matchIndex];
+			const matchItem = logData[matchIndex];
 			console.groupEnd();
 
 			return {
@@ -1530,7 +1613,7 @@ return {
 				console.info(data);
 
 			} catch(error) {
-				console.warn('SPJS Recv (json error):\n  ' + msg);
+				console.log('SPJS Recv (json error):\n  ' + msg);
 
 				this.consoleLog.appendMsg('SPJS', { Msg: msg, Type: 'Error' });
 				this.onParseError(msg);
@@ -2725,10 +2808,11 @@ return {
 
 		const cmdMap = this.consoleLog.SPJS.cmdMap;
 		const verifyMap = this.consoleLog.SPJS.verifyMap;
+		const logData = this.consoleLog.SPJS.logData;
 
 		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
 
-		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - verifyMap.length, IndexMap: verifyMap })) return;
+		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - logData.length, IndexMap: verifyMap })) return;
 
 		console.log(`No match was found for Id: '${Id}'`);
 
@@ -2772,10 +2856,11 @@ return {
 
 		const cmdMap = this.consoleLog.SPJS.cmdMap;
 		const verifyMap = this.consoleLog.SPJS.verifyMap;
+		const logData = this.consoleLog.SPJS.logData;
 
 		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
 
-		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - verifyMap.length, IndexMap: verifyMap })) return;
+		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - logData.length, IndexMap: verifyMap })) return;
 
 		console.log(`No match was found for Id: '${Id}'`);
 
@@ -2827,7 +2912,7 @@ return {
 	onErrorJson: function (data) {
 		const { Cmd } = data;
 
-		console.warn('SPJS -ErrorJson-\n ', data);
+		console.log('SPJS -ErrorJson-\n ', data);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -2838,7 +2923,7 @@ return {
 
 		const { Label, Desc } = this.lookupStatusCode(er.st);
 
-		console.warn('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${ Desc ? `\n  Desc: ${Desc}` : ''}`);
+		console.log('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${ Desc ? `\n  Desc: ${Desc}` : ''}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -3052,7 +3137,7 @@ return {
 						console.log(matchId);
 
 						if (!matchId) {
-							console.warn('No match was found for the partMsg and msg length given.');
+							console.log('No match was found for the partMsg and msg length given.');
 						}
 
 						// If no match is found or the length does not match.
@@ -3062,6 +3147,8 @@ return {
 
 					} else {
 						console.log('lineObj.r is unrecognized.');
+
+						throw 'Make lineObj.r recognized and do something with it.'
 
 					}
 
@@ -3266,7 +3353,7 @@ return {
 
 		// Since there was an error sending the command, show the error in the log and return false.
 		} catch (err) {
-			console.warn(`Could not send command to the SPJS.\nError: ${err}`);
+			console.log(`Could not send command to the SPJS.\nError: ${err}`);
 			this.consoleLog.updateCmd('SPJS', { Id: cmdId, Status: 'Error', Comment: 'SPJS Closed' });
 
 			return false;
@@ -3591,7 +3678,7 @@ return {
 			if (matchTime && deltaTime > this.consoleLog.staleCmdLimit) {
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
 			} else if (matchTime) {
-				console.warn("The SPJS is already processing a request for the portList.\nRequest for list terminated.");
+				console.log("The SPJS is already processing a request for the portList.\nRequest for list terminated.");
 				return false;
 			}
 		}
@@ -3608,7 +3695,7 @@ return {
 
 		// Since there was an error sending the command, show the error in the log and return false.
 		} catch (err) {
-			console.warn(`Could not send command to the SPJS.\nError: ${err}`);
+			console.log(`Could not send command to the SPJS.\nError: ${err}`);
 			this.consoleLog.updateCmd('SPJS', { Id: cmdId, Status: 'Error', Comment: 'SPJS Closed' });
 
 			return false;
