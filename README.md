@@ -9,30 +9,30 @@ Below a snapshot of the structure of files and folders of the application after 
 ```shell
 Strippit-Gui/
 ├── Strippit-Gui-Scripts/
-|	├── css/
-|	|	├── fonts/
+|   ├── css/
+|   |   ├── fonts/
 |   │   |	├── glyphicons-halflings-regular.eot
 |   │   |	└── ...
 |   |   ├── lib/
 |   |   |	├── bootstrap-paper.min.css
-|	|	|	├── font-awesome.min.css
+|   |   |   ├── font-awesome.min.css
 |   │   |	└── roboto-font.css
 |   |   ├── main.css
 |   |   └── ...
 |   ├── js/
-|	|	├── lib/
-|	|	|	├── amplify.core.js
-|	|	|	├── gui.js
-|	|	|	├── jquery.js
-|	|	|	└── require.js
+|   |   ├── lib/
+|   |   |   ├── amplify.core.js
+|   |   |   ├── gui.js
+|   |   |   ├── jquery.js
+|   |   |   └── require.js
 |   │   ├── require-config.js
 |   │   ├── main.js
 |   │   └── ...
 |   ├── icons/
 |   |   ├── boards/
-|	|	|	├── tinyg.jpg
-|	|	|	└── tinygv9.jpg
-|	|	|	└── ...
+|   |   |   ├── tinyg.jpg
+|   |   |   └── tinygv9.jpg
+|   |   |   └── ...
 |   |   └── icon.png
 |   ├── node_modules/
 |   |   └── johnny-five/
@@ -63,9 +63,13 @@ Installation
 -----
 Follow these steps to install the Strippit GUI.
 
+### Windows
+
 1. Install npm
 2. Clone this repository to your computer
 3. download the SPJS
-    *Windows: put the `json_server` directory inside the repository.
-4. cd into the repository and run `npm install`
-5. run `npm start` to launch the app
+4. put the `json_server` directory inside the repository
+5. cd into the repository and run `npm install`
+6. run `npm start` to launch the app
+
+Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
