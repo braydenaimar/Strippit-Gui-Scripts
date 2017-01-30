@@ -18,7 +18,7 @@ Follow these steps to install the Strippit GUI.
 Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
 
 
-The Application
+File Tree
 -----
 Below a snapshot of the structure of files and folders of the application after installation on Windows.
 
@@ -32,9 +32,13 @@ Strippit-Gui-Scripts/
 |   |   └── require.js
 │   ├── require-config.js
 │   ├── main.js
-│   └── ...
+│   ├── strippit-widget.js
+│   ├── settings-widget.js
+│   ├── connection-widget.js
+|   └── help-widget.js
 ├── css/
 |   ├── fonts/
+│   |   ├── fontawesome-webfont.eot
 │   |   ├── glyphicons-halflings-regular.eot
 │   |   └── ...
 |   ├── lib/
@@ -42,9 +46,15 @@ Strippit-Gui-Scripts/
 |   |   ├── font-awesome.min.css
 │   |   └── roboto-font.css
 |   ├── main.css
-|   └── ...
+│   ├── strippit-widget.css
+│   ├── settings-widget.css
+│   ├── connection-widget.css
+|   └── help-widget.css
 ├── html/
-|   └── ...
+│   ├── strippit-widget.html
+│   ├── settings-widget.html
+│   ├── connection-widget.html
+|   └── help-widget.html
 ├── icons/
 |   ├── boards/
 |   |   ├── tinyg.jpg
