@@ -709,7 +709,7 @@ return {
 			}
 
 			// Make sure that the SearchFrom argument is valid.
-			if (SearchFrom >= logData.length || logData.length + SearchFrom < 0) {
+			if (SearchFrom != 0 && (SearchFrom >= logData.length || logData.length + SearchFrom < 0)) {
 				throw `Invalid SearchFrom value.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`
 
 			}
@@ -1499,13 +1499,13 @@ return {
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
 
 			// Launch the SPJS in max garbage collection mode.
-			this.SPJS.go = spawn(`lxterminal --command "sudo json-server/linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+			this.SPJS.go = spawn(`lxterminal --command "sudo ./json-server/linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 			// this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (this.SPJS.launchGpioServerOnLinux) {
 
 				// Launch the GPIO JSON server.
-				this.SPJS.gpio = spawn(`lxterminal --command "sudo linux_arm/gpio-json-server"`, [], { shell: true });
+				this.SPJS.gpio = spawn(`lxterminal --command "sudo ./json-server/linux_arm/gpio-json-server"`, [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 					console.log(`GPIO Server. stdout: ${data}`);
