@@ -248,7 +248,7 @@ define([ 'jquery', 'gui', 'amplify' ], function ($) {
 	loadHtmlWidget = function (wgt) {
 		console.log("  Loading HTML & JS");
 
-		$('#' + wgt).load(wgt + '.html', '', function () {
+		$('#' + wgt).load('html/' + wgt + '.html', '', function () {
 
 			requirejs([wgt], function(ref) {
 				ref.loadHtml = widget[wgt].loadHtml;
