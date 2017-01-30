@@ -1,0 +1,17 @@
+{
+    "name": "Strippit-gui",
+    "version": "0.1.0",
+    "description": "A graphical user interface for the Strippit Punch Press.",
+    "main": "index.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "author": "Brayden Aimar",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^1.4.2"
+    },
+    "dependencies": {
+        "cson": "^4.0.0"
+    }
+}

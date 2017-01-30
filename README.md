@@ -2,63 +2,6 @@
 A graphical user interface for the Strippit punch press.
 
 
-The Application
------
-Below a snapshot of the structure of files and folders of the application after installation on Windows.
-
-```shell
-Strippit-Gui/
-├── Strippit-Gui-Scripts/
-|   ├── css/
-|   |   ├── fonts/
-|   │   |	├── glyphicons-halflings-regular.eot
-|   │   |	└── ...
-|   |   ├── lib/
-|   |   |	├── bootstrap-paper.min.css
-|   |   |   ├── font-awesome.min.css
-|   │   |	└── roboto-font.css
-|   |   ├── main.css
-|   |   └── ...
-|   ├── js/
-|   |   ├── lib/
-|   |   |   ├── amplify.core.js
-|   |   |   ├── gui.js
-|   |   |   ├── jquery.js
-|   |   |   └── require.js
-|   │   ├── require-config.js
-|   │   ├── main.js
-|   │   └── ...
-|   ├── icons/
-|   |   ├── boards/
-|   |   |   ├── tinyg.jpg
-|   |   |   └── tinygv9.jpg
-|   |   |   └── ...
-|   |   └── icon.png
-|   ├── node_modules/
-|   |   └── johnny-five/
-|   |       ├── node_modules/
-|   |       |   ├── serialport/
-|   |       |   |   └── ...
-|   |       |   └── ...
-|   |       └── ...
-|   ├── favicon.ico
-|   ├── index.html
-|   └── package.json
-├── buildTools/
-|   ├── 7z/
-|   │   ├── 7z.exe
-|   │   └── ...
-|   ├── ar/
-|   │   ├── Resourcer.exe
-|   │   └── ...
-|   ├── nw/
-|   |   ├── node-webkit-v0.8.6-win-ia32
-|   |   |   ├── nw.exe
-|   |   |   └── ...
-├── release/
-└── build.bat
-```
-
 Installation
 -----
 Follow these steps to install the Strippit GUI.
@@ -74,10 +17,72 @@ Follow these steps to install the Strippit GUI.
 
 Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
 
-### Linux
 
-coming soon
+File Tree
+-----
+Below a snapshot of the structure of files and folders of the application after installation on Windows.
 
-### Mac
-
-I've never used a mac so you are on your own on this one.
+```
+Strippit-Gui-Scripts/
+├── js/
+|   ├── lib/
+|   |   ├── amplify.core.js
+|   |   ├── gui.js
+|   |   ├── jquery.js
+|   |   └── require.js
+│   ├── require-config.js
+│   ├── main.js
+│   ├── strippit-widget.js
+│   ├── settings-widget.js
+│   ├── connection-widget.js
+|   └── help-widget.js
+├── css/
+|   ├── fonts/
+│   |   ├── fontawesome-webfont.eot
+│   |   ├── glyphicons-halflings-regular.eot
+│   |   └── ...
+|   ├── lib/
+|   |   ├── bootstrap-paper.min.css
+|   |   ├── font-awesome.min.css
+│   |   └── roboto-font.css
+|   ├── main.css
+│   ├── strippit-widget.css
+│   ├── settings-widget.css
+│   ├── connection-widget.css
+|   └── help-widget.css
+├── html/
+│   ├── strippit-widget.html
+│   ├── settings-widget.html
+│   ├── connection-widget.html
+|   └── help-widget.html
+├── icons/
+|   ├── boards/
+|   |   ├── tinyg.jpg
+|   |   └── tinygv9.jpg
+|   |   └── ...
+|   └── icon.png
+├── json-server/
+|   ├── windows_x64/
+|   |   ├── arduino/
+|   |   |   └── ...
+|   |   ├── drivers/windows/
+|   |   |   └── TinyGv2.inf
+|   |   ├── sample-cert.pem
+|   |   ├── sample-key.pem
+|   |   └── serial-port-json-server.exe
+|   └── linux_arm/
+|       ├── arduino/
+|       |   └── ...
+|       ├── sample-cert.pem
+|       ├── sample-key.pem
+|       └── serial-port-json-server.exe
+├── node_modules/
+|   ├── cson/
+|   |   └── ...
+|   └── electron/
+|       └── ...
+├── icon.ico
+├── index.js
+├── main.html
+└── package.json
+```

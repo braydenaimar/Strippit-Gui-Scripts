@@ -1,6 +1,6 @@
 /* Render Process JavaScript */
 
-define(['jquery','gui','amplify'], function ($) {
+define([ 'jquery', 'gui', 'amplify' ], function ($) {
 	console.log("running main.js");
 	console.log("global:", global);
 	// TODO: require bootstrap javascript
@@ -131,7 +131,7 @@ define(['jquery','gui','amplify'], function ($) {
 	// TODO: Load the widgets as modules in module exports.
 	// Stores the length of the widget object.
 	wgtLen = null;
-	// Same as respective widget's id, filename, reference object, dom container
+	// Same as respective widget's id, filename, reference object, and DOM container.
 	// wgtMap = ['statusbar-widget', 'strippit-widget', 'run-widget', 'program-widget', 'mdi-widget', 'tool-widget', 'routine-widget', 'settings-widget', 'connection-widget', 'help-widget'];
 	wgtMap = ['statusbar-widget', 'strippit-widget', 'settings-widget', 'connection-widget', 'help-widget'];
 	// Gets set to true once respective widget publishes '/widget-loaded'.
@@ -248,7 +248,7 @@ define(['jquery','gui','amplify'], function ($) {
 	loadHtmlWidget = function (wgt) {
 		console.log("  Loading HTML & JS");
 
-		$('#' + wgt).load(wgt + '.html', '', function () {
+		$('#' + wgt).load('html/' + wgt + '.html', '', function () {
 
 			requirejs([wgt], function(ref) {
 				ref.loadHtml = widget[wgt].loadHtml;
@@ -323,52 +323,55 @@ define(['jquery','gui','amplify'], function ($) {
 		wgtVisible = wgt;
 	};
 	updateGitRepo = function () {
+		// Pulls the latest repository from the master branch on GitHub.
 
 		let terminal = null;
 
-		if (hostMeta.hostName !== 'BRAYDENS-LAPTOP') {
-
-			console.log('Pulling latest repo from GitHub.');
-
-			terminal = spawn('cd Strippit-Gui-Scripts && git pull', [], { shell: true });
-
-			terminal.stdout.on('data', (data) => {
-
-				let msg = `${data}`;
-				let msgBuffer = msg.split('\n');
-
-				for (let i = 0; i < msgBuffer.length; i++) {
-
-					if (msgBuffer[i]) console.log(`Git pull stdout: ${msgBuffer[i]}`);
-
-					if (msgBuffer[i].includes('Updating')) {
-						console.log('Repository was updated.');
-
-						location.reload(true);
-					}
-
-				}
-
-			});
-
-			terminal.stderr.on('data', (data) => {
-
-				let msg = `${data}`;
-				let msgBuffer = msg.split('\n');
-
-				for (let i = 0; i < msgBuffer.length; i++) {
-
-					if (msgBuffer[i]) console.log(`Git pull stderr: ${msgBuffer[i]}`);
-
-				}
-
-			});
-
-			terminal.on('close', (code) => {
-				console.log(`Git pull.\nChild precess exited with the code: ${code}.`);
-			});
-
+		// Skip the update if host is my laptop or if there is no internet connection.
+		if (hostMeta.hostName === 'BRAYDENS-LAPTOP' || !navigator.onLine) {
+			return false;
 		}
+
+		console.log('Pulling latest repo from GitHub.');
+
+		terminal = spawn('git pull', [], { shell: true });
+
+		terminal.stdout.on('data', (data) => {
+
+			let msg = `${data}`;
+			let msgBuffer = msg.split('\n');
+
+			for (let i = 0; i < msgBuffer.length; i++) {
+
+				if (msgBuffer[i]) console.log(`Git pull stdout: ${msgBuffer[i]}`);
+
+				// If a newer repository was found, reload the GUI so the new scripts are used.
+				if (msgBuffer[i].includes('Updating')) {
+					console.log('Repository was updated.');
+
+					location.reload(true);
+				}
+
+			}
+
+		});
+
+		terminal.stderr.on('data', (data) => {
+
+			let msg = `${data}`;
+			let msgBuffer = msg.split('\n');
+
+			for (let i = 0; i < msgBuffer.length; i++) {
+
+				if (msgBuffer[i]) console.log(`Git pull stderr: ${msgBuffer[i]}`);
+
+			}
+
+		});
+
+		terminal.on('close', (code) => {
+			console.log(`Git pull.\nChild precess exited with the code: ${code}.`);
+		});
 
 	};
 	// initSidebarBtnEvts = function() {
