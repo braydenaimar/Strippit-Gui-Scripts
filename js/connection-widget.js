@@ -3,8 +3,8 @@
 define(['jquery'], function ($) {
 return {
 	id: "connection-widget",
-	name: "Area 51",
-	shortName: "Connect",
+	name: "Terminal",
+	shortName: "Terminal",
 	btnTheme: "warning",
 	icon: "fa fa-usb",
 	desc: "The connection widget handles the automated-based process of connecting to the JSON server and the controller hardware board via a websocket. It also handles the sending and receiving of data to and from the controller board via the websocket connection. The data to be sent is received via pub/sub events. The received data from the SPJS and connected ports is broadcasted in publish calls.",
@@ -282,6 +282,7 @@ return {
 		//  LF: Add a line-feed character '\n'.
 		//  CRLF: Add a carriage-return and line-feed character '\r\n'.
 		defaultLineEnding: 'LF',
+		// Stores the different line endings.
 		lineEndings: {
 			NONE: '',
 			CR: '\\r',
@@ -1176,7 +1177,7 @@ return {
 
 		console.log('initScripts:', JSON.stringify(this.initScripts));
 
-		CSON.parseCSONFile('Strippit-Gui-Scripts/libs/connection-widget_Settings.cson', function (err, result) {
+		CSON.parseCSONFile('config/connection-widget_Settings.cson', function (err, result) {
 			console.log('Error:', err, '\nResult:', result);
 
 			if (err) return false;
@@ -1210,7 +1211,7 @@ return {
 		let that = this;
 		console.log('Loading Status Codes from cson file.');
 
-		CSON.parseCSONFile('Strippit-Gui-Scripts/libs/TinyG_Status_Codes.cson', function (err, result) {
+		CSON.parseCSONFile('config/TinyG_Status_Codes.cson', function (err, result) {
 			// console.log('Error:', err, '\nResult:', result);
 			that.tinygStatusMeta = result;
 
@@ -1494,14 +1495,15 @@ return {
 	launchSpjs: function () {
 		console.log('Launching a new SPJS.');
 
-		// Launch the SPJS in max garbage collection mode.
 		// If on a Raspberry Pi.
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
 
+			// Launch the SPJS in max garbage collection mode.
 			this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (this.SPJS.launchGpioServerOnLinux) {
 
+				// Launch the GPIO JSON server.
 				this.SPJS.gpio = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/gpio-json-server"`, [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
@@ -1537,7 +1539,9 @@ return {
 
 			}
 
-		} else {
+		// If the host is on a windows platform.
+		} else if (hostMeta.os === 'Windows') {
+			// Launch the SPJS in max garbage collection mode.
 			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
 
 		}
