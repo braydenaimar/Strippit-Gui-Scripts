@@ -73,7 +73,7 @@ return {
 		// The openPorts object stores the names of the ports that are open.
 		// Ex. ["COM5", "COM10"]
 		openPorts: [],
-		launchGpioServerOnLinux: true,
+		launchGpioServerOnLinux: false,
 		// Sets the time (msec) that the program will wait between attempting to connect to the WebSocket.
 		// If wsPollReconnect has a value of 'null', no auto reconnection attempts will be made.
 		// NOTE: Loaded by cson file.
@@ -1499,13 +1499,13 @@ return {
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
 
 			// Launch the SPJS in max garbage collection mode.
-			this.SPJS.go = spawn(`lxterminal --command "sudo ./json-server/linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+			this.SPJS.go = spawn(`lxterminal --command "sudo json-server/linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 			// this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (this.SPJS.launchGpioServerOnLinux) {
 
 				// Launch the GPIO JSON server.
-				this.SPJS.gpio = spawn(`lxterminal --command "sudo ./json-server/linux_arm/gpio-json-server"`, [], { shell: true });
+				this.SPJS.gpio = spawn(`lxterminal --command "sudo json-server/linux_arm/gpio-json-server"`, [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 					console.log(`GPIO Server. stdout: ${data}`);

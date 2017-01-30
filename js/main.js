@@ -131,7 +131,7 @@ define([ 'jquery', 'gui', 'amplify' ], function ($) {
 	// TODO: Load the widgets as modules in module exports.
 	// Stores the length of the widget object.
 	wgtLen = null;
-	// Same as respective widget's id, filename, reference object, dom container
+	// Same as respective widget's id, filename, reference object, and DOM container.
 	// wgtMap = ['statusbar-widget', 'strippit-widget', 'run-widget', 'program-widget', 'mdi-widget', 'tool-widget', 'routine-widget', 'settings-widget', 'connection-widget', 'help-widget'];
 	wgtMap = ['statusbar-widget', 'strippit-widget', 'settings-widget', 'connection-widget', 'help-widget'];
 	// Gets set to true once respective widget publishes '/widget-loaded'.
@@ -334,7 +334,7 @@ define([ 'jquery', 'gui', 'amplify' ], function ($) {
 
 		console.log('Pulling latest repo from GitHub.');
 
-		terminal = spawn('cd Strippit-Gui-Scripts && git pull', [], { shell: true });
+		terminal = spawn('git pull', [], { shell: true });
 
 		terminal.stdout.on('data', (data) => {
 
