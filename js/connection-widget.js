@@ -1499,12 +1499,13 @@ return {
 		if (hostMeta.platform === 'linux' && hostMeta.architecture === 'arm') {
 
 			// Launch the SPJS in max garbage collection mode.
-			this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+			this.SPJS.go = spawn(`lxterminal --command "sudo json-server/linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
+			// this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (this.SPJS.launchGpioServerOnLinux) {
 
 				// Launch the GPIO JSON server.
-				this.SPJS.gpio = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/gpio-json-server"`, [], { shell: true });
+				this.SPJS.gpio = spawn(`lxterminal --command "sudo linux_arm/gpio-json-server"`, [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 					console.log(`GPIO Server. stdout: ${data}`);
@@ -1542,7 +1543,7 @@ return {
 		// If the host is on a windows platform.
 		} else if (hostMeta.os === 'Windows') {
 			// Launch the SPJS in max garbage collection mode.
-			this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
+			this.SPJS.go = spawn(`cd json_server/windows_x64 && serial-port-json-server.exe`, ['-gc max', '-allowexec'], { shell: true });
 
 		}
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max'], { shell: true });
