@@ -73,21 +73,28 @@ define(['jquery'], function($) {
 			if (locationItem === undefined) {
 				$('#' + this.id + ' ul.list-inline').prepend(statusHtml);
 				return false;
+
 			} else if (typeof locationItem === "string") {
 				// locationItem = [item, locationItem];
 				$('#' + this.id + ' li.' + locationItem).before(statusHtml);
 				return false;
+
 			} else if (locationItem.indexOf(item) == -1) {
 				console.warn("The item '" + item + "' is not in the locationItem array.");
 				locationItem.unshift(item);
+
 			}
+
 			for(var i = locationItem.indexOf(item) + 1; i < locationItem.length; i++) {
-				// console.log("i: " + i);
+
 				if (that.statusMeta[locationItem[i]] !== undefined) {
-					// console.log("  locationItem[i]: " + locationItem[i]);
+
 					$('#' + this.id + ' li.' + locationItem[i]).before(statusHtml);
+
 					return false;
+
 				}
+
 			}
 
 		},

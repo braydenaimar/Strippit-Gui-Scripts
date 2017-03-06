@@ -317,8 +317,8 @@ initScripts: [
     {   # Brayden's MSP430F5529
         "SerialNumber": "111D871D",
         "script": [
-            "$G D 0",
-            "$G D 1"
+            "$G 0 0",
+            "$G 1 1"
         ],
         "pause": 1000
     }

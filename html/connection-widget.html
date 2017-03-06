@@ -1,25 +1,42 @@
 <!-- Connection Widget HTML -->
 
 <div class="panel panel-default splist-panel">
+
 	<div class="panel-heading">
+
 		<h3>Serial Devices</h3>
+
 		<div class="btn-group">
+
+			<!-- Hide Panel Button -->
 			<span evt-signal="hide-body" evt-data="splist-panel" class="btn btn-xs btn-default">
 				<span class="glyphicon glyphicon-chevron-up"></span>
 			</span>
+
 		</div>
+
 		<div class="btn-group">
+
+			<!-- Request SPJS List Button -->
 			<span evt-signal="/connection-widget/spjs-send" evt-data="list" class="btn btn-xs btn-default">
 				<span class="glyphicon glyphicon-refresh"></span>
 			</span>
+
+			<!-- Restart SPJS Button -->
 			<span evt-signal="/connection-widget/spjs-send" evt-data="restart" class="btn btn-xs btn-default">
 				<span class="glyphicon glyphicon-retweet" style="color: red;"></span>
 			</span>
+
 		</div>
+
 	</div>
+
+	<!-- Serial Port Devices List -->
 	<div class="panel-body splist">
+
 		<div class="bg-danger spjs-connection-warning">You are not connected to a SPJS.</div>
 		<div class="bg-warning serialport-connection-warning hidden">There are no serial ports available.</div>
+
 		<table class="table serial-port-list">
 			<!-- <tbody>
 				<tr id="serial-port-list-item-port-COM9" class="port-list-item first-port-list-item port-COM9">
@@ -49,7 +66,9 @@
 				</tr>
 			</tbody> -->
 		</table>
+
 	</div>
+
 </div>
 
 <div class="panel panel-default console-log-panel">

@@ -2,11 +2,16 @@
 
 define(['jquery'], function ($) {
 return {
+	// id - must match the widget name (the name given to this file).
 	id: "connection-widget",
+	// name - The moniker that appears in the top left-hand corner ow the app.
 	name: "Terminal",
+	// shortName - The moniker that appears on the widget's button on the right-hand side of the app.
 	shortName: "Terminal",
+	// btnTheme - The theme used for the widget's button on the right-hand side of the app.
 	btnTheme: "warning",
-	icon: "fa fa-usb",
+	// icon - The icon that appears on the widget's button on the right-hand side of the app.
+	icon: "fa fa-terminal", // fa-usb
 	desc: "The connection widget handles the automated-based process of connecting to the JSON server and the controller hardware board via a websocket. It also handles the sending and receiving of data to and from the controller board via the websocket connection. The data to be sent is received via pub/sub events. The received data from the SPJS and connected ports is broadcasted in publish calls.",
 	publish: {},
 	subscribe: {
@@ -90,13 +95,18 @@ return {
 		exitUntrustedSpjs: true,
 		// Keep track of how many commands are in the SPJS queue.
 		queueCount: 0,
+		// Keeps track of wether or not buffered sending is paused.
+		pauseBufferedSend: false,
+		// The number of lines queued in the SPJS buffer above which sending of buffered instructions will be paused.
 		pauseOnQueueCount: 1000,
+		// The number of lines queued in the SPJS buffer below which sending of buffered instructions will be resumed.
 		resumeOnQueueCount: 700,
+		// The maximum number of instructions that can be sent to the SPJS at a time.
 		maxLinesAtATime: 100
 	},
 
 	// TODO: Restructure the deviceMeta object.
-	newdeviceMeta: {},
+	// newdeviceMeta: {},
 	// NOTE: Loaded by cson file.
 	// TODO: Change this from an array to an object and create a meta called 'default' rather than using the empty string for Vid/Pids convention.
 	deviceMeta: [
@@ -260,6 +270,7 @@ return {
 		// Sets the time limit (ms) that an active command in the console log can prevent other commands of the same type from being set.
 		// NOTE: Loaded by cson file.
 		staleCmdLimit: 30000,
+		staleListCmdLimit: 5000,
 		// Sets the number of digits that will be displayed by default. If the line number exceeds this, the number of digits used will be increased.
 		// NOTE: Loaded by cson file.
 		minLineNumberDigits: 3,
@@ -469,7 +480,7 @@ return {
 			if (Related && typeof Related === 'string') {
 				Related = { Port: Related };
 
-			// This shouldnt be needed becuse if there is just a single related command, the id of the command in the spjs will be the same as that of the related command.
+			// This should not be needed becuse if there is just a single related command, the id of the command in the spjs will be the same as that of the related command.
 			} else if (Related && Related.Id && typeof Related.Id === 'string') {
 				Related.Id = [ `${Related.Id}` ];
 
@@ -502,6 +513,7 @@ return {
 				logLength = this[port].logData.push({ Msg, Id, Line, Type, Status, Comment, Related, Meta, Time: Date.now() });
 				this[port].cmdMap.push(logLength - 1);
 				console.log(`Pushed onto cmdMap: ${this[port].cmdMap}`);
+				console.table(this[port].logData);
 
 				// If the command is not already verified, add it to the verifyBuffer object.
 				// if (Status !== 'Executed' && Status !== 'Error' && !(Status === 'Completed' && Meta.includes('NumberedGCode')))
@@ -618,7 +630,8 @@ return {
 
 			return safeString;
 		},
-		checkMatchItem({ Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem }) {
+		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
+			// The checkMatchItem method checks for a match between an item in the log and given search criteria.
 
 			console.log(`LogItem: %O`, LogItem);
 
@@ -628,16 +641,32 @@ return {
 			if (Id !== undefined && LogItem.Id !== Id) return false;
 			if (Line !== undefined && LogItem.Line !== Line) return false;
 			if (Type !== undefined && LogItem.Type !== Type) return false;
-			if (MinAge !== undefined && LogItem.Time - Date.now() < MinAge) return false;
-			if (MaxAge && LogItem.Time - Date.now() > MaxAge) {
 
-				if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+			const unixNow = Date.now();
 
-					this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
+			if (MinAge !== undefined && LogItem.Time - unixNow < MinAge) return false;
+			if (MaxAge && unixNow - LogItem.Time > MaxAge) {
+
+				console.log('Found old command.');
+
+				// If the command is stale, flag it in the log.
+				if (unixNow - LogItem.Time > this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+
+					console.log('Found stale command.');
+
+					this.updateCmd(port, { Index: LogIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
 				}
 
+				return false;
+			}
+
+			// If the command is stale, flag it in the log.
+			if (unixNow - LogItem.Time > this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
+
 				console.log('Found stale command.');
+
+				this.updateCmd(port, { Index: LogIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
 				return false;
 			}
@@ -660,8 +689,9 @@ return {
 		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0 }) {
 			// Return logData item of matched command within the specified search space.
 			// Defaults to searching entire logData object, use IndexMap to narrow that search.
-			// Arg. IndexMap [array][optional] - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
-			// Arg. StartFrom [number/string][optional] - Defaults to zero (eg. 10, 'Last').
+			// Arg. IndexMap [array] (optional) - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
+			// Arg. StartFrom [number/string] (optional) - Defaults to zero (eg. 10, 'Last').
+			// Arg. MaxAge [number] (optional) - Specifies the max age of a command for a match.
 
 			const that = this;
 
@@ -704,9 +734,9 @@ return {
 				Meta = [].push(Meta);
 			}
 
-			if (MaxAge === undefined) {
-				MaxAge = this.staleCmdLimit;
-			}
+			// if (MaxAge === undefined) {
+			// 	MaxAge = this.staleCmdLimit;
+			// }
 
 			// Make sure that the SearchFrom argument is valid.
 			if (SearchFrom != 0 && (SearchFrom >= logData.length || logData.length + SearchFrom < 0)) {
@@ -725,19 +755,6 @@ return {
 
 				console.log('Searching forwards through the log for a match (ie. old to recent).');
 
-				// Debugging purposes only.
-				// if (SearchFrom == IndexMap.length) {
-				// 	console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
-				// 	console.groupEnd();
-				// 	return { matchFound };
-				//
-				// } else if (SearchFrom > IndexMap.length) {
-				// 	for (let i = 0; i < 10; i++) {
-				// 		console.groupEnd();
-				// 	}
-				// 	throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
-				// }
-
 				let init = 0;
 
 				for (let i = 0; i < IndexMap.Length; i++) {
@@ -750,6 +767,13 @@ return {
 
 				}
 
+				if (init < SearchFrom) {
+					console.groupEnd();
+
+					return { matchFound };
+
+				}
+
 				// Search forwards through the console log for a match (ie. old -> new).
 				for (let i = init; i < IndexMap.length; i++) {
 
@@ -758,39 +782,8 @@ return {
 
 					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
-					// if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					// if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
-					// if (Length !== undefined && logItem.Msg.length !== Length) continue;
-					// if (Id !== undefined && logItem.Id !== Id) continue;
-					// if (Line !== undefined && logItem.Line !== Line) continue;
-					// if (Type !== undefined && logItem.Type !== Type) continue;
-					// if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
-					// if (MaxAge && logItem.Time - Date.now() > MaxAge) {
-					//
-					// 	if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
-					//
-					// 		this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
-					//
-					// 	}
-					//
-					// 	console.log('Found stale command.');
-					//
-					// 	continue;
-					// }
-					//
-					// if (Meta !== undefined) {
-					// 	let matchCount = 0;
-					//
-					// 	for (let x = 0; x < Meta.length; x++) {
-					// 		if (logItem.Meta.includes(Meta[x])) matchCount++;
-					// 	}
-					//
-					// 	if (matchCount == Meta.length) continue;
-					//
-					// }
-
 					// Check to see if found a match.
-					if (this.checkMatchItem({ Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem })) {
+					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex: logIndex })) {
 						console.log('  ...got a match.');
 						matchFound = true;
 						matchIndex = logIndex;
@@ -805,22 +798,10 @@ return {
 
 				console.log('Searching backwards through the log for a match (ie. recent to old).');
 
-				// Debugging purposes only.
-				// if (SearchFrom * -1 == IndexMap.length) {
-				// 	console.log(`SearchFrom is equal to IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`);
-				// 	console.groupEnd();
-				// 	return { matchFound };
-				//
-				// } else if (SearchFrom * -1 > IndexMap.length) {
-				// 	for (let i = 0; i < 10; i++) {
-				// 		console.groupEnd();
-				// 	}
-				// 	throw `What the fack?? SearchFrom is greater than IndexMap.length.\n  SearchFrom: ${SearchFrom}\n  IndexMap.length: ${IndexMap.length}`;
-				// }
-
 				let init = IndexMap.length - 1;
 				let refIndex = logData.length + SearchFrom;
 
+				// Iterate through log items to set the initial index.
 				for (let i = IndexMap.length - 1; i >= 0; i--) {
 
 					if (IndexMap[i] <= refIndex) {
@@ -828,6 +809,13 @@ return {
 						break;
 
 					}
+
+				}
+
+				if (init >= SearchFrom) {
+					console.groupEnd();
+
+					return { matchFound };
 
 				}
 
@@ -839,40 +827,8 @@ return {
 
 					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
-					// if (Msg !== undefined && logItem.Msg !== Msg) continue;
-					// if (PartMsg && !refMsg.test(this.makeRegExpSafe(logItem.Msg))) continue;
-					// if (Length !== undefined && logItem.Msg.length !== Length) continue;
-					// if (Id !== undefined && logItem.Id !== Id) continue;
-					// if (Line !== undefined && logItem.Line !== Line) continue;
-					// if (Type !== undefined && logItem.Type !== Type) continue;
-					// if (MinAge !== undefined && logItem.Time - Date.now() < MinAge) continue;
-					// if (MaxAge && logItem.Time - Date.now() > MaxAge) {
-					//
-					// 	if (MaxAge == this.staleCmdLimit && this.verifyPrecidence.indexOf(logItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
-					//
-					// 		this.updateCmd(port, { Index: logIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
-					//
-					// 	}
-					//
-					// 	console.log('Found stale command');
-					//
-					// 	continue;
-					// }
-					//
-					// if (Meta !== undefined) {
-					// 	let matchCount = 0;
-					//
-					// 	for (let x = 0; x < Meta.length; x++) {
-					// 		if (logItem.Meta.includes(Meta[x])) matchCount++;
-					//
-					// 	}
-					//
-					// 	if (matchCount == Meta.length) continue;
-					//
-					// }
-
 					// Check to see if found a match.
-					if (this.checkMatchItem({ Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem })) {
+					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex: logIndex })) {
 						console.log('  ...got a match.');
 						matchFound = true;
 						matchIndex = logIndex;
@@ -924,6 +880,7 @@ return {
 
 			if (this[port] === undefined) {
 				throw `The consoleLog.${port} object is undefined.`;
+				return { matchFound: false };
 			}
 
 			if (!Status && Comment === undefined) {
@@ -975,9 +932,12 @@ return {
 				return { matchFound };
 			}
 
+			// If the Status argument was passed and this is not a redundant update, update the status of the command in the log.
 			if (Status && this.verifyPrecidence.indexOf(matchStatus) < this.verifyPrecidence.indexOf(Status)) {
+
 				// let removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || (Status === 'Completed' && !matchMeta.includes('NumberedGCode'))) ? true : false;
 				let removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || Status === 'Completed') ? true : false;
+
 				const bufferLength = this[port].verifyMap.length;
 
 				console.log('Status Update.');
@@ -1002,7 +962,31 @@ return {
 
 						console.log("Time to " + Status + ": " + deltaTime + "ms");
 
-						this.updateCmd(port, { Index: matchIndex, Comment: `${deltaTime}ms`, PrevComment: 'right', UpdateRelated: false });
+						const timeStr = `${deltaTime}`;
+						let timeComment = 'ms';
+
+						// If the number is larger than 9999, put a comma between sets of digits (eg. '43,234ms').
+						if (deltaTime > 9999) {
+
+							for (let i = 0; i < timeStr.length; i++) {
+
+								if (i == 3 || i == 9 || i == 12) {
+									timeComment = `,${timeComment}`;
+
+								}
+
+								timeComment = `${timeStr[i]}${timeComment}`;
+
+							}
+
+						} else {
+							timeComment = `${deltaTime}ms`;
+
+						}
+
+						// let timeComment = `${deltaTime}ms`;
+
+						this.updateCmd(port, { Index: matchIndex, Comment: timeComment, PrevComment: 'right', UpdateRelated: false });
 
 					}
 
@@ -1051,6 +1035,7 @@ return {
 
 			}
 
+			// If a Comment argument was passed and this is not a redundant update, add the comment to the respective port in the log.
 			if (Comment !== undefined && !matchComment.includes(`[${Comment}]`)) {
 				console.log('Comment update.');
 
@@ -1081,6 +1066,7 @@ return {
 
 				console.log(`New Comment: ${newComment}`);
 
+			// If this is a redundant comment update, skip the comment update.
 			} else if (Comment && matchComment.includes(`[${Comment}]`)) {
 				console.log('Redundant Comment Update.');
 			}
@@ -1143,7 +1129,7 @@ return {
 	},
 
 	initBody: function () {
-		console.group(this.name + ".initBody()");
+		console.group(`${this.name}.initBody()`);
 
 		// Only connect to SPJS once all widgets have loaded so that we dont publish any important signals before other widgets have a chance to subscribe to them.
 		subscribe('/main/all-widgets-loaded', this, this.wsConnect.bind(this));
@@ -1153,13 +1139,13 @@ return {
 		subscribe('/main/widget-visible', this, this.visibleWidget.bind(this));
 
 		// Send a given message to the SPJS and add it to the console log so that it can be displayed as incomplete/complete.
-		subscribe('/' + this.id + '/spjs-send', this, this.spjsSend.bind(this));
+		subscribe(`/${this.id}/spjs-send`, this, this.newspjsSend.bind(this));
 		// Send message directly to SPJS as 'send [port] [cmd]' and add it to the respective port's log.
-		subscribe('/' + this.id + '/port-send', this, this.portSend.bind(this));
+		subscribe(`/${this.id}/port-send`, this, this.portSend.bind(this));
 		// Send message directly to SPJS as 'sendnobuf [port] [cmd]' and add it to the respective port's log.
-		subscribe('/' + this.id + '/port-sendnobuf', this, this.portSendNoBuf.bind(this));
+		subscribe(`/${this.id}/port-sendnobuf`, this, this.portSendNoBuf.bind(this));
 		// Send message directly to SPJS as 'sendjson { P: [port], Data: [{ D: [cmd], Id: [id] }] }' and add it to the respective port's log.
-		subscribe('/' + this.id + '/port-sendjson', this, this.portSendJson.bind(this));
+		subscribe(`/${this.id}/port-sendjson`, this, this.portSendJson.bind(this));
 
 		this.initSettings();
 		// Import the status codes from the 'TinyG_Status_Codes.json' file as an object.
@@ -1221,44 +1207,55 @@ return {
 
 	},
 	initClickEvents: function () {
-		var that = this;
+
+		const that = this;
 
 		// Console log tab events.
-		$('#' + this.id + ' .console-log-panel .nav-tabs').on('click', "span", function(evt) {
+		$(`#${this.id} .console-log-panel .nav-tabs`).on('click', 'span', function(evt) {
 			// console.log("evt:", evt);
 			// console.log("View " + $(this).attr("evt-data") + " log.");
-			that.consoleLogChangeView($(this).attr("evt-data"));
+			that.consoleLogChangeView($(this).attr('evt-data'));
 		});
 
 		// Serial port list header button events.
-		$('#' + this.id + ' .splist-panel .panel-heading .btn-group').on('click', "span.btn", function(evt) {
+		$(`#${this.id} .splist-panel .panel-heading .btn-group`).on('click', 'span.btn', function(evt) {
 			// console.log("evt:", evt, "\nthis:", this);
 			// console.log("  evt-signal: " + $(evt.currentTarget).attr("evt-signal"));
 			// console.log("  evt-data: " + $(evt.currentTarget).attr("evt-data"));
-			var evtSignal = $(this).attr('evt-signal');
-			var evtData = $(this).attr('evt-data');
+			let evtSignal = $(this).attr('evt-signal');
+			let evtData = $(this).attr('evt-data');
 
-			if (evtSignal == "hide-body") {
+			if (evtSignal === 'hide-body') {
 				console.log('Hide body.', this);
 
-				$('#connection-widget .' + evtData + ' .panel-body').addClass("hidden");
-				$(this).find('span').removeClass("glyphicon-chevron-up").addClass("glyphicon-chevron-down");
-				$(this).attr("evt-signal", "show-body");
+				$(`#connection-widget .${evtData} .panel-body`).addClass('hidden');
+				$(this).find('span').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+				$(this).attr('evt-signal', 'show-body');
 
 				that.resizeWidgetDom();
 
-			} else if (evtSignal == "show-body") {
-				console.log('Show body.', this);
+			} else if (evtSignal === 'show-body') {
+				console.log('Show body.', this)
 
-				$('#connection-widget .' + evtData + ' .panel-body').removeClass("hidden");
-				$(this).find('span').removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-up");
-				$(this).attr("evt-signal", "hide-body");
+				$(`#connection-widget .${evtData} .panel-body`).removeClass('hidden');
+				$(this).find('span').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+				$(this).attr('evt-signal', 'hide-body');
 
 				that.resizeWidgetDom();
+
+			} else if (evtData === 'list') {
+
+				that.newspjsSend({ Msg: 'list', Type: 'Command' });
+
+			} else if (evtData === 'restart') {
+
+				that.newspjsSend({ Msg: 'restart', Type: 'Command' });
 
 			} else if (evtSignal) {
 				publish(evtSignal, evtData);
+
 			}
+
 		});
 
 		// Click events for each port in the serial port list.
@@ -1437,18 +1434,26 @@ return {
 					// console.log("    Container: " + containerElement + "\n    Height: " + containerHeight);
 					return true;
 				}
+
 				var elementItem = containerElement + panelItem;
 				marginSpacing += Number($(elementItem).css("margin-top").replace(/px/g, ""));
 
-				if (panelIndex == setItem.length - 1) { // Last element in array, set it's height.
+				// Last element in array, set it's height.
+				if (panelIndex == setItem.length - 1) {
+
 					marginSpacing += Number($(elementItem).css("margin-bottom").replace(/px/g, ""));
+
 					var panelHeight = containerHeight - (marginSpacing + panelSpacing);
+
 					$(elementItem).css({"height": (panelHeight) + "px"});
 					// console.log("    panelHeight: " + panelHeight);
-				} else { // Not last element in array, read it's height.
+
+				// If it is not last element in array, read it's height.
+				} else {
 					// console.log("    panelHeight: " + $(elementItem).css("height").replace(/px/g, ""));
 					panelSpacing += Number($(elementItem).css("height").replace(/px/g, ""));
 				}
+
 			});
 		});
 		// console.groupEnd();
@@ -1584,21 +1589,21 @@ return {
 	},
 	onSpjsOpen: function () {
 		// If the SPJS is already in an 'open' state, skip DOM updates.
-		if (this.SPJS.wsState == "open") return false;
+		if (this.SPJS.wsState === 'open') return false;
 
 		// console.log("WebSocket -onOpen-" + gui.parseObject(this.SPJS.ws, 2, { keep: ["url"] }));
-		console.groupCollapsed("WebSocket -onOpen-" + gui.parseObject(this.SPJS.ws, 2, { keep: ["url"] }));
-		console.log("ws:" + gui.parseObject(this.SPJS.ws, 2, { keep: ["CONNECTING", "OPEN", "CLOSING", "CLOSED", "url", "readyState", "bufferedAmount"] }));
+		console.groupCollapsed(`WebSocket -onOpen-${gui.parseObject(this.SPJS.ws, 2, { keep: ["url"] })}`);
+		console.log(`ws:${gui.parseObject(this.SPJS.ws, 2, { keep: ["CONNECTING", "OPEN", "CLOSING", "CLOSED", "url", "readyState", "bufferedAmount"] })}`);
 
-		this.SPJS.wsState = "open";
+		this.SPJS.wsState = 'open';
 
-		$('#' + this.id + ' .spjs-connection-warning').addClass("hidden");
-		$('#' + this.id + ' .serialport-connection-warning').removeClass("hidden");
+		$(`#${this.id} .spjs-connection-warning`).addClass('hidden');
+		$(`#${this.id} .serialport-connection-warning`).removeClass('hidden');
 
-		publish('/statusbar-widget/hilite', "SPJS", "success");
+		publish('/statusbar-widget/hilite', 'SPJS', 'success');
 
-		console.log("openPorts: " + gui.parseObject(this.SPJS.openPorts));
-		console.log("openLogs: " + gui.parseObject(this.consoleLog.openLogs));
+		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		this.resizeWidgetDom();
 
@@ -1754,6 +1759,7 @@ return {
 		publish('/statusbar-widget/hilite', 'SPJS', 'danger');
 		console.groupEnd();
 	},
+	// IDEA: If the SPJS does not respond to a restart command, force an exit and launch a new SPJS instance.
 	onSpjsClose: function () {
 		let that = this;
 		// console.log('go:', this.SPJS.go);
@@ -1781,12 +1787,27 @@ return {
 		// 	console.log('SPJS was shut down because of a \'restart\' command.');
 		// }
 
-		if (this.consoleLog.updateCmd('SPJS', { Msg: 'exit', Status: 'Executed' }) && this.SPJS.wsReconnectOnExitCmd) {
-			console.log('SPJS was shut down because of a \'exit\' command.');
-			this.launchSpjs();
+		let { matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'exit', Status: 'Completed' });
 
-		} else if (this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Executed' })) {
-			console.log('SPJS was shut down because of a \'restart\' command.');
+		// If the SPJS was closed by an exit command and the wsReconnectOnExitCmd flag is set, launch a new SPJS.
+		if (matchFound) {
+			console.log('SPJS was shut down because of a \'exit\' command. ');
+
+			if (this.SPJS.wsReconnectOnExitCmd) {
+				console.log('Launching a new SPJS.');
+
+				this.launchSpjs();
+			}
+
+		// If the SPJS was closed by a restart command, update the command's status in the log and wait for the SPJS to restart.
+		} else {
+
+			let { matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Completed' });
+
+			if (matchFound) {
+				console.log('SPJS was shut down because of a \'restart\' command.');
+			}
+
 		}
 
 		console.groupCollapsed("WebSocket -onClose-" + gui.parseObject(this.SPJS.ws, 2, { keep: ["url", "bufferedAmount"] }));
@@ -1800,9 +1821,9 @@ return {
 
 		const verifyMap = this.consoleLog.SPJS.verifyMap;
 
+		// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
 		if (verifyMap.length > 0) {
 
-			// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
 			for (let i = verifyMap.length - 1; i > 0; i--) {
 				// Only mark commands that are more recent than the errorCmdOnSpjsCloseMaxAge setting.
 				// this.consoleLog.updateCmd('SPJS', { Id: this.consoleLog.SPJS.logData[verifyMap[i]].Id, MaxAge: this.consoleLog.errorCmdOnSpjsCloseMaxAge, Status: 'Error', Comment: 'SPJS Closed' });
@@ -1969,7 +1990,8 @@ return {
 			this.consoleLog.updateCmd('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap, Status: 'Warning', Comment: 'Corrupt' });
 
 			setTimeout(function() {
-				publish(`/${that.id}/spjs-send`, 'list');
+				// publish(`/${that.id}/spjs-send`, { Msg: 'List' });
+				this.newspjsSend({ Msg: 'list', Comment: 'Auto List'});
 			}, 500);
 
 			return false;
@@ -1981,6 +2003,7 @@ return {
 
 		console.groupCollapsed("onSerialPorts");
 		console.log("SPJS -PortList-" + gui.parseObject(dataObj, 2, ["DeviceClass", "IsPrimary", "AvailableBufferAlgorithms", "Ver"]));
+		console.table(dataObj);
 
 		// Build the portListDiffs object.
 		// If the port list has not changed since the last time it was received, exit the function.
@@ -2066,7 +2089,7 @@ return {
 		this.buildPortMeta();
 
 		// Publish the new portList object, portMeta object, and diffs object so that other widgets can react to these changes.
-		publish(`/${this.id}/recvPortList`, dataObj, this.SPJS.portMeta, diffs);
+		publish(`/${this.id}/recvPortList`, { PortList: dataObj, PortMeta: this.SPJS.portMeta, Diffs: diffs });
 
 		// If any ports have been added/removed, call the portListDomUpdate method.
 		if (diffs.added) {
@@ -2566,11 +2589,16 @@ return {
 
 		const that = this;
 		const safePort = this.makePortSafe(Port);
-		const verifyMap = this.consoleLog[safePort].verifyMap;
 
-		// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
-		const refCmd = `open ${Port}`;
-		verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: verifyMap, Status: 'Error' });
+		// If the port was open, set the unverified commands in it's console log to 'Error'.
+		if (this.consoleLog[safePort] !== undefined) {
+			const verifyMap = this.consoleLog[safePort].verifyMap;
+
+			// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
+			const refCmd = `open ${Port}`;
+			verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: verifyMap, Status: 'Error' });
+
+		}
 
 		this.portDisconnected(safePort);
 
@@ -3162,7 +3190,7 @@ return {
 			}
 
 			// Let the other modules handle the data received.
-			// publish(`/${this.id}/recvRawPortData`, port, lineObj);
+			publish(`/${this.id}/recvRawPortData`, port, { Msg: line, Data: lineObj });
 		}
 
 		console.groupEnd();
@@ -3324,7 +3352,9 @@ return {
 		return unsafePortName;
 	},
 
-	newspjsSend: function ({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [] }) {
+	newspjsSend: function ({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [], recursionDepth = 0 }) {
+		// Arg. recursionDepth - Counter used by this method internally to keep track of recursion depth to prevent infinite looping.
+
 		console.log(`SPJS Send\n  Msg: ${Msg}`);
 
 		// If the Meta argument is not an array, split it into an array.
@@ -3333,17 +3363,44 @@ return {
 			Meta = Meta.split(' ');
 		}
 
+		// If the SPJS is not open, abort sending the command.
+		if (this.SPJS.wsState !== 'open') {
+
+			console.log('The SPJS is not open.');
+
+			Comment = Comment ? `${Comment}] [SPJS Closed` : 'SPJS Closed';
+			const { cmdId } = this.consoleLog.appendMsg('SPJS', { Msg, Id, IdPrefix, Type, Status: 'Error', Comment, Related, Meta});
+
+			return false;
+
+		}
+
 		// If the Msg argument is 'list' and the SPJS is already processing a 'list' command, exit this method.
 		if (Msg === 'list') {
-			const { matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap });
-			const deltaTime = matchTime && Date.now() - matchTime;
-			// console.log(`matchTime: ${matchTime}\ndeltaTime: ${deltaTime}\nstaleCmdLimit: ${this.consoleLog.staleCmdLimit}`);
 
-			if (matchTime && deltaTime > this.consoleLog.staleCmdLimit) {
+			const { matchFound, matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap });
+			const deltaTime = matchFound && Date.now() - matchTime;
+
+			// console.log(`matchFound: ${matchFound}\nmatchTime: ${matchTime}\ndeltaTime: ${deltaTime}\nstaleListCmdLimit: ${this.consoleLog.staleListCmdLimit}`);
+
+			// If a match was found and it is older than staleListCmdLimit, flag that command as Error and try sending the list command again.
+			if (matchFound && Date.now() - matchTime > this.consoleLog.staleListCmdLimit) {
+
+				console.log('Found stale list command.');
+
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
 
-			} else if (matchTime) {
-				console.log("The SPJS is already processing a request for the portList.\nRequest for list terminated.");
+				// Limit the number of recursion events to prevent infinite loop.
+				if (recursionDepth >= 15) {
+					throw 'The newspjsSend method may be stuck in an infinite loop trying to send a \'list\' command.'
+				}
+
+				// Try sending the list command again as there may me multiple pending list commands in the SPJS that may or may not be stale.
+				recursionDepth += 1;
+				return newspjsSend({ Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta, recursionDepth });
+
+			} else if (matchFound) {
+				console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
 				return false;
 
 			}
@@ -3539,6 +3596,11 @@ return {
 
 		}
 
+		// Send the commands as buffered.
+		// this.portSendBuffered(port, { Data: cmdBuffer });
+
+		// let cmd = this.unparseComands(port, { Data: bufferItem });
+
 		const unsafePort = this.makePortUnSafe(port);
 		let cmd = `sendjson {"P":"${unsafePort}","Data":[`;
 		let cmdIds = [];
@@ -3580,26 +3642,75 @@ return {
 		// Return true to indicate that the command was sent successfully.
 		return spjsId;
 	},
-	sendBuffered: function ({ Data }) {
+	portSendBuffered: function (port, { Data }) {
 		// Receive message data the same way as the portSendJson method.
 		// Add message data to the buffer object.
 
-		// If the SPJS has fewer messages in the queue than the pauseOnQueueCount setting, send messages.
+		// Parse message date the same way as the portSendJson method.
+		// Buffer all those messages to the respective ports buffer.
+		// Check if messages can be sent to the SPJS.
 
+		const that = this;
+		const queueCount = this.SPJS.queueCount;
+		let pauseBufferedSend = this.SPJS.pauseBufferedSend;
+		const pauseOnQueueCount = this.SPJS.pauseOnQueueCount;
+		const resumeOnQueueCount = this.SPJS.resumeOnQueueCount;
 
-		// Approach #1:
-		// If there are messages in the sendBuffer, set a periodic interval timer to check if messages can be sent.
-		// 	-If messages can be sent, send the number of messages that can be sent to fill the queue.
-		// If the sendBuffer is empty, cancel the periodic interval timer.
-
-		// Approach #2: (the chilipeppr method)
 		// If queueCount < pauseOnQueueCount and sending is not paused, send a fixed number of lines.
 		// If queueCount > pauseOnQueueCount and sending is not paused, pause sending.
 		// If queueCount < resumeOnQueueCount, resume sending and send a fixed number of lines.
+		// Setup an interval to check if any new messages buffered messages can be sent.
+
+		// If there are few commands in the queue, send commands.
+		if (queueCount < pauseOnQueueCount && !pauseBufferedSend) {
+
+
+		// If there are too many commands in the queue, pause sending commands to the SPJS.
+		} else if (queueCount > pauseOnQueueCount && !pauseBufferedSend) {
+			pauseBufferedSend = true;
+
+		// If there are few commands in the queue, resume sending commands to the SPJS.
+		} else if (queueCount < resumeOnQueueCount) {
+			pauseBufferedSend = false;
+
+
+		}
 
 	},
-	// TODO: Parse port names to make sure that they are the correct case.
+	sendBuffered: function (port, { Data }) {
+
+		const unsafePort = this.makePortUnSafe(port);
+		let cmd = `sendjson {"P":"${unsafePort}","Data":[`;
+		let cmdIds = [];
+
+		// Build the command string.
+		for (let i = 0; i < Data.length; i++) {
+
+			let dataItem = Data[i];
+
+			// Append the command to this port's log and use the returned id as the id for the SPJS log as well.
+			// If the id argument was omitted, the appendMsg method will make one up based on the port and line number.
+			const { cmdId } = this.consoleLog.appendMsg(port, { Msg: dataItem.Msg , Id: dataItem.Id, IdPrefix: dataItem.IdPrefix, Type, Status: dataItem.Status, Comment: dataItem.Comment, Related: dataItem.Related, Meta: dataItem.Meta });
+			cmdIds.push(cmdId);
+
+			// Do not add a linefeed character to a reset or feedhold command.
+			if (!(/\\n$/).test(dataItem.Msg) && !(/[%!]/).test(dataItem.Msg)) {
+				// dataItem.Msg += '\\n';
+				dataItem.Msg += portMeta[port].lineEnding;
+
+			}
+
+			cmd += i ? ',' : '';
+			cmd += `{"D":"${dataItem.Msg}","Id":"${cmdIds[i]}"${dataItem.Pause ? `,"Pause":${dataItem.Pause}` : ''}}`;
+
+		}
+
+		cmd += ']}';
+
+		return cmd;
+	},
 	mdiSend: function (port, { Msg }) {
+		// Send a command comming from a MDI (Manual Data Input) from the user.
 
 		const that = this;
 		const portList = this.SPJS.portList;
@@ -3607,10 +3718,11 @@ return {
 		// If there is space before the message, remove it.
 		Msg = /^\s+\S/.test(Msg) ? Msg.replace(/^\s+/, '') : Msg;
 
+		// If sending to the SPJS port, correct any character upper/lower case mistakes for port names.
+		// Nothing should break if port is not entered with correct cases but it is just allot better.
+		// Ex. 'close com4' is changed to 'close COM4'.
 		if (port === 'SPJS') {
 
-			// Correct any character upper/lower case mistakes for port names. Nothing should break if port is not entered with correct cases but it is just allot better.
-			// Ex. 'close com4' is changed to 'close COM4'.
 			for (let portName in portList) {
 
 				let unsafePortName = this.makePortUnSafe(portName);
@@ -3717,9 +3829,14 @@ return {
 		var cmd = "send " + port + " " + msg;
 
 		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
-		if (!this.spjsSend(cmd, cmdId)) {
+		if (!this.newspjsSend({ Msg: cmd, Id: cmdId })) {
 			return false;
 		}
+
+		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
+		// if (!this.spjsSend(cmd, cmdId)) {
+		// 	return false;
+		// }
 
 		// Return true to indicate that the command was sent successfully.
 		return true;
