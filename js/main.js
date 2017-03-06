@@ -133,25 +133,27 @@ define([ 'jquery', 'gui', 'amplify' ], function ($) {
 	wgtLen = null;
 	// Same as respective widget's id, filename, reference object, and DOM container.
 	// wgtMap = ['statusbar-widget', 'strippit-widget', 'run-widget', 'program-widget', 'mdi-widget', 'tool-widget', 'routine-widget', 'settings-widget', 'connection-widget', 'help-widget'];
-	wgtMap = ['statusbar-widget', 'strippit-widget', 'settings-widget', 'connection-widget', 'help-widget'];
+	wgtMap = ['statusbar-widget', 'strippit-widget', 'strippit-widget-origional', 'settings-widget', 'connection-widget', 'help-widget'];
 	// Gets set to true once respective widget publishes '/widget-loaded'.
 	// Ex. [ false, false, ..., false ]
 	wgtLoaded = [];
 	// wgtVisible = "run-widget";
 	// wgtVisible = "program-widget";
-	wgtVisible = "connection-widget";
+	// wgtVisible = 'connection-widget';
+	wgtVisible = 'strippit-widget';
 	// Stores startup info and scope references for each widget
 	// IDEA: Take each of the widget refs and move them outside of the widget object.
 	// IDEA: Build each port's object during the program execution.
 	// IDEA: Call the widgets modules instead of widgets.
 	widget = {
-		// loadHtml: Specifies if the respective widget has dom elements that need to be loaded
+		// loadHtml: Specifies if the respective widget has dom elements that need to be loaded [true/false].
 		// visible: Specifies if the respective widget should be visible on startup, its current visibility status, and if it's visibility can be changed
 		//   (null = n/a, false = not visible on startup, true = visible on startup).
 		// sidebarBtn: Specifies how the button should be created (true: make & show button, false: make & hide button, null/undefined: no button)
 		// IDEA: Move loadHtml and sidebarBtn flags into each respective widget and only have the widget's objects stored here.
 		'statusbar-widget': { loadHtml: false, sidebarBtn: null },
 		'strippit-widget': 	{ loadHtml: true, sidebarBtn: true },
+		'strippit-widget-origional': 	{ loadHtml: true, sidebarBtn: true },
 		// 'run-widget': 		{ loadHtml: true, sidebarBtn: true },
 		// 'program-widget': 	{ loadHtml: true, sidebarBtn: true },
 		// 'mdi-widget': 		{ loadHtml: true, sidebarBtn: true },

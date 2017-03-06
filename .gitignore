@@ -1,5 +1,8 @@
 # Ignore the node_modules folder
 node_modules/
+html/strippit-widget-origional.html
+css/strippit-widget-origional.css
+js/strippit-widget-origional.js
 
 # Windows image file caches
 Thumbs.db
