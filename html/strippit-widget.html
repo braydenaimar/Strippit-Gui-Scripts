@@ -2,7 +2,7 @@
 
 <!-- in/mm Button -->
 <div id="strippit-inmm">
-	<span class="btn btn-xs btn-default btnInMm">in/mm</span>
+	<span class="btn btn-xs btn-default btnInMm">inch/mm</span>
 </div>
 
 <!-- Feedstop Button -->
@@ -18,7 +18,7 @@
 		<!-- <button type="button" class="btn btn-md btn-default btn-home-x"><span class="glyphicon glyphicon-home"></span> X</button> -->
 
 		<!-- DRO Label -->
-		<span class="btn dro-well dro-label-well flatright" btn-data="set-x">
+		<span class="btn dro-well dro-label-well flatright" btn-data="x">
 			<h2 class="dro-label">X</h2>
 		</span>
 
@@ -40,7 +40,7 @@
 		<!-- <button type="button" class="btn btn-md btn-default btn-home-y"><span class="glyphicon glyphicon-home"></span> Y</button> -->
 
 		<!-- DRO Label -->
-		<span class="btn dro-well dro-label-well flatright" btn-data="set-y">
+		<span class="btn dro-well dro-label-well flatright" btn-data="y">
 			<h2 class="dro-label">Y</h2>
 		</span>
 
@@ -64,27 +64,32 @@
 
 		</div>
 
-		<span class="btn btn-xl btn-default btn-saveto" btn-signal="control" btn-data="save"><span class="glyphicon glyphicon-floppy-disk"></span></span>
-		<!-- <button type="button" class="btn btn-xl btn-default btn-saveto"><span class="glyphicon glyphicon-floppy-disk"></span></button> -->
+		<div class="btn-group control-btns">
+
+			<span class="btn btn-xl btn-default btn-saveto" btn-signal="control" btn-data="save"><span class="glyphicon glyphicon-floppy-disk"></span></span>
+			<span class="btn btn-xl btn-default btn-delete" btn-signal="control" btn-data="delete"><span class="glyphicon glyphicon-floppy-remove"></span></span>
+			<span class="btn btn-xl btn-default btn-clear" btn-signal="control" btn-data="clear"><span class="fa fa-trash"></span></span>
+
+		</div>
 
 	</div>
 
 	<div class="left-btns">
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="1">1</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="3">3</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="5">5</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="7">7</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="9">9</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="11">11</span>
+		<span class="btn btn-xl btn-default pos-1" btn-signal="position" btn-data="1">1</span>
+		<span class="btn btn-xl btn-default pos-3" btn-signal="position" btn-data="3">3</span>
+		<span class="btn btn-xl btn-default pos-5" btn-signal="position" btn-data="5">5</span>
+		<span class="btn btn-xl btn-default pos-7" btn-signal="position" btn-data="7">7</span>
+		<span class="btn btn-xl btn-default pos-9" btn-signal="position" btn-data="9">9</span>
+		<span class="btn btn-xl btn-default pos-11" btn-signal="position" btn-data="11">11</span>
 	</div>
 
 	<div class="right-btns">
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="2">2</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="4">4</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="6">6</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="8">8</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="10">10</span>
-		<span class="btn btn-xl btn-default" btn-signal="position" btn-data="12">12</span>
+		<span class="btn btn-xl btn-default pos-2" btn-signal="position" btn-data="2">2</span>
+		<span class="btn btn-xl btn-default pos-4" btn-signal="position" btn-data="4">4</span>
+		<span class="btn btn-xl btn-default pos-6" btn-signal="position" btn-data="6">6</span>
+		<span class="btn btn-xl btn-default pos-8" btn-signal="position" btn-data="8">8</span>
+		<span class="btn btn-xl btn-default pos-10" btn-signal="position" btn-data="10">10</span>
+		<span class="btn btn-xl btn-default pos-12" btn-signal="position" btn-data="12">12</span>
 	</div>
 
 </div>
@@ -116,7 +121,7 @@
 
 	<!-- Calculator Value Display -->
 	<div class="well calc-display-well">
-		<h2 class="calc-value"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed calc-val-negpos" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
+		<h2 class="calc-value"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed calc-val-negpos" >-</span><span class="xyz-intgray xyz-dimmed">000</span><span class="xyz-intblack"></span></td><td><span class="xyz-dimmed">.</span><span class="xyz-decimal xyz-dimmed">000</span></td></tr></table></h2>
 
 		<div class="dro-dim">mm</div>
 	</div>
@@ -126,11 +131,7 @@
 		<!-- Calc Btn Column 1 -->
 		<div class="column-1">
 
-			<div class="btn-group recall-btns">
-				<span class="btn btn-sm btn-default btn-recal-x" btn-signal="function" btn-data="recall-x"><span class="glyphicon glyphicon-open"></span> X</span>
-				<span class="btn btn-sm btn-default btn-recal-y" btn-signal="function" btn-data="recall-y"><span class="glyphicon glyphicon-open"></span> Y</span>
-			</div>
-
+			<span class="btn btn-md btn-default" btn-signal="function" btn-data="clear">CE</span>
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="7">7</span>
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="4">4</span>
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="1">1</span>
@@ -152,37 +153,41 @@
 		<!-- Calc Btn Column 3 -->
 		<div class="column-3">
 
-			<span class="btn btn-md btn-default" btn-signal="function" btn-data="clear">CE</span>
-			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="9">9</span>
-			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="6">6</span>
-			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="3">3</span>
-			<span class="btn btn-md btn-default" btn-signal="function" btn-data="equal">=</span>
-
-		</div>
-
-		<!-- Calc Btn Column 4 -->
-		<div class="column-4">
-
 			<span class="btn btn-md btn-default btn-backspace" btn-signal="function" btn-data="backspace">
 				<span class="glyphicon glyphicon-arrow-left"></span>
 			</span>
 
-			<span class="btn btn-md btn-default btn-divide" btn-signal="function" btn-data="divide">
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="9">9</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="6">6</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="3">3</span>
+			<span class="btn btn-md btn-default btn-unavailable" btn-signal="function" btn-data="equal">=</span>
+
+		</div>
+
+		<!-- Calc Btn Column 4 -->
+		<!-- <div class="column-4 hidden">
+
+			<div class="btn-group recall-btns">
+				<span class="btn btn-sm btn-default btn-recal-x btn-unavailable" btn-signal="function" btn-data="recall-x"><span class="glyphicon glyphicon-open"></span> X</span>
+				<span class="btn btn-sm btn-default btn-recal-y btn-unavailable" btn-signal="function" btn-data="recall-y"><span class="glyphicon glyphicon-open"></span> Y</span>
+			</div>
+
+			<span class="btn btn-md btn-default btn-divide btn-unavailable" btn-signal="function" btn-data="divide">
 				<span class="badge">/</span>
 			</span>
 
-			<span class="btn btn-md btn-default btn-multiply" btn-signal="function" btn-data="multiply">
+			<span class="btn btn-md btn-default btn-multiply btn-unavailable" btn-signal="function" btn-data="multiply">
 				<span class="glyphicon glyphicon-remove-sign"></span>
 			</span>
 
-			<span class="btn btn-md btn-default btn-subtract" btn-signal="function" btn-data="subtract">
+			<span class="btn btn-md btn-default btn-subtract btn-unavailable" btn-signal="function" btn-data="subtract">
 				<span class="glyphicon glyphicon-minus-sign"></span>
 			</span>
 
-			<span class="btn btn-md btn-default btn-add" btn-signal="function" btn-data="add">
+			<span class="btn btn-md btn-default btn-add btn-unavailable" btn-signal="function" btn-data="add">
 				<span class="glyphicon glyphicon-plus-sign"></span>
 			</span>
 
-		</div>
+		</div> -->
 	</div>
 </div>

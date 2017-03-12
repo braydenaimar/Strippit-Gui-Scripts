@@ -3,6 +3,8 @@ node_modules/
 html/strippit-widget-origional.html
 css/strippit-widget-origional.css
 js/strippit-widget-origional.js
+.eslintrc.json
+.jshintrc
 
 # Windows image file caches
 Thumbs.db

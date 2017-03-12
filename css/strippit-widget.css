@@ -7,6 +7,14 @@
 
 /* -- in/mm Button -- */
 #strippit-inmm {
+	position: absolute;
+	top: 415px;
+	left: 250px;
+	width: 80px;
+}
+#strippit-inmm span.btnInMm {
+	padding-top: 8px;
+	padding-bottom: 8px;
 
 }
 
@@ -31,7 +39,7 @@
 /* -- Axis Home Buttons -- */
 /*#strippit-dro .btn-strippit-dro-xy .btn-home-y{
 	position: absolute;
-	top: 0px;
+	top: 0;
 	right: 635px;
 	width: 60px;
 	height: 38px;
@@ -41,19 +49,19 @@
 }*/
 #strippit-dro .dro-well {
     overflow: hidden;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     padding: 3px 16px;
 }
 /* -- Axis Label Well -- */
 #strippit-dro .dro-label-well {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	right: 545px;
 	width: 80px;
 	height: 38px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     margin-right: 2px;
     background-color: white;
 }
@@ -73,8 +81,8 @@
 /* -- Axis Position Value -- */
 #strippit-dro .dro-pos-well {
 	position: absolute;
-	top: 0px;
-	right: 0px;
+	top: 0;
+	right: 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 	width: 545px;
@@ -98,34 +106,41 @@
 }
 #strippit-savepos div.btn-header {
 	position: absolute;
-	top: 0px;
-	width: 100%;
+	top: 0;
+	width: 200%;
 	/*border: 1px dashed red;*/
 }
 #strippit-savepos div.step-btns {
 	position: absolute;
-	top: 0px;
-	left: 0px;
-	width: 58%;
+	top: 0;
+	left: 0;
+	width: 29%;
+	/*width: 58%;*/
 	/*height: 40px;*/
 	/*border: 1px dashed green;*/
 }
 #strippit-savepos div.step-btns span.btn-stepbck {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	width: 50%;
-	left: 0px;
+	left: 0;
 	/*height: 34px;*/
 }
 #strippit-savepos div.step-btns span.btn-stepfwd {
 	position: absolute;
-	right: 0px;
+	right: 0;
 	width: 50%;
 }
-#strippit-savepos span.btn-saveto {
+/*#strippit-savepos span.btn-saveto {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	left: 65%;
+}*/
+#strippit-savepos .btn-header .control-btns {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 71%;
 }
 #strippit-savepos div.left-btns,
 #strippit-savepos div.right-btns {
@@ -133,18 +148,30 @@
 	top: 40px;
 	width: 50%;
 }
-#strippit-savepos div.left-btns span.btn,
-#strippit-savepos div.right-btns span.btn {
+#strippit-savepos .left-btns .btn,
+#strippit-savepos .right-btns .btn {
+	border: dashed;
 	width: 60px;
 	margin-top: 10px;
-	margin-bottom: 0px;
-	background-color: #f5f5f5;
+	margin-bottom: 0;
+	color: #e9e9e9;
 }
 #strippit-savepos div.left-btns {
-	left: 0px
+	left: 0
 }
 #strippit-savepos div.right-btns {
-	right: 0px;
+	right: 0;
+}
+#strippit-savepos div.left-btns span.btn.slot-active,
+#strippit-savepos div.right-btns span.btn.slot-active {
+	border: solid;
+	background-color: #dff0d8;
+	color: #444444;
+}
+#strippit-savepos div.left-btns .btn.slot-filled,
+#strippit-savepos div.right-btns .btn.slot-filled {
+	background-color: #f5f5f5;
+	color: #444444;
 }
 
 /* -- Jog Controls -- */
@@ -158,15 +185,15 @@
 }
 #strippit-jog .jog-left-btns {
 	position: absolute;
-	top: 0px;
-	left: 0px;
+	top: 0;
+	left: 0;
 	width: 33.33%;
 	height: 100%;
 	/*border: 1px dashed red;*/
 }
 #strippit-jog .jog-middle-btns {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	left: 33.33%;
 	width: 33.33%;
 	height: 100%;
@@ -174,8 +201,8 @@
 }
 #strippit-jog .jog-right-btns {
 	position: absolute;
-	top: 0px;
-	right: 0px;
+	top: 0;
+	right: 0;
 	width: 33.33%;
 	height: 100%;
 	/*border: 1px dashed orange;*/
@@ -209,12 +236,12 @@
 }
 #strippit-calc div.calc-display-well {
 	position: absolute;
-	top: 0px;
-	left: 0px;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 44px;
     overflow: hidden;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     padding: 3px 16px;
 	/*border: 1px dashed green;*/
 }
@@ -227,51 +254,66 @@
 #strippit-calc div.calc-buttons {
 	position: absolute;
 	top: 45px;
-	left: 0px;
+	left: 0;
 	width: 410px;
 	height: 100%;
 	/*border: 1px dashed red;*/
 }
 #strippit-calc div.calc-buttons > div {
-	width: 25%;
-	height: 100%;
+	width: 33%;
+	/*width: 25%;*/
+	height: 150%;
 	/*border: 1px dashed green;*/
 }
 #strippit-calc div.column-1 {
 	position: absolute;
-	top: 0px;
-	left: 0px;
+	top: 0;
+	left: 0;
 }
 #strippit-calc div.column-2 {
 	position: absolute;
-	top: 0px;
-	left: 25%;
+	top: 0;
+	left: 33%;
+	/*left: 25%;*/
 }
 #strippit-calc div.column-3 {
 	position: absolute;
-	top: 0px;
-	left: 50%;
+	top: 0;
+	left: 67%;
+	/*left: 50%;*/
 }
 #strippit-calc div.column-4 {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	left: 75%;
 }
 #strippit-calc div.calc-buttons > div > span.btn { /* all calc btns except recall-x and recall-y */
 	width: 88%;
 	height: 44px;
+	/*height: 44px;*/
 	margin-top: 12px;
 }
-#strippit-calc div.column-1 > div.recall-btns {
+#strippit-calc div.column-4 > div.recall-btns {
 	width: 88%;
 }
-#strippit-calc div.column-1 > div.recall-btns > span.btn {
+#strippit-calc div.column-4 > div.recall-btns > span.btn {
 	width: 50%;
 	height: 44px;
 	margin-top: 12px;
 }
-#strippit-calc span.btn-number {
+#strippit-calc .btn-number {
 	background-color: #f5f5f5;
+}
+#strippit-calc span.btn-unavailable {
+	border: 1px dashed;
+	-webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+	color: #e9e9e9;
+}
+#strippit-calc span.btn-unavailable > span.badge {
+	color: #ffffff;
+	background-color: #e9e9e9;
+	/*background-color: #e9e9e9;*/
 }
 
 
@@ -315,7 +357,7 @@
 
 .dro-dim {
     position: absolute;
-    top: 0px;
+    top: 0;
     right: 14px;
     font-size: 13px;
 }
@@ -335,7 +377,7 @@
 .flatbottom {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    border-bottom: 0px solid red;
+    border-bottom: 0 solid red;
 }
 
 .flattop {
@@ -361,6 +403,9 @@
 .btn-nobg:hover {
     background: none;
     border: none;
+}
+.btn-active {
+	background-color: #dff0d8;
 }
 
 #strippit-dro .btnIconWarning {
