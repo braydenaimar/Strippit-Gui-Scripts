@@ -169,6 +169,7 @@ return { // eslint-disable-line indent
 
 	},
 	resizeWidgetDom: function() {
+		/* eslint-disable prefer-const*/
 
 		// If this widget is not visible, do not bother updating the DOM elements.
 		if (!this.widgetVisible) return false;
@@ -186,7 +187,7 @@ return { // eslint-disable-line indent
 
 			marginSpacing += Number(panelDom.css('margin-top').replace(/px/g, ''));
 
-			if (i == that.widgetDom.length - 1) {
+			if (i === that.widgetDom.length - 1) {
 				marginSpacing += Number(panelDom.css('margin-bottom').replace(/px/g, ''));
 
 				let panelHeight = containerHeight - (marginSpacing + panelSpacing);
@@ -198,6 +199,7 @@ return { // eslint-disable-line indent
 			}
 		}
 
+		/* eslint-enable prefer-const */
 	},
 	visibleWidget: function(wgtVisible, wgtHidden) {
 

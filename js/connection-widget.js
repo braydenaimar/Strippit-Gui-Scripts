@@ -86,7 +86,7 @@ return { // eslint-disable-line indent
 		// Use a value greater than approx 500ms to ensure the stability of the program.
 		// NOTE: Loaded by cson file.
 		requestListDelay: null,
-		// requestListDelay: 10000,
+		// requestListDelay: 4000,
 		// NOTE: Loaded by cson file.
 		exitUntrustedSpjs: true,
 		// Keep track of how many commands are in the SPJS queue.
@@ -504,7 +504,7 @@ return { // eslint-disable-line indent
 			if (Msg === '') {
 				console.log('The append message method got the Msg argument as an empty string.');
 
-			} else if (Msg === undefined) {
+			} else if (typeof Msg == 'undefined') {
 				// console.log('Aborted the append message method because the Msg argument was omitted.');
 				throw 'Aborted the append message method because the Msg argument was omitted.';
 
@@ -514,7 +514,7 @@ return { // eslint-disable-line indent
 			}
 
 			// Check that the Type argument is valid.
-			if (Type === undefined || this.style[Type] === undefined) {
+			if (typeof Type == 'undefined' || typeof this.style[Type] == 'undefined') {
 				console.error('The append message method received a bad Type argument. Using default.\n  Type:', Type);
 				Type = 'default';
 			}
@@ -525,7 +525,7 @@ return { // eslint-disable-line indent
 				Msg = Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 			}
 
-			if (port === undefined || this[port] === undefined) throw 'The port argument was not passed properly.';
+			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw 'The port argument was not passed properly.';
 
 			// Apply the default values here so that warning messages can be logged.
 			IdPrefix = IdPrefix || '';
@@ -637,7 +637,7 @@ return { // eslint-disable-line indent
 				// this.updateCmd(port, { Index: logLength - 1, Comment: Id, UpdateRelated: false });
 
 				// logLength = this[port].logData.push({ Msg, Id, Type, Status, Meta, Comment, Related, Line, Time: Date.now() });
-				logItem = this[port].logData[logLength - 1];
+				const logItem = this[port].logData[logLength - 1];
 
 				return {
 					cmdMsg: logItem.Msg,
@@ -690,16 +690,16 @@ return { // eslint-disable-line indent
 
 			console.log('LogItem: %O', LogItem);
 
-			if (Msg !== undefined && LogItem.Msg !== Msg) return false;
+			if (typeof Msg != 'undefined' && LogItem.Msg !== Msg) return false;
 			if (PartMsg && !PartMsg.test(this.makeRegExpSafe(LogItem.Msg))) return false;
-			if (Length !== undefined && LogItem.Msg.length !== Length) return false;
-			if (Id !== undefined && LogItem.Id !== Id) return false;
-			if (Line !== undefined && LogItem.Line !== Line) return false;
-			if (Type !== undefined && LogItem.Type !== Type) return false;
+			if (typeof Length != 'undefined' && LogItem.Msg.length !== Length) return false;
+			if (typeof Id != 'undefined' && LogItem.Id !== Id) return false;
+			if (typeof Line != 'undefined' && LogItem.Line !== Line) return false;
+			if (typeof Type != 'undefined' && LogItem.Type !== Type) return false;
 
 			const unixNow = Date.now();
 
-			if (MinAge !== undefined && LogItem.Time - unixNow < MinAge) return false;
+			if (typeof MinAge != 'undefined' && LogItem.Time - unixNow < MinAge) return false;
 			if (MaxAge && unixNow - LogItem.Time > MaxAge) {
 
 				console.log('Found old command.');
@@ -716,7 +716,7 @@ return { // eslint-disable-line indent
 				return false;
 			}
 
-			// If the command is stale, flag it in the log.
+			// If the command is stale, flag it in the log and return as non-match.
 			if (unixNow - LogItem.Time > this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
 
 				console.log('Found stale command.');
@@ -727,16 +727,14 @@ return { // eslint-disable-line indent
 			}
 
 			// Only counts a match as: all elements of Meta array are in the LogItem.Meta array.
-			if (Meta !== undefined) {
-				let matchCount = 0;
+			if (typeof Meta != 'undefined') {
 
 				for (let x = 0; x < Meta.length; x++) {
-					// if (!LogItem.Meta.includes(Meta[x])) matchCount++;
+
 					if (!LogItem.Meta.includes(Meta[x])) return false;
 
 				}
 
-				// if (matchCount == Meta.length) return false;
 			}
 
 			return true;
@@ -750,18 +748,18 @@ return { // eslint-disable-line indent
 
 			const that = this;
 
-			if (IndexMap === undefined && Index === undefined) {
+			if (typeof IndexMap == 'undefined' && typeof Index == 'undefined') {
 				throw 'IndexMap is undefined.';
-				// console.warn('IndexMap is undefined.');
-				IndexMap = this[port].cmdMap;
+
+				// IndexMap = this[port].cmdMap;
 
 			}
 
 			let matchFound = false;
 			let matchIndex = Index;
-			const dataRef = Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))));
+			const dataRef = typeof Msg != 'undefined' ? 'Msg' : (typeof PartMsg != 'undefined' ? 'PartMsg' : (typeof Length != 'undefined' ? 'Length' : (typeof Id != 'undefined' ? 'Id' : (typeof Line !== 'undefined' ? 'Line' : 'Type'))));
 			const data = arguments[1][dataRef];
-			const logData = this[port].logData;
+			const { logData } = this[port];
 
 			console.groupCollapsed(`Find - ${dataRef}: ${data}`);
 
@@ -785,7 +783,7 @@ return { // eslint-disable-line indent
 			}
 
 			// Make sure that the Meta argument is an array.
-			if (Meta !== undefined && !Array.isArray(Meta)) {
+			if (typeof Meta != 'undefined' && !Array.isArray(Meta)) {
 				Meta = [].push(Meta);
 			}
 
@@ -800,7 +798,7 @@ return { // eslint-disable-line indent
 			// }
 
 			// If the Index argument was given.
-			if (Index !== undefined) {
+			if (typeof Index != 'undefined') {
 				console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
 
 				matchFound = true;
@@ -854,7 +852,7 @@ return { // eslint-disable-line indent
 				console.log('Searching backwards through the log for a match (ie. recent to old).');
 
 				let init = IndexMap.length - 1;
-				let refIndex = logData.length + SearchFrom;
+				const refIndex = logData.length + SearchFrom;
 
 				// Iterate through log items to set the initial index.
 				for (let i = IndexMap.length - 1; i >= 0; i--) {
@@ -933,12 +931,12 @@ return { // eslint-disable-line indent
 			// Arg. UpdateRelated [boolean] - Specify wether the related message(s) in another log should also be updated.
 			//   Default: If port is SPJS - true. Otherwise - false.
 
-			if (this[port] === undefined) {
+			if (typeof this[port] == 'undefined') {
 				throw `The consoleLog.${port} object is undefined.`;
 				// return { matchFound: false };
 			}
 
-			if (!Status && Comment === undefined) {
+			if (!Status && typeof Comment == 'undefined') {
 				throw 'No Update Requested. Aborting update';
 				// return { matchFound: false };
 			}
@@ -947,9 +945,7 @@ return { // eslint-disable-line indent
 			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
 			console.log(CSON.stringify(arguments));
 
-			const cmdMap = this[port].cmdMap;
-			const verifyMap = this[port].verifyMap;
-			const logData = this[port].logData;
+			const { cmdMap, verifyMap, logData } = this[port];
 
 			// Use verifyMap if doing a status update other than warning or error.
 			if (IndexMap === undefined && Status && Status !== 'Warning' && Status !== 'Error') {
@@ -989,7 +985,7 @@ return { // eslint-disable-line indent
 			if (Status && this.verifyPrecidence.indexOf(matchStatus) < this.verifyPrecidence.indexOf(Status)) {
 
 				// let removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || (Status === 'Completed' && !matchMeta.includes('NumberedGCode'))) ? true : false;
-				let removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || Status === 'Completed') ? true : false;
+				const removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || Status === 'Completed') ? true : false;
 
 				const bufferLength = this[port].verifyMap.length;
 
@@ -1023,7 +1019,7 @@ return { // eslint-disable-line indent
 
 							for (let i = 0; i < timeStr.length; i++) {
 
-								if (i == 3 || i == 9 || i == 12) {
+								if (i === 3 || i === 9 || i === 12) {
 									timeComment = `,${timeComment}`;
 
 								}
@@ -1049,7 +1045,7 @@ return { // eslint-disable-line indent
 					console.log('  cmdMap:', this[port].cmdMap, '\n  verifyMap:', this[port].verifyMap);
 
 					// Double check that the item has been removed from the verifyBuffer object.
-					if (bufferLength && this[port].verifyMap.length + 1 == bufferLength) {
+					if (bufferLength && this[port].verifyMap.length + 1 === bufferLength) {
 						console.log('Item was removed from the verifyMap.');
 
 					} else {
@@ -1089,7 +1085,7 @@ return { // eslint-disable-line indent
 			}
 
 			// If a Comment argument was passed and this is not a redundant update, add the comment to the respective port in the log.
-			if (Comment !== undefined && !matchComment.includes(`[${Comment}]`)) {
+			if (typeof Comment != 'undefined' && !matchComment.includes(`[${Comment}]`)) {
 				console.log('Comment update.');
 
 				// Get the new value of the comment in case the comment was updated by the status update (ie. time to execute/error was added).
@@ -1211,7 +1207,7 @@ return { // eslint-disable-line indent
 	// FIXME: Get the settings from a cson file.
 	initSettings: function () {
 
-		let that = this;
+		const that = this;
 		console.log('Loading Settings from cson file.');
 
 		console.log('initScripts:', JSON.stringify(this.initScripts));
@@ -1226,7 +1222,7 @@ return { // eslint-disable-line indent
 
 			const { SPJS, consoleLog, deviceMeta, defaultMetaIndex, initScripts, connectScripts } = result;
 
-		    // Object.keys(result).forEach(function(key) {
+			// Object.keys(result).forEach(function(key) {
 			// 	that[key] = result[key];
 			// });
 
@@ -1236,6 +1232,7 @@ return { // eslint-disable-line indent
 			// Object.assign(that.deviceMeta, deviceMeta);
 			// Object.assign(that.defaultMetaIndex, defaultMetaIndex);
 			// Object.assign(that.initScripts, initScripts);
+
 			that.initScripts = initScripts;
 			that.connectScripts = connectScripts;
 
@@ -1250,7 +1247,7 @@ return { // eslint-disable-line indent
 	},
 	initStatusCodes: function () {
 		// Synchronous file read.
-		let that = this;
+		const that = this;
 		console.log('Loading Status Codes from cson file.');
 
 		CSON.parseCSONFile('config/TinyG_Status_Codes.cson', function (err, result) {
@@ -2050,7 +2047,6 @@ return { // eslint-disable-line indent
 			this.consoleLog.updateCmd('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap, Status: 'Warning', Comment: 'Corrupt' });
 
 			setTimeout(function() {
-				// publish(`/${that.id}/spjs-send`, { Msg: 'List' });
 				that.newspjsSend({ Msg: 'list', Comment: 'Auto List' });
 
 			}, 500);
@@ -2096,6 +2092,7 @@ return { // eslint-disable-line indent
 			});
 
 			for (let i in diffs.opened) {
+				// If the port has been opened on the SPJS but it's console log has not been opened, initialize the port's console log.
 				if (openLogs.indexOf(diffs.opened[i]) == -1) {
 					that.portConnected(diffs.opened[i]);
 				}
@@ -2142,7 +2139,7 @@ return { // eslint-disable-line indent
 		if (!data.length && this.SPJS.requestListDelay !== null) {
 			setTimeout(function() {
 				// publish(`/${that.id}/spjs-send`, 'list');
-				this.newspjsSend({ Msg: 'list', Comment: 'Auto List' });
+				that.newspjsSend({ Msg: 'list', Comment: 'Auto List' });
 			}, this.SPJS.requestListDelay);
 		}
 
@@ -2179,12 +2176,12 @@ return { // eslint-disable-line indent
 		// This method checks that port list data received from the SPJS is not corrupted.
 		console.log('Validating port list data.');
 
-		var that = this;
-		var requiredProp = [ 'SerialNumber', 'UsbPid', 'UsbVid' ];
+		const that = this;
+		const requiredProp = [ 'SerialNumber', 'UsbPid', 'UsbVid' ];
 
 		// Check that each property in the requiredProp array has an associated value for each port in the portList object.
-		for(var i in data) {
-			for(var x = 0; x < requiredProp.length; x++) {
+		for(let i in data) {
+			for(let x = 0; x < requiredProp.length; x++) {
 				// If port list data is corrupted, return 'false'.
 				if (!data[i][requiredProp[x]]) {
 					return false;
@@ -2199,12 +2196,12 @@ return { // eslint-disable-line indent
 		console.log('Finding diffs in list data.'); // ...since 1903
 		// console.log("this.SPJS.portList:", this.SPJS.portList);
 
-		var portList = this.SPJS.portList;
-		var diffs = this.SPJS.portListDiffs = {};
+		const { portList } = this.SPJS;
+		const diffs = this.SPJS.portListDiffs = {};
 
 		// The dataCount and portListCount properties are used to count how many ports are in the new and old port list data, respectively.
-		var dataCount = 0;
-		var portListCount = 0;
+		let dataCount = 0;
+		let portListCount = 0;
 
 		for(let port in data) {
 			dataCount++;
@@ -2244,7 +2241,7 @@ return { // eslint-disable-line indent
 		}
 
 		if (diffs && (!portListCount || !dataCount)) {
-			diffs.SPJS = [ (portListCount ? 'list':'no list') + ' -> ' + (dataCount ? 'list':'no list') ];
+			diffs.SPJS = [ `${portListCount ? 'list' : 'no list'} -> ${dataCount ? 'list' : 'no list'}` ];
 		}
 
 		return diffs;
@@ -2255,9 +2252,8 @@ return { // eslint-disable-line indent
 		// Builds the portMeta object based on the portList object and using information from the deviceMeta object.
 		// The portMeta object is used to determine which port to automatically connect to, and is used with portList to build the serial port list in the DOM.
 		const that = this;
-		const portList = this.SPJS.portList;
-		const deviceMeta = this.deviceMeta;
-		const portMeta = this.SPJS.portMeta;
+		const { deviceMeta } = this;
+		const { portList, portMeta } = this.SPJS;
 
 		let portMetaObj = {};
 		let matchIndex = 0;
