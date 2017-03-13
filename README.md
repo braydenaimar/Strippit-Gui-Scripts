@@ -8,12 +8,35 @@ Follow these steps to install the Strippit GUI.
 
 ### Windows
 
-1. Clone this repository to your computer.
-2. Install nodejs from www.nodejs.org/en.
-3. Launch the Node.js command prompt.
-4. `cd` into the repository (ex. `cd Documents/Strippit-Gui-Scripts`)
+1. Install nodejs from www.nodejs.org/en.
+1. Download Git for windows from https://git-for-windows.github.io/.
+2. Open Windows Command Prompt by going to the start menu and searching 'Command Prompt'.
+3. Run `cd Documents` then `git init` to initialize Git in your 'Documents' folder.
+4. Run `git clone https://github.com/braydenaimar/Strippit-Gui-Scripts.git` to download the program into your 'Documents' folder.
+4. Run `cd Strippit-Gui-Scripts` to open the file.
 5. Run `npm install`.
 5. Run `npm start` to launch the app.
+
+##### This is what command prompt should look like after completing the above steps.
+```
+C:\Users\YourName>cd Documents
+
+C:\Users\YourName\Documents>git init
+Initialized empty Git repository in C:/Users/YourName/Documents/.git/
+
+C:\Users\YourName\Documents>git clone https://github.com/braydenaimar/Strippit-Gui-Scripts.git
+Cloning into 'Strippit-Gui-Scripts'...
+~some more output~
+
+C:\Users\YourName\Documents>cd Strippit-Gui-Scripts
+
+C:\Users\YourName\Documents\Strippit-Gui-Scripts>npm install
+~a whack load of output~
+~note that it is normal to see some warning and error-like messages~
+
+C:\Users\YourName\Documents\Strippit-Gui-Scripts>npm start
+
+```
 
 Windows Firewall may pop-up with a security alert but you just need to click `Allow Access`.
 
