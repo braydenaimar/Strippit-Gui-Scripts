@@ -32,16 +32,16 @@ define(['jquery','gui'], function($) {
 				ret;
 
 			// console.log("Publish: " + topic + gui.parseObject(args, 2));
-			var publishCallLog = "Publish: " + topic;
+			var publishCallLog = `Publish: ${topic}`;
 			for ( var x = 0; x < args.length; x++) {
 				publishCallLog += `\n  ${x}: `;
 				// const argLine = (typeof args[x] == "string") ? args[x]:JSON.stringify(args[x]).replace(/\s*/g, "").replace(/\n/g, "");
-				const argLine = (typeof args[x] == "string") ? args[x]:JSON.stringify(args[x]);
-				publishCallLog += argLine.slice(0, 150) + (argLine.length > 150 ? '...':'');
+				const argLine = (typeof args[x] === 'string') ? args[x] : JSON.stringify(args[x]);
+				publishCallLog += (argLine === undefined) ? 'undefined' : `${argLine.slice(0, 150)}${argLine.length > 150 ? '...' : ''}`;
 			}
 
 			if ( !subscriptions[ topic ] ) {
-				console.error("There are no subscriptions for " + topic);
+				console.error(`There are no subscriptions for ${topic}`);
 				return true;
 			}
 
@@ -67,12 +67,12 @@ define(['jquery','gui'], function($) {
 
 		subscribe: function( topic, context, callback, priority ) {
 			// console.log("Subscribe Call:",topic,"\n      callback:",callback,"\n      priority:",priority);
-			console.log("Subscribe: " + topic);
+			console.log(`Subscribe: ${topic}`);
 			if ( typeof topic !== "string" ) {
-				throw new Error( "You must provide a valid topic to create a subscription." );
+				throw new Error( 'You must provide a valid topic to create a subscription.' );
 			}
 
-			if ( arguments.length === 3 && typeof callback === "number" ) {
+			if ( arguments.length === 3 && typeof callback === 'number' ) {
 				priority = callback;
 				callback = context;
 				context = null;

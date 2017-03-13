@@ -283,6 +283,7 @@ deviceMeta: [
 # If VidPids does not match portVid and portPid, assume serial device is a TinyG v8 board.
 defaultMetaIndex: 3
 
+# initScripts are sent to a device with matching information when a port is opened to the device.
 # Conditions: Friendly, Baud, Buffer, SerialNumber
 initScripts: [
     {   # Arduino Uno (GRBL Board)
@@ -307,7 +308,7 @@ initScripts: [
         ],
         "pause": 1000
     }
-    {
+    {   # TinyG
         "Buffer": "tinyg",
         "script": [
             "{sr:n}"
@@ -317,8 +318,8 @@ initScripts: [
     {   # Brayden's MSP430F5529
         "SerialNumber": "111D871D",
         "script": [
-            "$G D 0",
-            "$G D 1"
+            "$G 0 0",
+            "$G 1 1"
         ],
         "pause": 1000
     }
@@ -330,6 +331,27 @@ initScripts: [
     #     ],
     #     "pause": 100
     # }
+]
+
+# connectScripts are sent to a device with matching info if a port is already opened to the device on the SPJS but the UI just connected to the SPJS.
+connectScripts: [
+    {   # Arduino Due
+        "Buffer": "tinygg2",
+        "script": [
+            "{hp:n}",
+            "{fb:n}",
+            "{sr:n}",
+            "{qr:n}"
+        ],
+        "pause": 100
+    }
+    {   # TinyG
+        "Buffer": "tinyg",
+        "script": [
+            "{sr:n}"
+        ],
+        "pause": 100
+    }
 ]
 
 # 3B3CC6A6 Vincent's MSP430

@@ -5,7 +5,8 @@ requirejs.config({
 		jquery: 'lib/jquery',
         amplify: 'lib/amplify.core',
         gui: 'lib/gui',
-		bootstrap: 'lib/bootstrap'
+		bootstrap: 'lib/bootstrap',
+        mousetrap: 'lib/mousetrap.min'
 	}
     // nodeRequire: require
 });

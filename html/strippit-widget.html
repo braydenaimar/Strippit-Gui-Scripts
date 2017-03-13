@@ -1,408 +1,193 @@
 <!-- Strippit Widget HTML -->
 
-<div class="panel panel-default strippit-panel">
-	<div id="com-chilipeppr-widget-xyz" class="panel panel-default">
-	    <!-- <div id="com-chilipeppr-widgetholder-wcs" style="position: absolute;left:-80px;top:10px;"></div> -->
-	    <div class="panel-heading ba-panel-heading">
-			<!-- Heading -->
-	        <div class="btn-toolbar pull-right" role="toolbar" data-style="position:absolute;right:0px;top:0px;padding:10px 15px;">
-				<!-- Overflow Indicator -->
-	            <div class="btn-group plannerpause hidden" data-toggle="popover" data-content="This indicator turns orange when we're being asked to pause our sending of commands to the CNC controller so we don't overfill the buffer."> <span disabled="true" class="plannerpauseindicator glyphicon glyphicon glyphicon-time btn btn-sm"></span>
+<!-- in/mm Button -->
+<div id="strippit-inmm">
+	<span class="btn btn-xs btn-default btnInMm">inch/mm</span>
+</div>
 
-	            </div>
-				<!-- Touch Jog Button -->
-	            <div class="btn-group hidden">
-	                <button type="button" class="btn btn-xs btn-default hidden btnToggleShowTouchJog" data-delay="500" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Show Touch/Scroll/Mouse Jog" data-content="View the touch/scroll/mouse jog area.">
-	                    <svg width="18px" height="18px" viewBox="0 0 16 15" style="margin-bottom:-5px;">
-	                        <g id="layer1" inkscape:label="Layer 1" inkscape:groupmode="layer">
-	                            <rect style="fill:#c7c7c7;fill-opacity:1" id="rect2995" width="11.895755" height="7.6640639" x="-7.9218755" y="8.1015425" transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" />
-	                            <path style="fill:#000000;fill-opacity:1;stroke:none" d="M 12.012025,5.1134737 9.0594827,5.1513007 12.012026,7.369192 z" id="path4975" inkscape:connector-curvature="0" sodipodi:nodetypes="cccc" />
-	                            <rect transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" y="11.336672" x="-6.1134734" height="0.98116386" width="1.5229107" id="rect4987" style="fill:#000000;fill-opacity:1" />
-	                            <rect style="fill:#000000;fill-opacity:1" id="rect4989" width="1.5229107" height="0.98116386" x="-3.4123509" y="11.248804" transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" />
-	                            <rect transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" y="11.224115" x="-1.1307598" height="0.98116386" width="1.5229107" id="rect4991" style="fill:#000000;fill-opacity:1" />
-	                        </g>
-	                    </svg>
-	                </button>
-	            </div>
-				<!-- View A Axis Button -->
-	            <div class="btn-group hidden">
-	                <button type="button" class="btn btn-xs btn-default showhideaaxis" data-delay="500" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Show A Axis" data-content="View the A Axis in this widget.">
-	                    <!-- <span class="glyphicon" style=""> -->
-	                    <svg width="18px" height="18px" viewBox="0 0 15 15" style="margin-bottom:-5px;">
-	                        <g transform="translate(0,-1)" id="layer1">
-	                            <rect width="9.4103031" height="8.1495714" x="5.4276471" y="10.471354" transform="matrix(0.86602641,-0.49999826,0,1,0,0)" id="rect3833" style="fill:#f2f2f2;fill-opacity:1" />
-	                            <path d="m 1.2047429,5.7539288 3.4930048,2.0050654 0,8.1495718 -3.4930048,-2.005124 z" id="rect3843" style="fill:#cccccc;fill-opacity:1" />
-	                            <path d="M 1.2065082,5.751951 9.3485287,1.1046795 12.837494,3.111665 4.6954743,7.7589365 z" id="rect3845" style="fill:#e6e6e6;fill-opacity:1" />
-	                            <g transform="matrix(0.72698276,-0.41972171,0,0.72698276,1.9959922,6.7024392)" id="text3847" style="font-size:12.23077774px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans">
-	                                <path d="m 5.3885789,13.508963 3.3622695,-8.7550395 1.2481604,0 3.5832352,8.7550395 -1.319825,0 -1.021222,-2.651595 -3.6608723,0 -0.9615015,2.651595 z m 2.5261812,-3.5951802 2.9681139,0 L 9.9691485,7.4891267 C 9.6904481,6.7525795 9.4834169,6.1474114 9.3480543,5.6736206 9.2365721,6.2350015 9.079308,6.7923932 8.8762616,7.3457973 z"
-	                                id="path3852" />
-	                            </g>
-	                            <g transform="matrix(1.1671134,0,0,1.1671134,-4.6139988,-2.1092078)" id="text3854" style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-	                            /></g>
-	                    </svg>
-	                    <!-- </span> -->
-	                </button>
-	            </div>
-				<!-- View Small/Large Button -->
-	            <div class="btn-group hidden">
-	                <button type="button" class="btn btn-xs btn-default view-small active"><span class="glyphicon" style="font-size:8px;">S</span>
+<!-- Feedstop Button -->
+<div id="strippit-feedstop">
+	<span class="btn btn-md btn-danger btn-feedstop">Feedstop <span class="glyphicon glyphicon-stop"></span></span>
+</div>
 
-	                </button>
-	                <button type="button" class="btn btn-xs btn-default view-large"><span class="glyphicon">L</span>
+<!-- XY DRO -->
+<div id="strippit-dro">
+	<!-- X Axis DRO -->
+	<div id="strippit-dro-x" class="x-axis">
+		<!-- Home X Axis Button -->
+		<!-- <button type="button" class="btn btn-md btn-default btn-home-x"><span class="glyphicon glyphicon-home"></span> X</button> -->
 
-	                </button>
-	            </div>
-				<!-- in/mm Button -->
-	            <div class="btn-group">
-	                <button type="button" class="btn btn-xs btn-default btnInMm" data-delay="500" data-animation="false" data-placement="auto" data-container="body" data-trigger="hover" data-title="Toggle between in and mm" data-content="Send G20 or G21 to the controller to switch between in and mm."><span style="font-size:8px;">in / mm</span>
+		<!-- DRO Label -->
+		<span class="btn dro-well dro-label-well flatright" btn-data="x">
+			<h2 class="dro-label">X</h2>
+		</span>
 
-	                </button>
-	            </div>
-				<!-- Show/Hide Machine DRO Button -->
-	            <div class="btn-group">
-	                <button type="button" class="btn btn-xs btn-default showhidemDRO" data-delay="500" data-animation="false" data-placement="auto" data-container="body" data-trigger="hover" data-title="Toggle Machine DRO" data-content="Toggle visibility of axes readouts that show machine coordinates.">
-						<span class="glyphicon glyphicon-screenshot"></span>
-	                </button>
-	            </div>
-				<!-- Hide Body Button -->
-	            <div class="btn-group">
-	                <button type="button" class="btn btn-xs btn-default hidebody">
-						<span class="glyphicon glyphicon-chevron-up"></span>
-					</button>
-	            </div>
-				<!-- Dropdown Menu Button -->
-				<div class="btn-group">
-	                <div class="dropdown">
-	                    <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
-							<span class="caret"></span>
-	                    </button>
-	                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-	                    	<li role="presentation" class="dropdown-header fork-name"></li>
-	                    	<li><a href="" target="_blank" id="com-chilipeppr-widget-xyz-tbar-standalone">View Widget Standalone</a></li>
-	                    	<li><a href="" target="_blank" id="com-chilipeppr-widget-xyz-tbar-fork">Fork Widget</a></li>
-	                    </ul>
-	                </div>
-	            </div>
-	        </div> <span class="panel-title" data-toggle="popover">Punch Press - DRO</span>
-	    </div>
+		<!-- DRO Value -->
+		<div class="well dro-well dro-pos-well" data-axis="x">
 
-		<!-- Widget Body -->
-	    <div id="com-chilipeppr-widget-xyz-body" class="panel-body">
+			<h2 class="dro-pos">
+				<table style="font-size: 28px"><tr><td style="width:70px; text-align:right"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table>
+			</h2>
 
-			<!-- Feedstop Button -->
-			<div id="widget-dro-feedstop">
-				<button type="button" class="btn btn-md btn-danger btn-feedstop" style="width: 110px">Feedstop <span class="glyphicon glyphicon-stop"></span></button>
-			</div>
+			<div class="dro-dim">mm</div>
 
-			<!-- XY DRO -->
-			<div id="widget-dro-xy">
-				<!-- X Axis DRO -->
-				<div id="com-chilipeppr-widget-xyz-x">
-					<!-- Home X Axis Button -->
-					<button type="button" class="btn btn-md btn-default btn-home-x"><span class="glyphicon glyphicon-home"></span> X</button>
-					<!-- DRO Label -->
-					<button type="button" class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-label-well">
-						<h2 class="com-chilipeppr-xyz-label">X</h2>
-					</button>
-					<!-- DRO Value -->
-					<div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-pos-well" data-axis="x">
-						<h2 class="com-chilipeppr-xyz-pos"><table style="font-size: 28px;"><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
-						<div class="com-chilipeppr-xyz-dim">mm</div>
-					</div>
-				</div>
-
-				<!-- Y Axis DRO -->
-				<div id="com-chilipeppr-widget-xyz-y">
-					<!-- Home Y Axis Button -->
-					<button type="button" class="btn btn-md btn-default btn-home-y"><span class="glyphicon glyphicon-home"></span> Y</button>
-					<!-- DRO Label -->
-					<button type="button" class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-label-well">
-						<h2 class="com-chilipeppr-xyz-label">Y</h2>
-					</button>
-					<!-- DRO Value -->
-					<div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-pos-well" data-axis="y">
-						<h2 class="com-chilipeppr-xyz-pos"><table style="font-size: 28px;"><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
-
-						<div class="com-chilipeppr-xyz-dim">mm</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Save Position -->
-			<div id="widget-dro-savepos">
-				<div class="pos-btn-header">
-					<div class="btn-group pos-step-btns">
-						<button type="button" class="btn btn-md btn-default btn-stepbck flatright"><span class="glyphicon glyphicon-step-backward"></span></button>
-						<button type="button" class="btn btn-xs btn-default btn-stepfwd flatleft"><span class="glyphicon glyphicon-step-forward"></span></button>
-					</div>
-					<button type="button" class="btn btn-xl btn-default btn-saveto"><span class="glyphicon glyphicon-floppy-disk"></span></button>
-				</div>
-
-				<div class="left-btns">
-					<button type="button" class="btn btn-xl btn-default btn-pos-1"><span class="glyphicon glyphicon-open"></span> 1</button>
-					<button type="button" class="btn btn-xl btn-default btn-pos-3"><span class="glyphicon glyphicon-open"></span> 3</button>
-					<button type="button" class="btn btn-xl btn-default btn-pos-5"><span class="glyphicon glyphicon-open"></span> 5</button>
-					<button type="button" class="btn btn-xl btn-default btn-pos-7"><span class="glyphicon glyphicon-open"></span> 7</button>
-					<button type="button" class="btn btn-xl btn-default btn-pos-9"><span class="glyphicon glyphicon-open"></span> 9</button>
-					<button type="button" class="btn btn-xl btn-default btn-pos-11"><span class="glyphicon glyphicon-open"></span> 11</button>
-				</div>
-
-				<div class="right-btns">
-					<button type="button" class="btn btn-md btn-default btn-pos-2"><span class="glyphicon glyphicon-open"></span> 2</button>
-					<button type="button" class="btn btn-md btn-default btn-pos-4"><span class="glyphicon glyphicon-open"></span> 4</button>
-					<button type="button" class="btn btn-md btn-default btn-pos-6"><span class="glyphicon glyphicon-open"></span> 6</button>
-					<button type="button" class="btn btn-md btn-default btn-pos-8"><span class="glyphicon glyphicon-open"></span> 8</button>
-					<button type="button" class="btn btn-md btn-default btn-pos-10"><span class="glyphicon glyphicon-open"></span> 10</button>
-					<button type="button" class="btn btn-md btn-default btn-pos-12"><span class="glyphicon glyphicon-open"></span> 12</button>
-				</div>
-			</div>
-
-			<!-- Jog Controls -->
-			<div id="widget-dro-jog">
-				<div class="jog-left-btns">
-					<div class="btn-group">
-						<button type="button" class="btn btn-xs btn-default btn-jog-pt25">1/4</button>
-						<button type="button" class="btn btn-xs btn-default btn-jog-1">1</button>
-					</div>
-					<button type="button" class="btn btn-md btn-default btn-jog-x"><span class="glyphicon glyphicon-plus"></span> X</button>
-				</div>
-				<div class="jog-middle-btns">
-					<button type="button" class="btn btn-md btn-default btn-jog-y"><span class="glyphicon glyphicon-plus"></span> Y</button>
-					<button type="button" class="btn btn-md btn-default btn-jog-yneg"><span class="glyphicon glyphicon-minus"></span> Y</button>
-				</div>
-				<div class="jog-right-btns">
-					<div class="btn-group">
-						<button type="button" class="btn btn-xs btn-default btn-jog-6">6</button>
-						<button type="button" class="btn btn-xs btn-default btn-jog-12">12</button>
-					</div>
-					<button type="button" class="btn btn-md btn-default btn-jog btn-jog-xneg"><span class="glyphicon glyphicon-minus"></span> X</button>
-				</div>
-			</div>
-
-			<!-- Calculator -->
-			<div id="widget-dro-calc">
-
-				<!-- Calculator Value Display -->
-				<div class="well com-chilipeppr-xyz-well calc-display-well">
-					<h2 class="calc-value"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed calc-val-negpos" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
-
-					<div class="com-chilipeppr-xyz-dim">mm</div>
-				</div>
-
-				<div class="calc-btns">
-					<!-- Calc Btn Column 1 -->
-					<div class="calc-col-1">
-						<div class="btn-group">
-							<button type="button" class="btn btn-sm btn-default btn-recal-x"><span class="glyphicon glyphicon-open"></span> X</button>
-
-							<button type="button" class="btn btn-sm btn-default btn-recal-y"><span class="glyphicon glyphicon-open"></span> Y</button>
-						</div>
-						<button type="button" class="btn btn-md btn-default btn-seven">7</button>
-						<button type="button" class="btn btn-md btn-default btn-four">4</button>
-						<button type="button" class="btn btn-md btn-default btn-one">1</button>
-						<button type="button" class="btn btn-md btn-default btn-zero">0</button>
-					</div>
-
-					<!-- Calc Btn Column 2 -->
-					<div class="calc-col-2">
-						<button type="button" class="btn btn-xl btn-default btn-plusminus">+/-</button>
-						<button type="button" class="btn btn-xl btn-default btn-eight">8</button>
-						<button type="button" class="btn btn-xl btn-default btn-five">5</button>
-						<button type="button" class="btn btn-xl btn-default btn-two">2</button>
-						<button type="button" class="btn btn-xl btn-default btn-decimal">.</button>
-					</div>
-
-					<!-- Calc Btn Column 3 -->
-					<div class="calc-col-3">
-						<button type="button" class="btn btn-md btn-default btn-clear">CE</button>
-						<button type="button" class="btn btn-md btn-default btn-nine">9</button>
-						<button type="button" class="btn btn-md btn-default btn-six">6</button>
-						<button type="button" class="btn btn-md btn-default btn-three">3</button>
-						<button type="button" class="btn btn-md btn-primary btn-equal">=</button>
-					</div>
-
-					<!-- Calc Btn Column 4 -->
-					<div class="calc-col-4">
-						<button type="button" class="btn btn-md btn-default btn-backspace">
-							<span class="glyphicon glyphicon-arrow-left"></span></button>
-						<button type="button" class="btn btn-md btn-default btn-divide">
-							<span class="badge">/</span></button>
-						<button type="button" class="btn btn-md btn-default btn-multiply">
-							<span class="glyphicon glyphicon-remove-sign"></span></button>
-						<button type="button" class="btn btn-md btn-default btn-subtract">
-							<span class="glyphicon glyphicon-minus-sign"></span></button>
-						<button type="button" class="btn btn-md btn-default btn-add">
-							<span class="glyphicon glyphicon-plus-sign"></span></button>
-					</div>
-				</div>
-			</div>
-
-			<!-- Widget Serial Port -->
-			<div id="widget-dro-serial-port">
-				G90 G94 <br>G17 <br>G21 <br>G28 G91 Z0 <br>G90 <br>M9 <br>T1 M6 <br>S10000 M3 <br>G54 <br>M9 <br>G0 X3.372 Y33.178 <br>Z5 <br>Z2 <br>G1 Z0.018 F200 <br>G18 G3 X3.354 Z0 I-0.018 <br>G1 X2.497 F600 <br>Y30.195 <br>X3.394 Y30.194 <br>X3.463 Y30.173 <br>X3.502 Y30.138 <br>X3.52 Y30.083 <br>X3.511 Y30.021
-			</div>
-
-	        <!-- <div class="container-fluid"></div> -->
-	    </div>
-	    <div id="com-chilipeppr-widget-xyz-ftr" tabindex="1" class="panel-footer" style="position: relative; padding:2px;padding-bottom:0px;">
-	        <!-- <div class="com-chilipeppr-widget-xyz-buttonarray" style="border:1px solid green;">
-	            <table style="border: 1px solid red;">
-	                <tr valign="top">
-	                    <td class="col xcol-xs-2" style="border:1px red solid;" rowspan="2">
-	                        <div class="btn-group-vertical">
-	                            <button class="btn btn-xs btn-default joggotozerow" data-toggle="popover" data-placement="top" data-title="Rapid to Zero Position, all axes, current work coordinate" data-content="G0 X0 Y0 Z0 A0<br/>This moves all axes to zero in current work coordinate system; individual moves available via axis drop down menus above." data-html="true" data-delay="800" data-trigger="hover" data-container="body">Go To <span class="com-chilipeppr-widget-xyz-coords">Gxx</span> Zero</button>
-	                            <button class="btn btn-xs btn-default jogzerooutw " id="jogzerooutw" data-toggle="popover" data-placement="top" data-title="Set Active Coordinate Zero Here" data-content="Sets active work coordinate system zero to current machine position." data-html="true" data-delay="800" data-trigger="hover" data-container="body">Set <span class="com-chilipeppr-widget-xyz-coords">Gxx</span> Zero</button>
-	                            <button class="btn btn-xs btn-default joggotozerom" data-toggle="popover" data-placement="top" data-title="Rapid to Zero Position, all axes, absolute machine coordinate" data-content="G53 G0 X0 Y0 Z0 A0<br/>This moves all axes to zero in absolute machine coordinate system; individual moves available via axis drop down menus above." data-html="true" data-delay="800" data-trigger="hover" data-container="body" style="background-color:#eef1ee">Go To Mch Zero</button>
-	                            <button class="btn btn-xs btn-default jogzerooutm " data-toggle="popover" data-placement="top" data-title="Set Machine Zero on All Axes" data-content="G28.3 X0 Y0 Z0 A0<br/>Sets hardware zero (G53) to the current position.  Useful if machine does not have limit switches." data-html="true" data-delay="800" data-trigger="hover" data-container="body" style="background-color:#eef1ee">Set Mch Zero</button>
-	                            <button class="btn btn-xs btn-default joghomem " data-toggle="popover" data-placement="top" data-title="Homing Sequence" data-content="G28.2 X0 Y0 Z0 A0<br/>Runs homing cycle on all axes. MUST have home/limit switches" data-html="true" data-delay="200" data-trigger="hover" data-container="body" style="background-color:#eef1ee">Home <span class="glyphicon glyphicon-home"></span> Mch</button>
-	                        </div>
-	                    </td>
-	                    <td class="col xcol-xs-2" style="border:0px green solid;padding-left:4px;">
-	                        <div class="btn-group-vertical" style="margin-right:-0px;">
-
-	                            <!-- <div class="btn-group">
-	                                <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"  style="padding: 3px 2px;" > <span class="caret"></span>
-
-	                                </button>
-	                                <ul class="dropdown-menu xpull-right" role="menu">
-	                                    <li role="presentation" class="dropdown-header">Jogging Algorithm</li>
-	                                    <li><a href="javascript:" class="alert-info jogviaincr">Jog via Sending Increments then Feedhold</a></li>
-	                                    <li><a href="javascript:" class="jogvialongmove">Jog via Sending Single Long Move then Feedhold</a></li>
-	                                </ul>
-	                            </div> -->
-	        <!-- <button id="com-chilipeppr-widget-xyz-jog" class="btn btn-default dbltall" style="padding: 8px 4px;" data-toggle="popover" data-placement="auto" data-title="Jog Shortcut Keys" data-content="X+ : Left Arrow<br>X- : Right Arrow<br>Y+ : Up Arrow<br>Y- : Down Arrow<br>Z+ : Page Up<br>Z- : Page Down<br>Shift : 10x Move By<br>Ctrl (or Alt) : 100x Move By<br>Shift + Ctrl (or Alt) : 1,000x Move By" data-html="true" data-delay="200" data-trigger="hover" data-container="body"><span class="rotate90">Jog</span>
-	                            </button>
-	                        </div>
-	                    </td>
-	                    <td class="col xcol-xs-2" style="border:0px yellow solid;">
-	                        <button class="btn btn-default jogxneg dbltall">X
-	                            <br/><span class="glyphicon glyphicon-circle-arrow-left"></span>
-
-	                        </button>
-	                    </td>
-	                    <td>
-	                        <div class="btn-group-vertical" style="margin-right:-0px;">
-	                            <button class="btn btn-default jogy">Y <span class="glyphicon glyphicon-circle-arrow-up"></span>
-	                            </button>
-	                            <button class="btn btn-default jogyneg ">Y <span class="glyphicon glyphicon-circle-arrow-down"></span>
-	                            </button>
-	                        </div>
-	                    </td>
-	                    <td>
-	                        <button class="btn btn-default jogx dbltall">X
-	                            <br/><span class="glyphicon glyphicon-circle-arrow-right"></span>
-	                        </button>
-	                    </td>
-	                    <td>
-	                        <div class="btn-group-vertical">
-	                            <button class="btn btn-default jogz ">Z <span class="glyphicon glyphicon-plus-sign"></span>
-	                            </button>
-	                            <button class="btn btn-default jogzneg ">Z <span class="glyphicon glyphicon-minus-sign"></span>
-	                            </button>
-	                        </div>
-	                    </td>
-	                    <td class="xhidden" style="">
-	                        <button type="button" class="btn btn-lg btn-default btnShowTouchJog btnToggleShowTouchJog" style="padding:0 10px;">
-	                            <svg width="38px" height="38px" viewBox="0 0 16 15" style="margin-bottom:-5px;">
-	                                <g id="layer1" inkscape:label="Layer 1" inkscape:groupmode="layer">
-	                                    <rect style="fill:#c7c7c7;fill-opacity:1" id="rect2995" width="11.895755" height="7.6640639" x="-7.9218755" y="8.1015425" transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" />
-	                                    <path style="fill:#000000;fill-opacity:1;stroke:none" d="M 12.012025,5.1134737 9.0594827,5.1513007 12.012026,7.369192 z" id="path4975" inkscape:connector-curvature="0" sodipodi:nodetypes="cccc" />
-	                                    <rect transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" y="11.336672" x="-6.1134734" height="0.98116386" width="1.5229107" id="rect4987" style="fill:#000000;fill-opacity:1" />
-	                                    <rect style="fill:#000000;fill-opacity:1" id="rect4989" width="1.5229107" height="0.98116386" x="-3.4123509" y="11.248804" transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" />
-	                                    <rect transform="matrix(0.80452054,-0.59392483,0.80452054,0.59392483,0,0)" y="11.224115" x="-1.1307598" height="0.98116386" width="1.5229107" id="rect4991" style="fill:#000000;fill-opacity:1" />
-	                                </g>
-	                            </svg>
-	                        </button>
-	                    </td>
-	                </tr>
-	                <tr>
-	                    <td colspan="7" style="padding-left:4px;padding-top:2px;">
-	                        <div class="btn-group jogincrements-horiz dropup " style="">
-	                            <button class="btn btn-default btn-xs jogincr1 hilite">1</button>
-	                            <button class="btn btn-default btn-xs jogincrpt1 ">0.1</button>
-	                            <button class="btn btn-default btn-xs jogincrpt01 ">0.01</button>
-	                            <button class="btn btn-default btn-xs jogincrpt001 ">0.001</button>
-	                            <button class="btn btn-default btn-xs jogincrCustomBtn ">Custom <code class="jogincrCustomVal">10</code>
-	                            </button>
-	                            <button type="button" class="btn btn-xs btn-default dropdown-toggle jogincrCustomDropUpBtn" data-toggle="dropdown" aria-expanded="false"> <span class="caret"></span>
-
-	                            </button>
-	                            <ul class="dropdown-menu dropdown-menu-right jogincrCustomDropUpMenu" role="menu" style="padding:6px 8px;">
-	                                <div class="input-group">
-	                                    <input type="number" class="form-control jogincrCustomInput jogincrCustomInput1" value="" placeholder="Custom Move By 1" /> <span class="input-group-btn">
-	                                    <button type="button" class="btn btn-default jogincrCustomSet jogincrCustomSet1">Set</button>
-	                                </span>
-
-	                                </div>
-	                                <div class="input-group">
-	                                    <input type="number" class="form-control jogincrCustomInput jogincrCustomInput2" value="" placeholder="Custom Move By 2" /> <span class="input-group-btn">
-	                                    <button type="button" class="btn btn-default jogincrCustomSet jogincrCustomSet2">Set</button>
-	                                </span>
-
-	                                </div>
-	                                <div class="input-group">
-	                                    <input type="number" class="form-control jogincrCustomInput jogincrCustomInput3" value="" placeholder="Custom Move By 3" /> <span class="input-group-btn">
-	                                    <button type="button" class="btn btn-default jogincrCustomSet jogincrCustomSet3">Set</button>
-	                                </span>
-
-	                                </div>
-	                                <div class="input-group">
-	                                    <input type="number" class="form-control jogincrCustomInput jogincrCustomInput4" value="" placeholder="Custom Move By 4" /> <span class="input-group-btn">
-	                                    <button type="button" class="btn btn-default jogincrCustomSet jogincrCustomSet4">Set</button>
-	                                </span>
-
-	                                </div>
-	                            </ul>
-	                        </div>
-	                    </td>
-	                </tr>
-	            </table>
-	        </div> -->
-	        <div id="com-chilipeppr-widget-xyz-machinecoords" class="panel-body">
-	            <div class="container-fluid">
-	                <!-- mX -->
-	                <div id="com-chilipeppr-widget-xyz-mx" class="row hidden">
-	                    <!-- Label -->
-	                    <div class="col col-xs-3" style="position:relative;">
-	                        <div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-label-well flatbottom flattop" style="background-color:#eef1ee">
-	                            <h2 class="com-chilipeppr-xyz-label">m&nbsp;X&nbsp;&nbsp;&nbsp;&nbsp;</h2>
-
-	                        </div>
-	                    </div>
-	                    <!-- Value -->
-	                    <div class="col col-xs-9">
-	                        <div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-pos-well flatbottom flattop" style="background-color:#eef1ee">
-	                            <h2 class="com-chilipeppr-xyz-pos"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
-
-	                            <div class="com-chilipeppr-xyz-dim">mm</div>
-	                        </div>
-	                    </div>
-	                </div>
-	                <!-- mY -->
-	                <div id="com-chilipeppr-widget-xyz-my" class="row hidden">
-	                    <!-- Label -->
-	                    <div class="col col-xs-3" style="position:relative;">
-	                        <div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-label-well flattop" style="background-color:#eef1ee">
-	                            <h2 class="com-chilipeppr-xyz-label">m&nbsp;Y&nbsp;&nbsp;&nbsp;&nbsp;</h2>
-
-	                        </div>
-	                    </div>
-	                    <!-- Value -->
-	                    <div class="col col-xs-9">
-	                        <div class="well com-chilipeppr-xyz-well com-chilipeppr-xyz-pos-well flattop" style="background-color:#eef1ee">
-	                            <h2 class="com-chilipeppr-xyz-pos"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
-
-	                            <div class="com-chilipeppr-xyz-dim">mm</div>
-	                        </div>
-	                    </div>
-	                </div>
-	                <!-- end -->
-	            </div>
-	        </div>
-	        <div class="touchpad-overlay hidden" style="margin-top:4px;">
-	            <canvas style="border:1px dashed silver;border-radius: 4px;"></canvas>
-	        </div>
-	    </div>
+		</div>
 	</div>
 
+	<!-- Y Axis DRO -->
+	<div id="strippit-dro-y" class="y-axis">
+		<!-- Home Y Axis Button -->
+		<!-- <button type="button" class="btn btn-md btn-default btn-home-y"><span class="glyphicon glyphicon-home"></span> Y</button> -->
+
+		<!-- DRO Label -->
+		<span class="btn dro-well dro-label-well flatright" btn-data="y">
+			<h2 class="dro-label">Y</h2>
+		</span>
+
+		<!-- DRO Value -->
+		<div class="well dro-well dro-pos-well" data-axis="y">
+			<h2 class="dro-pos"><table style="font-size: 28px;"><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
+			<div class="dro-dim">mm</div>
+		</div>
+	</div>
+</div>
+
+<!-- Save Position -->
+<div id="strippit-savepos">
+
+	<div class="btn-header">
+
+		<div class="btn-group step-btns">
+
+			<span class="btn btn-md btn-default btn-stepbck flatright" btn-signal="control" btn-data="prev"><span class="glyphicon glyphicon-step-backward"></span></span>
+			<span class="btn btn-md btn-default btn-stepfwd flatleft" btn-signal="control" btn-data="next"><span class="glyphicon glyphicon-step-forward"></span></span>
+
+		</div>
+
+		<div class="btn-group control-btns">
+
+			<span class="btn btn-xl btn-default btn-saveto" btn-signal="control" btn-data="save"><span class="glyphicon glyphicon-floppy-disk"></span></span>
+			<span class="btn btn-xl btn-default btn-delete" btn-signal="control" btn-data="delete"><span class="glyphicon glyphicon-floppy-remove"></span></span>
+			<span class="btn btn-xl btn-default btn-clear" btn-signal="control" btn-data="clear"><span class="fa fa-trash"></span></span>
+
+		</div>
+
+	</div>
+
+	<div class="left-btns">
+		<span class="btn btn-xl btn-default pos-1" btn-signal="position" btn-data="1">1</span>
+		<span class="btn btn-xl btn-default pos-3" btn-signal="position" btn-data="3">3</span>
+		<span class="btn btn-xl btn-default pos-5" btn-signal="position" btn-data="5">5</span>
+		<span class="btn btn-xl btn-default pos-7" btn-signal="position" btn-data="7">7</span>
+		<span class="btn btn-xl btn-default pos-9" btn-signal="position" btn-data="9">9</span>
+		<span class="btn btn-xl btn-default pos-11" btn-signal="position" btn-data="11">11</span>
+	</div>
+
+	<div class="right-btns">
+		<span class="btn btn-xl btn-default pos-2" btn-signal="position" btn-data="2">2</span>
+		<span class="btn btn-xl btn-default pos-4" btn-signal="position" btn-data="4">4</span>
+		<span class="btn btn-xl btn-default pos-6" btn-signal="position" btn-data="6">6</span>
+		<span class="btn btn-xl btn-default pos-8" btn-signal="position" btn-data="8">8</span>
+		<span class="btn btn-xl btn-default pos-10" btn-signal="position" btn-data="10">10</span>
+		<span class="btn btn-xl btn-default pos-12" btn-signal="position" btn-data="12">12</span>
+	</div>
+
+</div>
+
+<!-- Jog Controls -->
+<!-- <div id="strippit-jog" class="hidden">
+	<div class="jog-left-btns">
+		<div class="btn-group">
+			<button type="button" class="btn btn-xs btn-default btn-jog-pt25">1/4</button>
+			<button type="button" class="btn btn-xs btn-default btn-jog-1">1</button>
+		</div>
+		<button type="button" class="btn btn-md btn-default btn-jog-x"><span class="glyphicon glyphicon-plus"></span> X</button>
+	</div>
+	<div class="jog-middle-btns">
+		<button type="button" class="btn btn-md btn-default btn-jog-y"><span class="glyphicon glyphicon-plus"></span> Y</button>
+		<button type="button" class="btn btn-md btn-default btn-jog-yneg"><span class="glyphicon glyphicon-minus"></span> Y</button>
+	</div>
+	<div class="jog-right-btns">
+		<div class="btn-group">
+			<button type="button" class="btn btn-xs btn-default btn-jog-6">6</button>
+			<button type="button" class="btn btn-xs btn-default btn-jog-12">12</button>
+		</div>
+		<button type="button" class="btn btn-md btn-default btn-jog btn-jog-xneg"><span class="glyphicon glyphicon-minus"></span> X</button>
+	</div>
+</div> -->
+
+<!-- Calculator -->
+<div id="strippit-calc">
+
+	<!-- Calculator Value Display -->
+	<div class="well calc-display-well">
+		<h2 class="calc-value"><table><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed calc-val-negpos" >-</span><span class="xyz-intgray xyz-dimmed">000</span><span class="xyz-intblack"></span></td><td><span class="xyz-dimmed">.</span><span class="xyz-decimal xyz-dimmed">000</span></td></tr></table></h2>
+
+		<div class="dro-dim">mm</div>
+	</div>
+
+	<!-- Calculator Buttons -->
+	<div class="calc-buttons">
+		<!-- Calc Btn Column 1 -->
+		<div class="column-1">
+
+			<span class="btn btn-md btn-default" btn-signal="function" btn-data="clear">CE</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="7">7</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="4">4</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="1">1</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="0">0</span>
+
+		</div>
+
+		<!-- Calc Btn Column 2 -->
+		<div class="column-2">
+
+			<span class="btn btn-md btn-default" btn-signal="function" btn-data="plusminus">+/-</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="8">8</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="5">5</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="2">2</span>
+			<span class="btn btn-md btn-default" btn-signal="function" btn-data="decimal">.</span>
+
+		</div>
+
+		<!-- Calc Btn Column 3 -->
+		<div class="column-3">
+
+			<span class="btn btn-md btn-default btn-backspace" btn-signal="function" btn-data="backspace">
+				<span class="glyphicon glyphicon-arrow-left"></span>
+			</span>
+
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="9">9</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="6">6</span>
+			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="3">3</span>
+			<span class="btn btn-md btn-default btn-unavailable" btn-signal="function" btn-data="equal">=</span>
+
+		</div>
+
+		<!-- Calc Btn Column 4 -->
+		<!-- <div class="column-4 hidden">
+
+			<div class="btn-group recall-btns">
+				<span class="btn btn-sm btn-default btn-recal-x btn-unavailable" btn-signal="function" btn-data="recall-x"><span class="glyphicon glyphicon-open"></span> X</span>
+				<span class="btn btn-sm btn-default btn-recal-y btn-unavailable" btn-signal="function" btn-data="recall-y"><span class="glyphicon glyphicon-open"></span> Y</span>
+			</div>
+
+			<span class="btn btn-md btn-default btn-divide btn-unavailable" btn-signal="function" btn-data="divide">
+				<span class="badge">/</span>
+			</span>
+
+			<span class="btn btn-md btn-default btn-multiply btn-unavailable" btn-signal="function" btn-data="multiply">
+				<span class="glyphicon glyphicon-remove-sign"></span>
+			</span>
+
+			<span class="btn btn-md btn-default btn-subtract btn-unavailable" btn-signal="function" btn-data="subtract">
+				<span class="glyphicon glyphicon-minus-sign"></span>
+			</span>
+
+			<span class="btn btn-md btn-default btn-add btn-unavailable" btn-signal="function" btn-data="add">
+				<span class="glyphicon glyphicon-plus-sign"></span>
+			</span>
+
+		</div> -->
+	</div>
 </div>
