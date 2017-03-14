@@ -243,18 +243,18 @@ return { // eslint-disable-line indent
 		let updateUnit = false;
 
 		// If the data includes position info, update the stored position in the widget.
-		if (Data && Data.sr && typeof Data.sr.posx !== 'undefined') {
+		if (Data && Data.sr && typeof Data.sr.posz !== 'undefined') {
 			console.log('Got x-axis postion update.');
 			updateDRO = true;
 
-			this.machPosition.x = Data.sr.posx;
+			this.machPosition.x = Data.sr.posz;
 
 		// Get this when a getting a response from a status report request.
-		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posx !== 'undefined') {
+		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posz !== 'undefined') {
 			console.log('Got x-axis postion update.');
 			updateDRO = true;
 
-			this.machPosition.x = Data.r.sr.posx;
+			this.machPosition.x = Data.r.sr.posz;
 		}
 
 		// If the data includes position info, update the stored position in the widget.
@@ -555,7 +555,9 @@ return { // eslint-disable-line indent
 		if (value === '' || value === '-') return false;
 
 		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;
-		const Msg = `g0 ${axis}${position}`;
+
+		// Note that the z-axis is used instead of the x-axis.
+		const Msg = `g0 ${axis === 'x' ? 'z' : axis}${position}`;
 
 		publish('/connection-widget/port-sendjson', port, { Msg });
 
@@ -630,8 +632,8 @@ return { // eslint-disable-line indent
 			// If this is an invalid update, skip the update.
 			if (this.savedPos[pos - 1] === null) return false;
 
-			// Send move command to the device on the SPJS to move to the saved position.
-			const Msg = `g0 x${this.savedPos[pos - 1]}`;
+			// Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis).
+			const Msg = `g0 z${this.savedPos[pos - 1]}`;
 			publish('/connection-widget/port-sendjson', port, { Msg });
 
 			// If another position slot is active, deactivate the currently active position slot.
