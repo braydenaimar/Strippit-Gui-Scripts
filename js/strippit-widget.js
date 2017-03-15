@@ -1,7 +1,3 @@
-// Strippit Widget JavaScript
-
-define([ 'jquery' ], function ($) {
-return { // eslint-disable-line indent
 /**
  *   ____  _        _             _ _    __        ___     _            _         _                  ____            _       _
  *  / ___|| |_ _ __(_)_ __  _ __ (_) |_  \ \      / (_) __| | __ _  ___| |_      | | __ ___   ____ _/ ___|  ___ _ __(_)_ __ | |_
