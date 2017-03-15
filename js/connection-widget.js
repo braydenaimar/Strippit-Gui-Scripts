@@ -1,8 +1,27 @@
-/* Connection Widget JavaScript */
-/* eslint-disable no-unused-vars */
+/**
+ *    ____                            _   _              __        ___     _            _         _                  ____            _       _
+ *   / ___|___  _ __  _ __   ___  ___| |_(_) ___  _ __   \ \      / (_) __| | __ _  ___| |_      | | __ ___   ____ _/ ___|  ___ _ __(_)_ __ | |_
+ *  | |   / _ \| '_ \| '_ \ / _ \/ __| __| |/ _ \| '_ \   \ \ /\ / /| |/ _` |/ _` |/ _ \ __|  _  | |/ _` \ \ / / _` \___ \ / __| '__| | '_ \| __|
+ *  | |__| (_) | | | | | | |  __/ (__| |_| | (_) | | | |   \ V  V / | | (_| | (_| |  __/ |_  | |_| | (_| |\ V / (_| |___) | (__| |  | | |_) | |_
+ *   \____\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|    \_/\_/  |_|\__,_|\__, |\___|\__|  \___/ \__,_| \_/ \__,_|____/ \___|_|  |_| .__/ \__|
+ *                                                                           |___/                                                    |_|
+ *
+ *  @author Brayden Aimar
+ */
 
-define([ 'jquery' ], function ($) {
-return { // eslint-disable-line indent
+/* eslint-disable padded-blocks */
+/* eslint-disable quote-props */
+/* eslint-disable no-unused-vars */
+/* eslint-disable object-shorthand */
+/* eslint-disable prefer-const */
+/* eslint-disable no-console */
+/* eslint-disable func-names */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-continue */
+
+
+define([ 'jquery' ], $ => ({
+
 	// id - must match the widget name (the name given to this file).
 	id: 'connection-widget',
 	// name - The moniker that appears in the top left-hand corner ow the app.
@@ -75,18 +94,31 @@ return { // eslint-disable-line indent
 		// Ex. ["COM5", "COM10"]
 		openPorts: [],
 		launchGpioServerOnLinux: false,
-		// Sets the time (msec) that the program will wait between attempting to connect to the WebSocket.
-		// If wsPollReconnect has a value of 'null', no auto reconnection attempts will be made.
 		// NOTE: Loaded by cson file.
+		/**
+		 *  Sets the time (msec) that the program will wait between attempting to connect to the WebSocket.
+		 *  If wsReconnectDelay has a value of 0, no auto reconnection attempts will be made.
+		 *
+		 *  @type {number}
+		 */
 		wsReconnectDelay: 2000,
-		// Sets if a new spjs is launched after an exit command is issued to the current spjs. If false, a new spjs may be launched based on the setting of wsReconnectDelay.
+		/**
+		 *  Sets if a new spjs is launched after an exit command is issued to the current spjs.
+		 *  If false, a new spjs may be launched based on the setting of wsReconnectDelay.
+		 *
+		 *  @type {Boolean}
+		 */
 		wsReconnectOnExitCmd: true,
-		// Sets the time (msec) that the program will wait between getting the port list when there are no available ports.
-		// If requestListDelay has a value of 'null', no automatic list requests will be sent.
-		// Use a value greater than approx 500ms to ensure the stability of the program.
 		// NOTE: Loaded by cson file.
-		requestListDelay: null,
-		// requestListDelay: 4000,
+		/**
+		 *  Sets the time (msec) that the program will wait between getting the port list when there are no available ports.
+		 *  If requestListDelay has a value of 0, no automatic list requests will be sent.
+		 *  Use a value greater than approx 500ms to ensure the stability of the program.
+		 *
+		 *  @type {number}
+		 */
+		requestListDelay: 4000,
+		// requestListDelay: null,
 		// NOTE: Loaded by cson file.
 		exitUntrustedSpjs: true,
 		// Keep track of how many commands are in the SPJS queue.
@@ -98,7 +130,19 @@ return { // eslint-disable-line indent
 		// The number of lines queued in the SPJS buffer below which sending of buffered instructions will be resumed.
 		resumeOnQueueCount: 700,
 		// The maximum number of instructions that can be sent to the SPJS at a time.
-		maxLinesAtATime: 100
+		maxLinesAtATime: 100,
+		/**
+		 *  The time (milliseconds) that is waited before sending a queue flush command to a device after the feedstop command.
+		 *
+		 *  @type {number}
+		 */
+		waitQueueFlushOnFeedstop: 2000,
+		/**
+		 *  The time (milliseconds) that is waited before sending a cycle resume command to a device after the queue flush command.
+		 *
+		 *  @type {number}
+		 */
+		waitCycleResumeOnFeedstop: 500
 	},
 
 	// TODO: Restructure the deviceMeta object.
@@ -209,7 +253,7 @@ return { // eslint-disable-line indent
 			useReceivedFriendly: true,
 			autoConnectPort: false,
 			portMuted: false,
-			lineEnding: 'CRLF',
+			lineEnding: 'CRLF', // Defines that both carriage-return and line-feed characters must be added to messages sent to this device.
 			VidPids: [
 				{ Vid: '2047', Pid: '0013' }
 			]
@@ -321,10 +365,21 @@ return { // eslint-disable-line indent
 		maxLineLimit: 500,
 		// Specifies the minimum number of lines to be displayed in the console log.
 		// NOTE: Loaded by cson file.
-		minLineLimit: 250,
-		// Sets the time limit (ms) that an active command in the console log can prevent other commands of the same type from being set.
+		minLineLimit: 300,
 		// NOTE: Loaded by cson file.
+		/**
+		 *  Sets the time limit (ms) that an active command in the console log can be verified.
+		 *  To prevent messages from being marked as stale, set this to 0.
+		 *
+		 *  @type {number}
+		 */
 		staleCmdLimit: 30000,
+		/**
+		 *  Sets the time limit (ms) that an active command in the console log can prevent other commands of the same type from being set.
+		 *  To prevent messages from being marked as stale, set this to 0.
+		 *
+		 *  @type {number}
+		 */
 		staleListCmdLimit: 5000,
 		// Sets the number of digits that will be displayed by default. If the line number exceeds this, the number of digits used will be increased.
 		// NOTE: Loaded by cson file.
@@ -335,13 +390,19 @@ return { // eslint-disable-line indent
 		// Set to null for no limit.
 		// errorCmdOnSpjsCloseMaxAge: 5000,
 		errorCmdOnSpjsCloseMaxAge: null,
-		// The maximum age of a command in the Spjs that can be assigned the status 'sent'.
+		/**
+		 *  The maximum age of a command in the Spjs that can be assigned the status 'sent'.
+		 *  To prevent messages from being marked as stale, set this to 0.
+		 *
+		 *  @type {number}
+		 */
 		sentSpjsCmdMaxAge: 10000,
 		// Sets if the time to verify a given command is added beside the command in the console log as a comment.
 		// NOTE: Loaded by cson file.
 		commentTimeToVerify: true,
 		// Add a comment to every command to show it's id. Very useful for debugging.
 		commentCmdId: true,
+
 		// Set the default line ending to be used for messages sent to ports on the SPJS. This is over-ridden by lineEnding inside each port's respective deviceMeta object.
 		//  NONE: No line ending characters are added to port messages.
 		//  CR: Add a carriage-return character '\r'.
@@ -364,12 +425,12 @@ return { // eslint-disable-line indent
 			cmdMap: [],
 			// The verifyMap object stores the index of all command messages in the logData object that still need to be verified.
 			verifyMap: [],
-			// TODO: Remove this.
-			msgCount: 0,
 			// Using lineCount to keep track of how many lines are in the console log and is used to make unique id for SPJS commands.
 			lineCount: 0,
 			// value [string] - Stores the most recent information in the respective port's <input> element. Used to fill in the text field when switching between console log tabs.
 			value: '',
+			// logPanelDOM - Store the JQuery DOM reference to the console log panel.
+			logPanelDOM: $('#connection-widget .console-log-panel .log-SPJS'),
 			// inputStatus [string] - Stores the most recent status of the respective port's <input> element. Used to correctly hilite the input field when switching between console log tabs.
 			inputStatus: null,
 			cmdCount: 0,
@@ -388,7 +449,7 @@ return { // eslint-disable-line indent
 			// logHtml: []
 			// NOTE: Loaded by cson file.
 			msgShow: {
-				'default': true,
+				default: true,
 				stdout: true,
 				stderr: true,
 				Version: true,
@@ -419,10 +480,12 @@ return { // eslint-disable-line indent
 			}
 		},
 		// Add 'samp' to use a samp DOM tag, default is 'code'.
+		// The <samp> tag has no background.
+		// The <code> tag has hilited background.
 		// NOTE: Loaded by cson file.
 		style: {
 			lineWrap: false,
-			'default': 'text-default',
+			default: 'text-default',
 			stdout: 'samp text-muted',
 			stderr: 'samp text-muted',
 			Version: 'text-muted',
@@ -447,11 +510,12 @@ return { // eslint-disable-line indent
 			GarbageHeap: 'text-muted',
 			ExecRuntimeStatus: 'text-muted',
 			ExecStatus: 'text-muted',
-			SpjsCommand: 'text-default',	// A command sent to the spjs that is placed in the respective port's log.
+			SpjsCommand: 'text-default', // A command sent to the spjs that is placed in the respective port's log.
 			Command: 'samp text-default',
 			MdiCommand: 'samp hilite-blue',	// A command that origionated at the text input field.
 			CmdComment: 'samp text-muted',
-			CommandEcho: 'text-default'
+			CommandEcho: 'text-default',
+			LogBot: 'samp text-muted' // Messages that are create by the console log to provide the user with information on important log events.
 		},
 		// Command Verification Steps:
 		// 1. Sent - Your Gcode has been sent to the SPJS.
@@ -476,7 +540,7 @@ return { // eslint-disable-line indent
 		// Used to create the msgShow object in each port's consoleLog object.
 		// NOTE: Loaded by cson file.
 		msgShowDefault: {
-			'default': true,
+			default: true,
 			Open: true,
 			OpenFail: true,
 			Close: true,
@@ -493,7 +557,7 @@ return { // eslint-disable-line indent
 			Command: true,
 			MdiCommand: true
 		},
-		appendMsg(port, { Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta }) {
+		appendMsg: function (port, { Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta }) {
 			// This method gets called when a message is received from the SPJS and ports on the SPJS.
 			// If Id is provided, it will be used for the message's id.
 			// If Id is omitted but IdPrefix is provided, a new id based on the IdPrefix, port number, and line number will be created.
@@ -506,23 +570,31 @@ return { // eslint-disable-line indent
 
 			} else if (typeof Msg == 'undefined') {
 				// console.log('Aborted the append message method because the Msg argument was omitted.');
-				throw 'Aborted the append message method because the Msg argument was omitted.';
+				throw new Error('Aborted the append message method because the Msg argument was omitted.');
 
-			} else if (typeof Msg === 'object') {
+			} else if (typeof Msg == 'object') {
+
 				// console.warn(`The append message method got called with a message that is an object.\nMessage: ${Msg}\nParsed Message: ${JSON.stringify(Msg, null, ' ')}`);
 				Msg = JSON.stringify(Msg, null, ' ').replace(/\}$/, ' \}');
+
 			}
 
 			// Check that the Type argument is valid.
 			if (typeof Type == 'undefined' || typeof this.style[Type] == 'undefined') {
+
 				console.error('The append message method received a bad Type argument. Using default.\n  Type:', Type);
+
 				Type = 'default';
+
 			}
 
 			// Prevent any messages containing '<' or '>' because these can mess with the console log DOM structure.
 			if (/[<>]/.test(Msg)) {
+
 				if (Type === 'stdout' || Type === 'stderr') console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
+
 				Msg = Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;');
+
 			}
 
 			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw 'The port argument was not passed properly.';
@@ -537,7 +609,7 @@ return { // eslint-disable-line indent
 				Related = { Port: Related };
 
 			// This should not be needed becuse if there is just a single related command, the id of the command in the spjs will be the same as that of the related command.
-			} else if (Related && Related.Id && typeof Related.Id === 'string') {
+			} else if (Related && Related.Id && typeof Related.Id == 'string') {
 				Related.Id = [ `${Related.Id}` ];
 
 			}
@@ -548,6 +620,7 @@ return { // eslint-disable-line indent
 
 			// If the message is a command.
 			if (Type === 'Command' || Type === 'MdiCommand') {
+
 				console.groupCollapsed(`Append: ${Msg}`);
 
 				// Make the id.
@@ -559,85 +632,62 @@ return { // eslint-disable-line indent
 				}
 
 				if (this.commentCmdId) {
-					Comment = Comment ? `${Comment} [${Id}]`: `[${Id}]`;
+					Comment = Comment ? `${Comment} [${Id}]` : `[${Id}]`;
 				}
 
 				// Turn the Meta argument into an array.
-				Meta = (typeof Meta === 'string') ? Meta.split(' ') : Meta;
+				Meta = (typeof Meta == 'string') ? Meta.split(' ') : Meta;
 
 				// Add the command data to this port's logData object.
 				logLength = this[port].logData.push({ Msg, Id, Line, Type, Status, Comment, Related, Meta, Time: Date.now() });
+
 				this[port].cmdMap.push(logLength - 1);
+
 				console.log(`Pushed onto cmdMap: ${this[port].cmdMap}`);
 				console.table(this[port].logData);
 
 				// If the command is not already verified, add it to the verifyBuffer object.
 				// if (Status !== 'Executed' && Status !== 'Error' && !(Status === 'Completed' && Meta.includes('NumberedGCode')))
 				if (this.verifyPrecidence.indexOf(Status) < this.verifyPrecidence.indexOf('Completed')) {
+
 					this[port].verifyMap.push(logLength - 1);
+
 					console.log(`Pushed onto verifyMap: ${this[port].verifyMap}`);
+
 				}
-
-			// If the message is not a command.
-			} else {
-				// Add the message data to this port's logData object.
-				logLength = this[port].logData.push({ Msg, Type, Line });
-			}
-
-			// If the style object says that this message should not be shown, abort this method.
-			// if (!this[port].msgShow[Type]) return Id;
-			if (!this[port].msgShow[Type]) return (Type === 'Command' || Type === 'MdiCommand') ? Id : false;
-
-			// JQuery reference to the console log panel.
-			const logPanel = $(`#connection-widget .console-log-panel .log-${port}`);
-
-			const prefixZeros = (Line.toString().length > this.minLineNumberDigits) ? 0 : this.minLineNumberDigits - Line.toString().length;
-			const domLineNumber = '0'.repeat(prefixZeros) + Line;
-
-			const domTag = (this.style[Type].includes('samp')) ? 'samp':'code';
-			const domClass = ((port === 'SPJS') ? (this.style.lineWrap ? '' : 'text-nowrap ') : (this.style.lineWrap ? 'text-prewrap ':'text-pre ')) + this.style[Type].replace('samp ', '');
-			const domMsg = Msg.replace(/\n/g, '').replace(/\r/g, '').replace(/\\"/g, '\"');
-
-			// Build DOM element for the line number and left margin.
-			let msgHtml = `<span class="text-muted" style="font-size: 8px; margin-right: ${(Type === 'Command' || Type === 'MdiCommand') ? '3px':'19px'}; margin-left: 0px;">${domLineNumber}</span>`;
-
-			// Build DOM elements for command message.
-			if (Type === 'Command' || Type === 'MdiCommand') {
-				console.log(`Port: ${port}\nMsg: ${Msg}\nType: ${Type}\nId: ${Id}\nStatus: ${Status}\nMeta: ${Meta}\nComment: ${Comment}\n${ Related ? (Related.Port ? `\nRelated Port: ${Related.Port}` : '') + (Related.Id ? `\nRelated Id: ${CSON.stringify(Related.Id)}` : '') : '' }`);
-				console.log('logData:', this[port].logData, '\ncmdMap:', this[port].cmdMap, '\nverifyMap:', this[port].verifyMap);
-
-				const domCommentTag = (this.style.CmdComment.includes('samp')) ? 'samp':'code';
-				const domCommentClass = ((this.style.lineWrap) ? 'text-pre ':'text-prewrap ') + this.style.CmdComment.replace('samp ', '');
-				const domComment = Comment;
-
-				msgHtml += `<span class="fa fa-check fa-fw verify-mark ${Id} ${this.verifyStyle[Status]}" style="font-size: 10px; margin-right: 3px;"></span>`;
-				msgHtml += `<${domTag} class="cmd ${domClass}">${domMsg}</${domTag}>`;
-				msgHtml += `<${domCommentTag} class="cmd-comment ${Id} ${domCommentClass}" style="margin-left: 6px;">${domComment}</${domCommentTag}><br>`;
 
 				console.groupEnd();
 
-			// Build DOM elements for message.
+			// If the message is not a command, append the message data to this port's logData object.
 			} else {
-				msgHtml += `<${domTag} class="${domClass}">${domMsg}</${domTag}><br />`;
+
+				logLength = this[port].logData.push({ Msg, Type, Line });
+
 			}
 
-			// If the console log is longer than the limit, reduce the length of the log.
-			if (logLength > this.maxLineLimit) {
-				this.truncateLog(port);
-			}
+			// JQuery reference to the console log panel.
+			const logPanel = this[port].logPanelDOM;
+
+			const logItem = this[port].logData[logLength - 1];
+
+			// Append the message or command onto the end of the respective port's log.
+			const msgHTML = this.buildMsgHTML(port, logItem);
 
 			// Add the message to the bottom the the console log.
-			logPanel.append(msgHtml);
+			logPanel.append(msgHTML);
 
 			// Scroll to bottom of console log.
 			logPanel.scrollTop(logPanel.prop('scrollHeight'));
 
-			// Return the Id used for this command so that it can be used for related messages on other port's logs.
-			if (Type === 'Command' || Type === 'MdiCommand') {
-				// this.updateCmd(port, { Index: logLength - 1, Comment: Id, UpdateRelated: false });
+			// If the console log is longer than the limit, reduce the length of the log.
+			if (this[port].logData.length > this.maxLineLimit) {
 
-				// logLength = this[port].logData.push({ Msg, Id, Type, Status, Meta, Comment, Related, Line, Time: Date.now() });
-				const logItem = this[port].logData[logLength - 1];
+				this.truncateLog(port);
+
+			}
+
+			// Return the data that was just appended to the log.
+			if (Type === 'Command' || Type === 'MdiCommand') {
 
 				return {
 					cmdMsg: logItem.Msg,
@@ -653,19 +703,121 @@ return { // eslint-disable-line indent
 			}
 
 			return true;
-			// return (Type === 'Command' || Type === 'MdiCommand') ? Id : true;
 
 		},
-		truncateLog(port) {
-			// console.log(`Truncate the '${port}' log.`);
+		buildMsgHTML: function (port, { Msg, Id, Line, IdPrefix, Type, Status, Comment, Related, Meta }) {
+
+			// If the style object says that this message should not be shown, abort this method.
+			if (!this[port].msgShow[Type]) return false;
+
+			// JQuery reference to the console log panel.
+			const logPanel = this[port].logPanelDOM;
+
+			const prefixZeros = (Line.toString().length > this.minLineNumberDigits) ? 0 : this.minLineNumberDigits - Line.toString().length;
+			const domLineNumber = '0'.repeat(prefixZeros) + Line;
+
+			const domTag = (this.style[Type].includes('samp')) ? 'samp' : 'code';
+			const domClass = ((port === 'SPJS') ? (this.style.lineWrap ? '' : 'text-nowrap ') : (this.style.lineWrap ? 'text-prewrap ' : 'text-pre ')) + this.style[Type].replace('samp ', '');
+			const domMsg = Msg.replace(/\n/g, '').replace(/\r/g, '').replace(/\\"/g, '\"');
+
+			// Build DOM element for the line number and left margin.
+			let msgHTML = `<span class="text-muted" style="font-size: 8px; margin-right: ${(Type === 'Command' || Type === 'MdiCommand') ? '3px':'19px'}; margin-left: 0px;">${domLineNumber}</span>`;
+
+			// If this is a command, build DOM elements for command.
+			if (Type === 'Command' || Type === 'MdiCommand') {
+
+				// console.log(`Port: ${port}\nMsg: ${Msg}\nType: ${Type}\nId: ${Id}\nStatus: ${Status}\nMeta: ${Meta}\nComment: ${Comment}\n${ Related ? (Related.Port ? `\nRelated Port: ${Related.Port}` : '') + (Related.Id ? `\nRelated Id: ${CSON.stringify(Related.Id)}` : '') : '' }`);
+
+				const domCommentTag = (this.style.CmdComment.includes('samp')) ? 'samp' : 'code';
+				const domCommentClass = ((this.style.lineWrap) ? 'text-pre ' : 'text-prewrap ') + this.style.CmdComment.replace('samp ', '');
+				const domComment = Comment;
+
+				msgHTML += `<span class="fa fa-check fa-fw verify-mark ${Id} ${this.verifyStyle[Status]}" style="font-size: 10px; margin-right: 3px;"></span>`;
+				msgHTML += `<${domTag} class="cmd ${domClass}">${domMsg}</${domTag}>`;
+				msgHTML += `<${domCommentTag} class="cmd-comment ${Id} ${domCommentClass}" style="margin-left: 6px;">${domComment}</${domCommentTag}><br>`;
+
+			// If this is a message and not a command, build DOM elements for message.
+			} else {
+				msgHTML += `<${domTag} class="${domClass}">${domMsg}</${domTag}><br />`;
+
+			}
+
+			return msgHTML;
+
+		},
+		truncateLog: function (port) {
 
 			// Have to re-assign index values in the cmdMap and verifyMap objects to point to new locations of items in the logData object and remove pointers to items that have been truncated.
 			// Re-build the port's log using this.buildLog(port).
+
+			// If the port argument is not valid, throw an error.
+			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw 'The port argument is invalid.';
+
+			const { maxLineLimit, minLineLimit } = this;
+			const { logData, cmdMap, verifyMap } = this[port];
+			const logLength = logData.length;
+
+			// If the port is not exceeding the maximum length, abort this method.
+			if (logLength <= maxLineLimit) return false;
+
+			console.log(`Truncating the '${port}' log.`);
+
+			const deleteCount = logLength - minLineLimit;
+
+			// Truncate the log to the minLineLimit.
+			const removedData = this[port].logData.splice(0, deleteCount);
+
+			let newCmdMap = [];
+			let newVerifyMap = [];
+
+			// Build the new cmdMap array.
+			for (let i = 0; i < cmdMap.length; i++) {
+
+				// If the element points to data that was truncated, do nothing with the element.
+				if (cmdMap[i] < deleteCount) continue;
+
+				newCmdMap.push(cmdMap[i] - deleteCount);
+
+			}
+
+			// Build the new verifyMap array.
+			for (let i = 0; i < verifyMap.length; i++) {
+
+				// If the element points to data that was truncated, do nothing with the element.
+				if (verifyMap[i] < deleteCount) continue;
+
+				newVerifyMap.push(verifyMap[i] - deleteCount);
+
+			}
+
+			this[port].cmdMap = newCmdMap;
+			this[port].verifyMap = newVerifyMap;
+
+			this.rebuildLog(port);
+
+			return true;
+
 		},
-		buildLog(port) {
+		rebuildLog: function (port) {
+
 			console.log(`Build the '${port}' log.`);
+
+			const { logData, logPanelDOM } = this[port];
+
+			let panelHTML = '';
+
+			for (let i = 0; i < logData.length; i++) {
+
+				panelHTML += this.buildMsgHTML(port, logData[i]);
+
+			}
+
+			logPanelDOM.html(panelHTML);
+
+			return true;
+
 		},
-		makeRegExpSafe(str) {
+		makeRegExpSafe: function (str) {
 			console.log(`String: ${str}`);
 
 			let safeString = '';
@@ -684,8 +836,9 @@ return { // eslint-disable-line indent
 			console.log(`safeString: ${safeString}`);
 
 			return safeString;
+
 		},
-		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
+		checkMatchItem: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
 			// The checkMatchItem method checks for a match between an item in the log and given search criteria.
 
 			console.log('LogItem: %O', LogItem);
@@ -739,7 +892,7 @@ return { // eslint-disable-line indent
 
 			return true;
 		},
-		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0 }) {
+		findItem: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0, SearchBackwards = false }) {
 			// Return logData item of matched command within the specified search space.
 			// Defaults to searching entire logData object, use IndexMap to narrow that search.
 			// Arg. IndexMap [array] (optional) - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
@@ -749,17 +902,18 @@ return { // eslint-disable-line indent
 			const that = this;
 
 			if (typeof IndexMap == 'undefined' && typeof Index == 'undefined') {
-				throw 'IndexMap is undefined.';
 
+				throw new Error('IndexMap is undefined.');
 				// IndexMap = this[port].cmdMap;
 
 			}
 
 			let matchFound = false;
 			let matchIndex = Index;
+
+			const { logData } = this[port];
 			const dataRef = typeof Msg != 'undefined' ? 'Msg' : (typeof PartMsg != 'undefined' ? 'PartMsg' : (typeof Length != 'undefined' ? 'Length' : (typeof Id != 'undefined' ? 'Id' : (typeof Line !== 'undefined' ? 'Line' : 'Type'))));
 			const data = arguments[1][dataRef];
-			const { logData } = this[port];
 
 			console.groupCollapsed(`Find - ${dataRef}: ${data}`);
 
@@ -804,12 +958,13 @@ return { // eslint-disable-line indent
 				matchFound = true;
 
 			// If the Index argument was omitted, search the port's console log for a match.
-			} else if (SearchFrom >= 0) {
+			} else if (!SearchBackwards) {
 
 				console.log('Searching forwards through the log for a match (ie. old to recent).');
 
 				let init = 0;
 
+				// Iterate through the IndexMap and figure out at what element of IndexMap should be used to strar searching for a match from.
 				for (let i = 0; i < IndexMap.Length; i++) {
 
 					if (IndexMap[i] >= SearchFrom) {
@@ -817,13 +972,6 @@ return { // eslint-disable-line indent
 						break;
 
 					}
-
-				}
-
-				if (init < SearchFrom) {
-					console.groupEnd();
-
-					return { matchFound };
 
 				}
 
@@ -847,12 +995,12 @@ return { // eslint-disable-line indent
 				}
 
 			// Search backwards through the log for a match (ie. recent to old).
-			} else if (SearchFrom < 0) {
+			} else {
 
 				console.log('Searching backwards through the log for a match (ie. recent to old).');
 
 				let init = IndexMap.length - 1;
-				const refIndex = logData.length + SearchFrom;
+				const refIndex = SearchFrom;
 
 				// Iterate through log items to set the initial index.
 				for (let i = IndexMap.length - 1; i >= 0; i--) {
@@ -862,13 +1010,6 @@ return { // eslint-disable-line indent
 						break;
 
 					}
-
-				}
-
-				if (init >= SearchFrom) {
-					console.groupEnd();
-
-					return { matchFound };
 
 				}
 
@@ -920,7 +1061,7 @@ return { // eslint-disable-line indent
 
 			return { matchFound };
 		},
-		updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, Status, Comment, PrevComment = 'left', UpdateRelated }) {
+		updateCmd: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards = false, Status, Comment, PrevComment = 'left', UpdateRelated }) {
 			// This method updates the status of commands in the SPJS console log.
 			// Matches to command data can be partial and are not cose sensitive but matches to command id's have to be exact.
 			// Arg. port - Specifies the console log (eg. "SPJS" or "COM7").
@@ -932,50 +1073,52 @@ return { // eslint-disable-line indent
 			//   Default: If port is SPJS - true. Otherwise - false.
 
 			if (typeof this[port] == 'undefined') {
-				throw `The consoleLog.${port} object is undefined.`;
+				throw new Error(`The consoleLog.${port} object is undefined.`);
 				// return { matchFound: false };
 			}
 
 			if (!Status && typeof Comment == 'undefined') {
-				throw 'No Update Requested. Aborting update';
+				throw new Error('No Update Requested. Aborting update');
 				// return { matchFound: false };
 			}
 
-			console.groupCollapsed(`${port}${ Comment ? ` - Comment: '${Comment}'` : '' }${ Status ? ` - Status: ${Status}` : '' } - ${ Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`))))) }`);
+			console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`))))) }`);
 			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
 			console.log(CSON.stringify(arguments));
 
 			const { cmdMap, verifyMap, logData } = this[port];
 
 			// Use verifyMap if doing a status update other than warning or error.
-			if (IndexMap === undefined && Status && Status !== 'Warning' && Status !== 'Error') {
+			if (typeof IndexMap == 'undefined' && Status && Status !== 'Warning' && Status !== 'Error') {
 				IndexMap = verifyMap;
 
-			} else if (IndexMap === undefined) {
+			} else if (typeof IndexMap == 'undefined') {
 				IndexMap = cmdMap;
 			}
 
-			if (SearchFrom === undefined && (Status === 'Warning' || Status === 'Error')) {
-				SearchFrom = 1 - cmdMap.length;
+			if (typeof SearchFrom == 'undefined' && (Status === 'Warning' || Status === 'Error')) {
+				SearchFrom = IndexMap[IndexMap.length - 1];
+				SearchBackwards = true;
 
-			} else if (SearchFrom === undefined) {
+			} else if (typeof SearchFrom == 'undefined') {
 				SearchFrom = 0;
 			}
 
-			if (UpdateRelated === undefined && port === 'SPJS') {
+			if (typeof UpdateRelated == 'undefined' && port === 'SPJS') {
 				UpdateRelated = true;
 
-			} else if (UpdateRelated === undefined) {
+			} else if (typeof UpdateRelated == 'undefined') {
 				UpdateRelated = false;
+
 			}
 
 			// Check if command is in this port's verify buffer.
 			// const matchItem = this.findItem(port, { Msg, PartMsg, Id, Index, IndexMap: this[port].verifyMap });
-			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom });
+			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards });
 
 			console.log('matchFound:', matchFound, '\nmatchIndex:', matchIndex, '\nmatchMsg:', matchMsg, '\nmatchId:', matchId, '\nmatchLine:', matchLine, '\nmatchType:', matchType, '\nmatchStatus:', matchStatus, '\nmatchComment:', matchComment, '\nmatchRelated:', matchRelated, '\nmatchMeta:', matchMeta, '\nmatchTime:', matchTime);
 
-			if (matchIndex === undefined) {
+			if (typeof matchIndex == 'undefined') {
 				console.log('No Match Found. Aborting update.');
 				console.groupEnd();
 				return { matchFound };
@@ -1024,7 +1167,7 @@ return { // eslint-disable-line indent
 
 								}
 
-								timeComment = `${timeStr[i]}${timeComment}`;
+								timeComment = `${timeStr[(timeStr.length - i) - 1]}${timeComment}`;
 
 							}
 
@@ -1044,6 +1187,8 @@ return { // eslint-disable-line indent
 
 					console.log('  cmdMap:', this[port].cmdMap, '\n  verifyMap:', this[port].verifyMap);
 
+					console.table(this[port].logData);
+
 					// Double check that the item has been removed from the verifyBuffer object.
 					if (bufferLength && this[port].verifyMap.length + 1 === bufferLength) {
 						console.log('Item was removed from the verifyMap.');
@@ -1062,19 +1207,17 @@ return { // eslint-disable-line indent
 			} else if (Status && this.verifyPrecidence.indexOf(matchStatus) >= this.verifyPrecidence.indexOf(Status)) {
 
 				if ((Status === 'Warning' || Status === 'Error') && matchIndex > 0) {
-					console.groupEnd();
 
+					console.groupEnd();
 					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${1 - matchIndex}`);
 
-					// return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: 1 - matchIndexMap.indexOf(matchIndex), Status, Comment, PrevComment, UpdateRelated });
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: 1 - matchIndex, Status, Comment, PrevComment, UpdateRelated });
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex - 1, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated });
 
 				} else if (Status !== 'Warning' && Status !== 'Error' && SearchFrom < logData.length - 1) {
-					console.groupEnd();
 
+					console.groupEnd();
 					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndex + 1}`);
 
-					// return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndexMap.indexOf(matchIndex) + 1, Status, Comment, PrevComment, UpdateRelated });
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex + 1, Status, Comment, PrevComment, UpdateRelated });
 
 				} else {
@@ -1086,6 +1229,7 @@ return { // eslint-disable-line indent
 
 			// If a Comment argument was passed and this is not a redundant update, add the comment to the respective port in the log.
 			if (typeof Comment != 'undefined' && !matchComment.includes(`[${Comment}]`)) {
+
 				console.log('Comment update.');
 
 				// Get the new value of the comment in case the comment was updated by the status update (ie. time to execute/error was added).
@@ -1118,12 +1262,14 @@ return { // eslint-disable-line indent
 			// If this is a redundant comment update, skip the comment update.
 			} else if (Comment && matchComment.includes(`[${Comment}]`)) {
 				console.log('Redundant Comment Update.');
+
 			}
 
 			// Debugging purposes only.
 			// Check that matchRelated has a port.
 			if (matchRelated && !matchRelated.Port) {
-				throw 'matchRelated does not have a port.';
+				throw new Error('matchRelated does not have a port.');
+
 			}
 
 			// If the command has a related command in a port's log, verify that command using the id from the command in the SPJS log.
@@ -1135,11 +1281,9 @@ return { // eslint-disable-line indent
 				if (matchRelated.Id) {
 
 					// Debugging Purposes Only.
-					if (!Array.isArray(matchRelated.Id)) {
-						throw 'matchRelated.Id is not an array.';
-					}
+					if (!Array.isArray(matchRelated.Id)) throw new Error('matchRelated.Id is not an array.');
 
-					// Update each message in the list of id's.
+					// Update each message in the port's console log using Ids in this list of related Ids.
 					for (let i = 0; i < matchRelated.Id.length; i++) {
 						this.updateCmd(matchRelated.Port, { Id: matchRelated.Id[i], Status, Comment, PrevComment, UpdateRelated: false });
 
@@ -1175,9 +1319,11 @@ return { // eslint-disable-line indent
 			};
 
 		}
+
 	},
 
 	initBody: function () {
+
 		console.group(`${this.name}.initBody()`);
 
 		// Only connect to SPJS once all widgets have loaded so that we dont publish any important signals before other widgets have a chance to subscribe to them.
@@ -1195,6 +1341,8 @@ return { // eslint-disable-line indent
 		subscribe(`/${this.id}/port-sendnobuf`, this, this.newportSendNoBuf.bind(this));
 		// Send message directly to SPJS as 'sendjson { P: [port], Data: [{ D: [cmd], Id: [id] }] }' and add it to the respective port's log.
 		subscribe(`/${this.id}/port-sendjson`, this, this.newportSendJson.bind(this));
+		// Sends message to the given port to stop all motion on that device.
+		subscribe(`/${this.id}/port-feedstop`, this, this.portFeedstop.bind(this));
 
 		this.initSettings();
 		// Import the status codes from the 'TinyG_Status_Codes.json' file as an object.
@@ -1203,14 +1351,40 @@ return { // eslint-disable-line indent
 		this.initConsoleInput();
 
 		publish('/main/widget-loaded', this.id);
+
 	},
 	// FIXME: Get the settings from a cson file.
 	initSettings: function () {
 
 		const that = this;
-		console.log('Loading Settings from cson file.');
 
-		console.log('initScripts:', JSON.stringify(this.initScripts));
+		console.log('Loading Settings from CSON file.');
+		// console.log('initScripts:', JSON.stringify(this.initScripts));
+
+		// let SPJS = {};
+		// let consoleLog = {};
+		// let deviceMeta = {};
+		// let defaultDeviceMeta = {};
+		// let initScripts = {};
+		// let connectScripts = {};
+		//
+		// const keys = [ 'spjs', 'consoleLog', 'deviceMeta', 'defaultDeviceMeta', 'initScripts', 'connectScripts' ];
+		//
+		// for (let i = 0; i < keys.length; i++) {
+		//
+		// 	CSON.parseCSONFile(`config/connection-widget_${keys[i]}.cson`, (err, result) => {
+		//
+		// 		console.log('Error:', err, '\nResult:', result);
+		//
+		// 		if (err) return false;
+		//
+		// 		console.log(`Result -${keys[i]}-\n${CSON.stringify(result)}`);
+		//
+		// 		return true;
+		//
+		// 	});
+		//
+		// }
 
 		CSON.parseCSONFile('config/connection-widget_Settings.cson', function (err, result) {
 
@@ -1233,17 +1407,43 @@ return { // eslint-disable-line indent
 			// Object.assign(that.defaultMetaIndex, defaultMetaIndex);
 			// Object.assign(that.initScripts, initScripts);
 
-			that.initScripts = initScripts;
-			that.connectScripts = connectScripts;
+			// that.initScripts = initScripts;
+			// that.connectScripts = connectScripts;
 
 		});
 
-		console.log('SPJS:', this.SPJS);
-		console.log('consoleLog:', this.consoleLog);
-		console.log('deviceMeta:', this.deviceMeta);
-		console.log('defaultMetaIndex:', this.defaultMetaIndex);
-		console.log('initScripts:', this.initScripts);
-		console.log('connectScripts:', this.connectScripts);
+		if (hostMeta.hostName === 'BRAYDENS-LAPTOP') {
+
+			this.SPJS.requestListDelay = null;
+			this.consoleLog.commentCmdId = true;
+
+		}
+
+		console.groupCollapsed('CSON Format');
+		console.log(`SPJS:${CSON.stringify(this.SPJS)}`);
+		console.log(`consoleLog:${CSON.stringify(this.consoleLog)}`);
+		console.log(`deviceMeta:${CSON.stringify(this.deviceMeta)}`);
+		console.log(`defaultMetaIndex:${CSON.stringify(this.defaultMetaIndex)}`);
+		console.log(`initScripts:${CSON.stringify(this.initScripts)}`);
+		console.log(`connectScripts:${CSON.stringify(this.connectScripts)}`);
+		console.groupEnd();
+
+		console.groupCollapsed('JSON Format');
+		console.log(`SPJS:${JSON.stringify(this.SPJS)}`);
+		console.log(`consoleLog:${JSON.stringify(this.consoleLog)}`);
+		console.log(`deviceMeta:${JSON.stringify(this.deviceMeta)}`);
+		console.log(`defaultMetaIndex:${JSON.stringify(this.defaultMetaIndex)}`);
+		console.log(`initScripts:${JSON.stringify(this.initScripts)}`);
+		console.log(`connectScripts:${JSON.stringify(this.connectScripts)}`);
+		console.groupEnd();
+
+		// console.log('SPJS:', this.SPJS);
+		// console.log('consoleLog:', this.consoleLog);
+		// console.log('deviceMeta:', this.deviceMeta);
+		// console.log('defaultMetaIndex:', this.defaultMetaIndex);
+		// console.log('initScripts:', this.initScripts);
+		// console.log('connectScripts:', this.connectScripts);
+
 	},
 	initStatusCodes: function () {
 		// Synchronous file read.
@@ -1663,28 +1863,29 @@ return { // eslint-disable-line indent
 		this.resizeWidgetDom();
 
 		console.groupEnd();
+
 	},
 	onSpjsMessage: function (msg) {
 		// This method receives all messages from the SPJS and sends each message to it's respective method.
 
 		if (msg.match(/^\{/)) {
-			var data = null;
+			let data = null;
 
 			try {
-				// data = $.parseJSON(msg);
 				data = JSON.parse(msg);
-				// console.log('SPJS Recv (json):\n ', data);
-				// console.info('SPJS Recv (json):\n ', data);
+
 				console.info(data);
 
-			} catch(error) {
-				console.log('SPJS Recv (json error):\n  ' + msg);
+			} catch (error) {
+				console.log(`SPJS Recv (json error):\n  ${msg}`);
 
 				this.consoleLog.appendMsg('SPJS', { Msg: msg, Type: 'Error' });
+
 				this.onParseError(msg);
+
 				return false;
+
 			}
-			// TODO: Re-order these condition statements so that they go most common -> least common to increase efficiency.
 
 			if (data.Version) {
 				this.onVersion(data);
@@ -1731,6 +1932,7 @@ return { // eslint-disable-line indent
 
 				} else {
 					this.onQueuedText(data);
+
 				}
 
 				// Update prog bar of buffer as this would decrement prog bar cuz a dequeue happened.
@@ -1773,12 +1975,15 @@ return { // eslint-disable-line indent
 				this.onExecStatus(data);
 
 			} else {
+
 				console.error('Did nothing with JSON.\n  msg: ' + msg + '\n  data:' + gui.parseObject(data, 4));
 
 				this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
+
 			}
 
 		} else if (msg.match(/We could not find the serial port/)) {
+
 			console.error('SPJS Recv (error):\n  ' + msg);
 			console.error('SPJS -Port Not Found-');
 
@@ -1786,21 +1991,26 @@ return { // eslint-disable-line indent
 
 		// If this msg is an echo of a spjs (aka. non port specific) message, mark the message in the spjs log as received.
 		} else {
+
 			// const matchId = this.logCmdStatus('SPJS', {Cmd: msg}, 'Sent');
-			const matchItem = this.consoleLog.updateCmd('SPJS', { Msg: msg, Status: 'Sent' });
-			const { matchId, matchRelated } = matchItem;
-			// console.log(`Match Item:`, matchItem);
+			const { matchFound, matchId, matchRelated } = this.consoleLog.updateCmd('SPJS', { Msg: msg, Status: 'Sent' });
 
 			// If this message has a match in the console log, it is a SPJS command echo.
-			const Type = matchId ? 'CommandEcho' : 'default';
+			const Type = matchFound ? 'CommandEcho' : 'default';
+
 			this.consoleLog.appendMsg('SPJS', { Msg: msg, Type });
+
 		}
 	},
 	onSpjsError: function (error) {
+
 		// If the SPJS is already in an 'error' or 'closed' state, skip DOM updates.
-		if (this.SPJS.wsState == 'error' || this.SPJS.wsState == 'closed') {
+		if (this.SPJS.wsState === 'error' || this.SPJS.wsState === 'closed') {
+
 			console.groupEnd();
+
 			return false;
+
 		}
 
 		// console.error('WebSocket -onError-' + gui.parseObject(this.SPJS.ws, 2, { keep: ['url', 'bufferedAmount'] }));
@@ -1812,40 +2022,40 @@ return { // eslint-disable-line indent
 		// console.log('Web Socket -onSpjsError-' + gui.parseObject(this.SPJS.ws, 2, { keep: ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount'] }));
 
 		publish('/statusbar-widget/hilite', 'SPJS', 'danger');
+
 		console.groupEnd();
+
+		return true;
+
 	},
 	// IDEA: If the SPJS does not respond to a restart command, force an exit and launch a new SPJS instance.
 	onSpjsClose: function () {
-		let that = this;
-		// console.log('go:', this.SPJS.go);
+
+		const that = this;
+		const { wsState, wsReconnectDelay, wsReconnectOnExitCmd } = this.SPJS;
+		const { verifyMap, errorCmdOnSpjsCloseMaxAge, staleCmdLimit, staleListCmdLimit } = this.consoleLog.SPJS;
 
 		// If a reconnect delay has been set, attempt to reconnect to the SPJS after that delay.
-		if (this.SPJS.wsReconnectDelay !== null) {
-			setTimeout(function() {
-				that.wsConnect();
-			}, this.SPJS.wsReconnectDelay);
+		if (wsReconnectDelay !== null) {
+
+			setTimeout(() => that.wsConnect(), wsReconnectDelay);
+
 		}
 
-		// If the SPJS is already in a 'closed' state, skip DOM and object updates.
-		if (this.SPJS.wsState == 'closed') {
-			console.groupEnd();
+		// If the SPJS is already in a 'closed' state, launch a new spjs and skip DOM and object updates.
+		if (wsState === 'closed') {
+
 			this.launchSpjs();
-			return false;
-		}
 
-		// If the SPJS was not shut down because of a command, launch a new SPJS.
-		// if (this.logCmdStatus('SPJS', {Cmd: 'exit'}, 'Executed')) {
-		// 	console.log('SPJS was shut down because of a \'exit\' command.');
-		// 	this.launchSpjs();
-		//
-		// } else if (this.logCmdStatus('SPJS', {Cmd: 'restart'}, 'Executed')) {
-		// 	console.log('SPJS was shut down because of a \'restart\' command.');
-		// }
+			return false;
+
+		}
 
 		let { matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'exit', Status: 'Completed' });
 
 		// If the SPJS was closed by an exit command and the wsReconnectOnExitCmd flag is set, launch a new SPJS.
 		if (matchFound) {
+
 			console.log('SPJS was shut down because of a \'exit\' command. ');
 
 			if (this.SPJS.wsReconnectOnExitCmd) {
@@ -1854,45 +2064,51 @@ return { // eslint-disable-line indent
 				this.launchSpjs();
 			}
 
+		}
+
 		// If the SPJS was closed by a restart command, update the command's status in the log and wait for the SPJS to restart.
-		} else {
+		// If that SPJS was not closed by an 'exit' command.
+		if (!matchFound) {
 
-			let { matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Completed' });
+			({ matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Completed' }));
 
-			if (matchFound) {
-				console.log('SPJS was shut down because of a \'restart\' command.');
-			}
+			if (matchFound) console.log('SPJS was shut down because of a \'restart\' command.');
 
 		}
 
-		console.groupCollapsed('WebSocket -onClose-' + gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url', 'bufferedAmount' ] }));
+		console.groupCollapsed(`WebSocket -onClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url', 'bufferedAmount' ] })}`);
 
 		this.SPJS.wsState = 'closed';
 
-		console.log('Web Socket -onSpjsClose-' + gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] }));
+		console.log(`Web Socket -onSpjsClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] })}`);
 
-		console.log('openPorts: ' + gui.parseObject(this.SPJS.openPorts));
-		console.log('openLogs: ' + gui.parseObject(this.consoleLog.openLogs));
-
-		const verifyMap = this.consoleLog.SPJS.verifyMap;
+		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
 		if (verifyMap.length > 0) {
+
+			const timeNow = Date.now();
 
 			for (let i = verifyMap.length - 1; i > 0; i--) {
 				// Only mark commands that are more recent than the errorCmdOnSpjsCloseMaxAge setting.
 				// this.consoleLog.updateCmd('SPJS', { Id: this.consoleLog.SPJS.logData[verifyMap[i]].Id, MaxAge: this.consoleLog.errorCmdOnSpjsCloseMaxAge, Status: 'Error', Comment: 'SPJS Closed' });
 
-				let { matchId, matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Index: verifyMap[i] });
+				const { matchFound, matchMsg, matchId, matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Index: verifyMap[i] });
 
-				if (!matchId) continue;
+				if (!matchFound) continue;
 
-				// If the command is not verified and the spjs is closed, set the message to error.
-				if (this.consoleLog.errorCmdOnSpjsCloseMaxAge === null || matchTime - Date.now() < this.consoleLog.errorCmdOnSpjsCloseMaxAge) {
+				const matchAge = matchTime - timeNow;
+
+				// if (errorCmdOnSpjsCloseMaxAge === null || matchTime - timeNow < errorCmdOnSpjsCloseMaxAge) {
+				// If the message is younger than the maximum age the message can be verified or is the max age is set to zero, give the message a comment of 'SPJS Closed'.
+				if ((matchMsg === 'list' && (!staleCmdLimit || matchAge < staleListCmdLimit)) || (matchMsg !== 'list' && (!staleCmdLimit || matchAge < staleCmdLimit))) {
+
 					this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'SPJS Closed' });
 
-					// If the command is older than the stale command limit, .
-				} else if (this.consoleLog.staleCmdLimit !== null && matchTime - Date.now() > this.consoleLog.staleCmdLimit) {
+				// If the message is stale, mark the message as stale.
+				} else {
+
 					this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
 
 				}
@@ -1902,28 +2118,31 @@ return { // eslint-disable-line indent
 		}
 
 		// Clear the verifyBuffer since any commands still not executed will not be able to execute now that the SPJS has disconnected/closed.
-		// TODO: remove verifyBuffer stuff.
 		this.consoleLog.SPJS.verifyBuffer = [];
 		this.consoleLog.SPJS.cmdMap = [];
 		this.consoleLog.SPJS.verifyMap = [];
 
+		// Hilite the SPJS status indicator in the statusbar red.
 		publish('/statusbar-widget/hilite', 'SPJS', 'danger');
 
+		// Close the console logs of any open ports.
 		this.portDisconnected(this.consoleLog.openLogs);
+
+		// Remove the port status indicators in the statusbar.
 		publish('/statusbar-widget/remove', this.SPJS.openPorts);
 
 		this.SPJS.openPorts = [];
 		this.SPJS.portList = {};
 		this.SPJS.portMeta = {};
 
-		// TODO: Do this in the portListDomUpdate() method.
-		$('#' + this.id + ' .serialport-connection-warning').addClass('hidden');
-		$('#' + this.id + ' .spjs-connection-warning').removeClass('hidden');
+		// Show a warning banner in the serial port list saying that there is no connection to a SPJS.
+		$(`#${this.id} .serialport-connection-warning`).addClass('hidden');
+		$(`#${this.id} .spjs-connection-warning`).removeClass('hidden');
 
 		this.portListDomUpdate();
 
-		console.log('openPorts: ' + gui.parseObject(this.SPJS.openPorts));
-		console.log('openLogs: ' + gui.parseObject(this.consoleLog.openLogs));
+		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		console.groupEnd();
 
@@ -1932,7 +2151,9 @@ return { // eslint-disable-line indent
 	},
 
 	onVersion: function (data) {
+
 		const { Version } = data;
+
 		// Ex. { "Version": "1.92" }
 
 		console.log(`SPJS -Version-\n  Version: ${Version}`);
@@ -2039,17 +2260,12 @@ return { // eslint-disable-line indent
 			// console.warn("Got corrupted port list data.");
 			console.log('Got corrupted port list data.');
 
-			const that = this;
-
 			// Indicate that the 'list' command has errored in the SPJS console log.
 			// This also removes the 'list command from the verifyBuffer object allowing others 'list' commands to be sent.
 			// this.logCmdStatus('SPJS', {Cmd: 'list'}, 'Error');
 			this.consoleLog.updateCmd('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap, Status: 'Warning', Comment: 'Corrupt' });
 
-			setTimeout(function() {
-				that.newspjsSend({ Msg: 'list', Comment: 'Auto List' });
-
-			}, 500);
+			setTimeout(() => this.newspjsSend({ Msg: 'list', Comment: 'Auto List' }), 500);
 
 			return false;
 		}
@@ -2059,63 +2275,72 @@ return { // eslint-disable-line indent
 		this.consoleLog.updateCmd('SPJS', { Msg: 'list', Status: 'Executed' });
 
 		console.groupCollapsed('onSerialPorts');
-		console.log('SPJS -PortList-' + gui.parseObject(dataObj, 2, [ 'DeviceClass', 'IsPrimary', 'AvailableBufferAlgorithms', 'Ver' ]));
+		console.log(`SPJS -PortList-${gui.parseObject(dataObj, 2, [ 'DeviceClass', 'IsPrimary', 'AvailableBufferAlgorithms', 'Ver' ])}`);
 		console.table(dataObj);
 
 		// Build the portListDiffs object.
 		// If the port list has not changed since the last time it was received, exit the function.
 		if (!this.buildPortListDiffs(dataObj)) {
+
 			console.groupEnd();
 			console.log('PortList not changed.');
+
 			return false;
+
 		}
-		console.log('PortList changed.' + gui.parseObject(this.SPJS.portListDiffs, 2));
+
+		console.log(`PortList changed.${gui.parseObject(this.SPJS.portListDiffs, 2)}`);
 
 		this.SPJS.portList = dataObj;
-		let diffs = this.SPJS.portListDiffs;
-		// var openPorts = this.SPJS.openPorts;
-		let openLogs = this.consoleLog.openLogs;
+
+		const { portListDiffs: diffs, exitUntrustedSpjs, requestListDelay } = this.SPJS;
+		let { openLogs } = this.consoleLog;
 
 		// Do object and DOM updates based on how the portList has changed.
 		// If any ports have opened/closed, update the openPorts object, and call portConnected()/portDisconnected() if they have not been called yet (aka. when we connect to the SPJS and it already has open ports on it).
 		// Normally when a port is opened/closed, portConnected()/portDisconnected() is called by onPortOpen()/onPortClose() in response to an 'open/close port' command from the SPJS.
 		if (diffs.opened) {
-			console.log('diffs.opened: ' + gui.parseObject(diffs.opened));
-			this.SPJS.openPorts = this.SPJS.openPorts.concat(diffs.opened);
-			// TODO: Change this from an anonymous function to an arror function.
-			// this.SPJS.openPorts = this.SPJS.openPorts.sort(function(a, b) {
-			// 	return Number(a.substring(3)) - Number(b.substring(3));
-			// });
 
+			console.log(`diffs.opened: ${gui.parseObject(diffs.opened)}`);
+
+			// this.SPJS.openPorts = this.SPJS.openPorts.concat(diffs.opened);
+			this.SPJS.openPorts = [ ...this.SPJS.openPorts, ...diffs.opened ];
+
+			// Sort the openPorts list by port number.
 			this.SPJS.openPorts = this.SPJS.openPorts.sort((a, b) => {
 				return Number(a.substring(3)) - Number(b.substring(3));
 			});
 
 			for (let i in diffs.opened) {
+
 				// If the port has been opened on the SPJS but it's console log has not been opened, initialize the port's console log.
-				if (openLogs.indexOf(diffs.opened[i]) == -1) {
-					that.portConnected(diffs.opened[i]);
-				}
+				if (!openLogs.includes(diffs.opened[i])) that.portConnected(diffs.opened[i]);
+
 			}
+
 		}
+
 		if (diffs.closed) {
+
 			// Remove the ports in the actionData object from the openPorts object.
 			for (let i in diffs.closed) {
-			 	const port = diffs.closed[i];
+
+				const port = diffs.closed[i];
+
 				that.SPJS.openPorts.splice(that.SPJS.openPorts.indexOf(port), 1);
 
-				if (openLogs.indexOf(port) != -1) {
-					that.portDisconnected(port);
-				}
+				if (openLogs.includes(port)) that.portDisconnected(port);
+
 			}
+
 		}
 
 		// If SPJS has 'no list -> list' or 'list -> no list', show/hide the warning in the port list DOM.
-		if (diffs.SPJS && diffs.SPJS[0] == 'no list -> list') {
-			$('#' + this.id + ' .serialport-connection-warning').addClass('hidden');
+		if (diffs.SPJS && diffs.SPJS[0] === 'no list -> list') {
+			$(`#${this.id} .serialport-connection-warning`).addClass('hidden');
 		}
-		if (diffs.SPJS && diffs.SPJS[0] == 'list -> no list') {
-			$('#' + this.id + ' .serialport-connection-warning').removeClass('hidden');
+		if (diffs.SPJS && diffs.SPJS[0] === 'list -> no list') {
+			$(`#${this.id} .serialport-connection-warning`).removeClass('hidden');
 		}
 
 		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
@@ -2126,28 +2351,29 @@ return { // eslint-disable-line indent
 		// If connected to an SPJS that was not launched by the launchSpjs method with no devices active, close the SPJS and launch a new one.
 		// console.log('go:', this.SPJS.go);
 		// console.log('openPorts:', this.SPJS.openPorts);
-		if (this.SPJS.exitUntrustedSpjs && !this.SPJS.openPorts.length && this.SPJS.go === null) {
+		if (exitUntrustedSpjs && !this.SPJS.openPorts.length && this.SPJS.go === null) {
+
 			console.log('Exiting this SPJS and launching a new one.');
 
 			this.newspjsSend({ Msg: 'exit', Comment: 'Untrusted SPJS' });
 
 			// Exit this method to prevent trying to open ports automatically.
 			return false;
+
 		}
 
 		// If there are no ports on SPJS and requestListDelay is set, request a new list.
-		if (!data.length && this.SPJS.requestListDelay !== null) {
-			setTimeout(function() {
-				// publish(`/${that.id}/spjs-send`, 'list');
-				that.newspjsSend({ Msg: 'list', Comment: 'Auto List' });
-			}, this.SPJS.requestListDelay);
+		if (!data.length && requestListDelay !== null) {
+
+			setTimeout(() => that.newspjsSend({ Msg: 'list', Comment: 'Auto List' }), requestListDelay);
+
 		}
 
 		// Build the portMeta object based on the portList and deviceMeta objects.
 		this.buildPortMeta();
 
 		// If just connected to a SPJS that already had ports open on it, try to send connectScripts to those devices.
-		if (diffs.SPJS && diffs.SPJS[0] == 'no list -> list' && this.SPJS.go === null) {
+		if (diffs.SPJS && diffs.SPJS[0] === 'no list -> list' && this.SPJS.go === null) {
 			this.sendConnectScript(this.SPJS.openPorts);
 
 		}
@@ -2157,19 +2383,21 @@ return { // eslint-disable-line indent
 
 		// If any ports have been added/removed, call the portListDomUpdate method.
 		if (diffs.added) {
-			// IDEA: Make portListDomUpdate accept arguments to make updates more efficient (eg. this.portListDomUpdate(diffs.added)).
+
 			this.portListDomUpdate();
 
 			// If no ports are currently open, try to auto connect to one.
 			this.SPJS.openPorts.length || this.autoConnectPorts();
+
 		}
 		if (diffs.removed) {
-			// IDEA: Make portListDomUpdate accept arguments to make updates more efficient (eg. this.portListDomUpdate(diffs.removed)).
+
 			this.portListDomUpdate();
+
 		}
 
-		console.log('openPorts: ' + gui.parseObject(this.SPJS.openPorts));
-		console.log('openLogs: ' + gui.parseObject(this.consoleLog.openLogs));
+		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 	},
 	validifyPortList: function (data) {
@@ -2494,7 +2722,9 @@ return { // eslint-disable-line indent
 
 	},
 	onPortOpen: function (data) {
+
 		const { Cmd, Desc, Port, IsPrimary, Baud, BufferType } = data;
+
 		// Ex. { Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2" }
 
 		console.log(`SPJS -PortOpen-${gui.parseObject(data, 2)}`);
@@ -2502,18 +2732,15 @@ return { // eslint-disable-line indent
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		const that = this;
 		const portMeta = this.SPJS.portMeta;
 		const safePort = this.makePortSafe(Port);
 
 		let refCmd = `open ${Port} ${Baud}${BufferType ? ` ${BufferType}` : ''}`;
 
+		let { matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: refCmd, Status: 'Executed' });
+
 		// If this was caused by an 'open' command in the SPJS, set the status of that command to 'Executed'.
-		if (!this.consoleLog.updateCmd('SPJS', { Msg: refCmd, Status: 'Executed' })) {
-
-			this.consoleLog.updateCmd('SPJS', { PartMsg: `open ${Port}`, Status: 'Executed' });
-
-		}
+		if (!matchFound) this.consoleLog.updateCmd('SPJS', { PartMsg: `open ${Port}`, Status: 'Executed' });
 
 		// If the port was opened with different settings from the deviceMeta data, update the serial ports list DOM.
 		if (Baud !== portMeta[safePort].Baud || BufferType !== portMeta[safePort].Buffer) {
@@ -2533,16 +2760,13 @@ return { // eslint-disable-line indent
 
 		// Get port list to keep the portList object up to date.
 		// Use a delay to avoid getting corrupted port list data.
-		setTimeout(function() {
-			that.newspjsSend({ Msg: 'list' });
-
-		}, 250);
+		setTimeout(() => this.newspjsSend({ Msg: 'list' }), 250);
 
 	},
 	portConnected: function (port) {
 		// The portConnected method handles all the DOM and object updates required whenever a port is connected.
 
-		var nextPort = null;
+		let nextPort = null;
 		// If the port argument is [array], this function will be ran once for each port in the array.
 		if (typeof port == 'object') {
 			nextPort = [ ...port ];
@@ -2552,10 +2776,10 @@ return { // eslint-disable-line indent
 		if (port === 'SPJS') return false;
 
 		console.groupCollapsed('Port Connected: ' + port);
-		let that = this;
+		const that = this;
 
 		// If this port is already initiated (ie. this method was called redundantly), skip all DOM and object updates.
-		if (this.consoleLog[port] !== undefined && this.consoleLog.openLogs.indexOf(port) != -1) {
+		if (typeof this.consoleLog[port] != 'undefined' && this.consoleLog.openLogs.indexOf(port) !== -1) {
 			console.log('portConnected was already called for this port.' + gui.parseObject(this.consoleLog, 2));
 
 		// If this method was not called redundantly, update objects and DOM elements.
@@ -2569,7 +2793,7 @@ return { // eslint-disable-line indent
 			$('#' + this.id + ' .splist .port-' + port + ' .port-toggle-btn > span').removeClass('fa-toggle-on').addClass('fa-toggle-off');
 
 			// If this port's console log is visible, make the spjs' console log visible.
-			if (port == this.consoleLog.activeLog) {
+			if (port === this.consoleLog.activeLog) {
 				// console.log("This port's console log was visible.");
 				this.consoleLogChangeView('SPJS');
 			}
@@ -2587,31 +2811,19 @@ return { // eslint-disable-line indent
 			// Update and sort the openLogs object. Sort the SPJS element to the end of the array.
 			// IDEA: Use .splice() to add this port to the openLogs array so it does not need to be sorted everytime and use .localCompare() to know where it should be added.
 			this.consoleLog.openLogs.unshift(port);
+
 			this.consoleLog.openLogs = this.consoleLog.openLogs.sort(function(a, b) {
-				var x = (a == 'SPJS') ? 999:Number(a.substring(3));
-				var y = (b == 'SPJS') ? 999:Number(b.substring(3));
+
+				const x = (a === 'SPJS') ? 999 : Number(a.substring(3));
+				const y = (b === 'SPJS') ? 999 : Number(b.substring(3));
+
 				return x - y;
+
 			});
 
 			// const origional = { a: 1, b: 2 };
-			const msgShowDefault = this.consoleLog.msgShowDefault;
+			const { msgShowDefault } = this.consoleLog;
 			// const msgShowDefault = { ...this.consoleLog.msgShowPortDefault };
-
-			// Build the port log object.
-			this.consoleLog[port] = {
-				logData: [],
-				cmdMap: [],
-				verifyMap: [],
-				msgCount: 0,
-				value: '',
-				inputStatus: null,
-				cmdCount: 0,
-				history: [],
-				historyRecallIndex: null,
-				placeholder: `GCode ${this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, ''))}`,
-				verifyBuffer: [],
-				msgShow: Object.assign({}, msgShowDefault)
-			};
 
 			// HTML for the console log tab.
 			let consoleLogTabHtml = '';
@@ -2622,13 +2834,32 @@ return { // eslint-disable-line indent
 			let consoleLogOutputHtml = '<div class="console-log-output log-' + port + ' hidden"></div>';
 
 			// Build the console log DOM based on the openLogs array.
-			for(let i = this.consoleLog.openLogs.indexOf(port) + 1; i < this.consoleLog.openLogs.length; i++) {
+			for (let i = this.consoleLog.openLogs.indexOf(port) + 1; i < this.consoleLog.openLogs.length; i++) {
 				// console.log("openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
 				publish('/statusbar-widget/add', port, this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, '')), 'success', that.consoleLog.openLogs[i]);
+
 				$('#' + that.id + ' .console-log-panel .nav-tabs .list-tab-' + that.consoleLog.openLogs[i]).before(consoleLogTabHtml);
 				$('#' + that.id + ' .console-log-panel .panel-body .log-' + that.consoleLog.openLogs[i]).before(consoleLogOutputHtml);
+
 				break;
+
 			}
+
+			// Build the port log object (Must do this after building the log panel in the DOM so that the JQuery DOM reference can be made).
+			this.consoleLog[port] = {
+				logData: [],
+				cmdMap: [],
+				verifyMap: [],
+				logPanelDOM: $(`#connection-widget .console-log-panel .log-${port}`),
+				value: '',
+				inputStatus: null,
+				cmdCount: 0,
+				history: [],
+				historyRecallIndex: null,
+				placeholder: `GCode ${this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, ''))}`,
+				verifyBuffer: [],
+				msgShow: Object.assign({}, msgShowDefault)
+			};
 
 			// Call a  resize on the DOM elements so that 'style="height: ---px;"' is added to the console log's DOM element to ensure that scroll bars are created properly..
 			this.resizeWidgetDom();
@@ -2636,7 +2867,7 @@ return { // eslint-disable-line indent
 			console.log('openLogs: ' + gui.parseObject(this.consoleLog.openLogs));
 
 			// If this port's raw data buffer is undefined, define it.
-			if (this.dataRecvBuffer[port] === undefined) {
+			if (typeof this.dataRecvBuffer[port] == 'undefined') {
 				this.dataRecvBuffer[port] = '';
 
 			// If this port's raw data buffer is already defined, call onRawPortData method to add the raw data to this port's log.
@@ -2656,7 +2887,7 @@ return { // eslint-disable-line indent
 		console.groupEnd();
 
 		// If the port argument was passed as [array], run the portConnected method for the next element in the port array.
-		if (nextPort && nextPort.length && nextPort != 'SPJS') this.portConnected(nextPort);
+		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portConnected(nextPort);
 	},
 	portDisconnected: function (port) {
 		let nextPort = null;
@@ -2681,8 +2912,8 @@ return { // eslint-disable-line indent
 		} else {
 			// Update the openPorts array.
 			// IDEA: Use .splice() to remove this port from the openLogs array.
-			var openLogs = [];
-			for(var i = 0; i < this.consoleLog.openLogs.length; i++) {
+			let openLogs = [];
+			for (var i = 0; i < this.consoleLog.openLogs.length; i++) {
 				// console.log("consoleLog.openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
 				if (that.consoleLog.openLogs[i] != port) {
 					// console.log("  ...concat-ing");
@@ -2701,20 +2932,20 @@ return { // eslint-disable-line indent
 			// }
 
 			// Remove any hilites on the port in the serial device list.
-			$('#' + this.id + ' .splist .port-' + port).removeClass('success warning');
+			$(`#${this.id} .splist .port-${port}`).removeClass('success warning');
 			// Change the toggle-on button into a toggle-off button in the serial device list.
-			$('#' + this.id + ' .splist .port-' + port + ' .port-toggle-btn > span').removeClass('fa-toggle-on').addClass('fa-toggle-off');
+			$(`#${this.id} .splist .port-${port} .port-toggle-btn > span`).removeClass('fa-toggle-on').addClass('fa-toggle-off');
 
 			// If this port's console log is visible, make the spjs' console log visible.
-			if (port == this.consoleLog.activeLog) {
+			if (port === this.consoleLog.activeLog) {
 				// console.log("This port's console log was visible.");
 				this.consoleLogChangeView('SPJS');
 			}
 
 			// Remove the respective port's console log output <div> element.
-			$('#' + this.id + ' .console-log-panel .nav-tabs .list-tab-' + port).remove();
+			$(`#${this.id} .console-log-panel .nav-tabs .list-tab-${port}`).remove();
 			// Remove the respective port's console log tab.
-			$('#' + this.id + ' .console-log-panel .panel-body .log-' + port).remove();
+			$(`#${this.id} .console-log-panel .panel-body .log-${port}`).remove();
 
 			// Delete the respective port's consoleLog and dataRecvBuffer objects.
 			delete this.consoleLog[port];
@@ -2728,22 +2959,27 @@ return { // eslint-disable-line indent
 		if (nextPort && nextPort.length && nextPort != 'SPJS') this.portDisconnected(nextPort);
 	},
 	onPortOpenFail: function (data) {
+
 		const { Cmd, Port, Baud, Desc } = data;
+
 		// Ex. { Cmd: "OpenFail", Desc: "Error opening port. The system cannot find the file specified.", Port: "COM69", Baud: 115200 }
+
 		console.log(`SPJS -PortOpenFail-\n  Cmd: ${Cmd}\n  Port: ${Port}\n  Baud: ${Baud}\n  Desc: ${Desc}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		const that = this;
 		const safePort = this.makePortSafe(Port);
+		const { requestListDelay } = this.SPJS;
 
 		// If the port was open, set the unverified commands in it's console log to 'Error'.
-		if (this.consoleLog[safePort] !== undefined) {
+		if (typeof this.consoleLog[safePort] != 'undefined') {
+
 			const verifyMap = this.consoleLog[safePort].verifyMap;
 
-			// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
 			const refCmd = `open ${Port}`;
+
+			// It this was caused by an 'open' command in the SPJS, set the status of that command to 'Error'.
 			verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, IndexMap: verifyMap, Status: 'Error' });
 
 		}
@@ -2751,24 +2987,20 @@ return { // eslint-disable-line indent
 		this.portDisconnected(safePort);
 
 		// Repeatedly attempt to connect to a port.
-		if (this.SPJS.requestListDelay !== null) {
-
-			setTimeout(function() {
-				that.newspjsSend({ Msg: 'list' });
-
-			}, this.SPJS.requestListDelay);
-		}
+		requestListDelay && setTimeout(() => this.newspjsSend({ Msg: 'list' }), requestListDelay);
 
 	},
 	onPortClose: function (data) {
+
 		const { Cmd, Desc, Port, Baud } = data;
+
 		// Ex. {Cmd: "Close", Desc: "Got unregister/close on port.", Port: "COM10", Baud: 115200}
-		console.log('SPJS -PortClose-\n  Cmd: ' + data.Cmd + '\n  Port: ' + data.Port + '\n  Baud: ' + data.Baud + '\n  Desc: ' + data.Desc);
+
+		console.log(`SPJS -PortClose-\n  Cmd: ${data.Cmd}\n  Port: ${data.Port}\n  Baud: ${data.Baud}\n  Desc: ${data.Desc}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		const that = this;
 		const safePort = this.makePortSafe(Port);
 
 		const refCmd = `close ${Port}`;
@@ -2780,6 +3012,7 @@ return { // eslint-disable-line indent
 			// FIXME: Fix this.
 			// FIXME: This is weird, the port doesnt autoconnect even though there is no code here.
 			this.deviceMeta[this.SPJS.portMeta[safePort].metaIndex].autoConnectPort = false;
+
 			console.log(`Clearing auto-connect on: ${Port}`);
 
 		// If the port closed because of a SPJS command.
@@ -2798,12 +3031,11 @@ return { // eslint-disable-line indent
 
 		// Get port list to keep the portList object up to date.
 		// Use a delay to avoid getting corrupted port list data.
-		setTimeout(function() {
-			that.newspjsSend({ Msg: 'list' });
-		}, 250);
+		setTimeout(() => this.newspjsSend({ Msg: 'list' }), 250);
 
 	},
 	sendPortInits: function (port) {
+
 		console.groupCollapsed('Sending init scripts to device.');
 		console.log(`Init scripts for ${port}.`);
 
@@ -2813,21 +3045,25 @@ return { // eslint-disable-line indent
 
 		// Scan through the initScripts array for a match with the port information.
 		for (let i = 0; i < this.initScripts.length; i++) {
+
 			console.log(`i: ${i}`);
+
 			let misMatch = 0;
 			let scriptItem = this.initScripts[i];
 
-			Object.keys(scriptItem).forEach(function (key, index) {
-			    // key: the name of the object key
-			    // index: the ordinal position of the key within the object
+			Object.keys(scriptItem).forEach((key, index) => {
+
+				// key: the name of the object key
+				// index: the ordinal position of the key within the object
+
 				console.log(`key: ${key}`);
 
 				if (key !== 'script' && key !== 'pause') {
 
-					if ((key === 'Friendly' || key === 'Baud' || key === 'Buffer') && meta[key] !== scriptItem[key] ) {
+					if ((key === 'Friendly' || key === 'Baud' || key === 'Buffer') && meta[key] !== scriptItem[key]) {
 						misMatch += 1;
 
-					} else if (key === 'SerialNumber' && portData[key] !== scriptItem[key] ) {
+					} else if (key === 'SerialNumber' && portData[key] !== scriptItem[key]) {
 						misMatch += 1;
 
 					}
@@ -2838,7 +3074,9 @@ return { // eslint-disable-line indent
 
 			// If there is no mis-matching info, send the script.
 			if (!misMatch) {
+
 				console.groupEnd();
+
 				// Return so that the caller knows that init scripts were sent.
 				return this.newportSendJson(port, { Data: scriptItem.script, Id: 'init0', Pause: scriptItem.pause });
 
@@ -2847,12 +3085,16 @@ return { // eslint-disable-line indent
 		}
 
 		console.groupEnd();
+
 		return false;
 
 	},
 	onBroadcast: function (data) {
+
 		const { Cmd, Msg } = data;
+
 		// Ex. {Cmd: "Broadcast", Msg: "helloworld↵"}
+
 		console.log(`SPJS -Broadcast-\n  Cmd: ${Cmd}\n  Msg: ${Msg}`);
 
 		// Add the message to the SPJS log.
@@ -2862,7 +3104,9 @@ return { // eslint-disable-line indent
 
 	},
 	onWipedQueue: function (data) {
+
 		const { Cmd, QCnt, Port } = data;
+
 		// Ex. { "Cmd": "WipedQueue", "QCnt": 0, "Port": "COM10" }
 
 		console.log(`SPJS -WipedQueue-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Port: ${Port}`);
@@ -2874,6 +3118,7 @@ return { // eslint-disable-line indent
 
 	},
 	onQueuedJson: function (data) {
+
 		const { Cmd, QCnt, P, Data } = data;
 
 		// Ex. { "Cmd": "Queued", "QCnt": 1, "P": "COM10", "Data": [{ "D": "\n", "Id": "startup1", "Pause": 0 }] }
@@ -2890,26 +3135,35 @@ return { // eslint-disable-line indent
 
 			// If a command was sent in one line that the device parses as two lines, it will add a suffix to the command's id like: 'com10n7' -> 'com10n7-part-1-2' and 'com10n7-part-1-2'.
 			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
-			const refId = Data[i].Id.split('-part')[0];
+			const [ refId ] = Data[i].Id.split('-part');
 
-			if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+			let matchFound = false;
 
-			if (this.consoleLog.updateCmd(safePort, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+			refId || ({ matchFound } = this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true }));
 
-			if (this.consoleLog.updateCmd(safePort, { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+			if (matchFound) continue;
+
+			({ matchFound } = this.consoleLog.updateCmd(safePort, { Msg: Data[i].D, Status: 'Queued', UpdateRelated: true }));
+
+			if (matchFound) continue;
+
+			({ matchFound } = this.consoleLog.updateCmd(safePort, { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true }));
+
+			if (matchFound) continue;
 
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
-			if (this.consoleLog.updateCmd('SPJS', { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true })) continue;
+			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true }));
 
-			console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
+			if (!matchFound) console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
 
 		}
 
 	},
-	// FIXME: Make this work for multiple commands at a time (when a list of data and ids are received).
-	// TODO: Test that it works when receiving multiple commands at a time (see comment above).
+	// TODO: Test that it works when receiving multiple commands at a time where a list of data and ids are received.
 	onQueuedText: function (data) {
+
 		const { Cmd, QCnt, Ids, D, Port } = data;
+
 		// Ex. { "Cmd": "Queued", "QCnt": 2, "Ids": [ "" ], "D": [ "!" ], "Port": "COM5" }
 
 		console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
@@ -2923,23 +3177,32 @@ return { // eslint-disable-line indent
 
 			// If a command was sent in one line that the device parses as two lines, it will add a suffix to the command's id like: 'com10n7' -> 'com10n7-part-1-2' and 'com10n7-part-1-2'.
 			// If there is no Id, the message may have been sent as a non-buffered command which does not send an associated id.
-			const refId = Ids[i].split('-part')[0];
+			const [ refId ] = Ids[i].split('-part');
 
-			if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true })) continue;
+			let matchFound = false;
 
-			if (this.consoleLog.updateCmd(safePort, { Msg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+			refId || ({ matchFound } = this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Queued', UpdateRelated: true }));
 
-			if (this.consoleLog.updateCmd(safePort, { PartMsg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+			if (matchFound) continue;
+
+			({ matchFound } = this.consoleLog.updateCmd(safePort, { Msg: D[i], Status: 'Queued', UpdateRelated: true }));
+
+			if (matchFound) continue;
+
+			({ matchFound } = this.consoleLog.updateCmd(safePort, { PartMsg: D[i], Status: 'Queued', UpdateRelated: true }));
+
+			if (matchFound) continue;
 
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
-			if (this.consoleLog.updateCmd('SPJS', { PartMsg: D[i], Status: 'Queued', UpdateRelated: true })) continue;
+			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: D[i], Status: 'Queued', UpdateRelated: true }));
 
-			console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
+			if (!matchFound) console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
 
 		}
 
 	},
 	onWriteJson: function (data) {
+
 		const { Cmd, QCnt, Id, P } = data;
 
 		// Ex. { "Cmd": "Write", "QCnt" :0, "Id": "startup1", "P": "COM10" }
@@ -2954,51 +3217,46 @@ return { // eslint-disable-line indent
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		// // See if we have an Id in the resposne, if so it is from a json send and we need to see the response.
-		// // If there is no id, look for a recent command sent without buffering.
-		// if (Id === '') {
-		//
-		// 	if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Written', UpdateRelated: true })) {
-		// 		console.log('No match found searching for portSendNoBuf commands.');
-		// 	}
-		//
-		// 	return;
-		// }
-		//
-		// const refId = Id.split('-part')[0];
-		//
-		// // if (Id.includes('-part')) {
-		// // 	console.warn(`There was '-part' added onto the id.\nId: ${Id}\nNew Id: ${refId}`);
-		// // }
-		//
-		// // If the command was sent in json for with one or more other commands, look for it in the port's console log.
-		// if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Written', UpdateRelated: true })) {
-		// 	this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' });
-		//
-		// }
+		// See if we have an Id in the resposne, if so it is from a json send and we need to see the response.
+		// If there is no id, look for a recent command sent without buffering.
+		if (Id === '') {
+
+			// The message could be from a recent sendNoBuf command.
+			const refMsg = `sendnobuf ${P}`;
+			const { logData, cmdMap, verifyMap } = this.consoleLog.SPJS;
+
+			let matchFound = false;
+
+			// This is my newer method of verifying messages without Ids.
+			if (verifyMap && verifyMap.length) ({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: logData.length - 1, SearchBackwards: true, IndexMap: verifyMap }));
+
+			if (matchFound) return;
+
+			// This is what i had the first time i wrote this code and left it in here cuz why not.
+			({ matchFound } = this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Written', UpdateRelated: true }));
+
+			if (!matchFound) console.log('No match found searching for portSendNoBuf commands.');
+
+			return;
+
+		}
 
 		const safePort = this.makePortSafe(P);
-		const refId = Id.split('-part')[0];
+		const [ refId ] = Id.split('-part');
 
-		if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true })) return;
+		// Look for and try to verify the command in the port's console log using the received Id.
+		let { matchFound } = this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Written', UpdateRelated: true });
 
-		if (refId && this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' })) return;
+		if (matchFound) return;
 
-		// The message could be from a recent sendNoBuf command.
-		const refMsg = `sendnobuf ${P}`;
+		// Look for and try to verify the command in the SPJS console log using the received Id.
+		({ matchFound } = this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' }));
 
-		const cmdMap = this.consoleLog.SPJS.cmdMap;
-		const verifyMap = this.consoleLog.SPJS.verifyMap;
-		const logData = this.consoleLog.SPJS.logData;
-
-		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
-
-		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Written', SearchFrom: 1 - logData.length, IndexMap: verifyMap })) return;
-
-		console.log(`No match was found for Id: '${Id}'`);
+		return;
 
 	},
 	onCompleteJson: function (data) {
+
 		const { Cmd, Id, P } = data;
 
 		// Ex. { "Cmd": "Complete", "Id": "internalInit0", "P": "COM10" }
@@ -3011,42 +3269,38 @@ return { // eslint-disable-line indent
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
 
-		// // If there is no id, look for a recent command sent without buffering.
-		// if (Id === '') {
-		// 	if (!this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Completed', UpdateRelated: true })) {
-		// 		console.log('No match found searching for portSendNoBuf commands.');
-		// 	}
-		// 	return;
-		// }
-		// // const refId = (Id.match('-part')) ? Id.split()
-		// const refId = Id.split('-part')[0];
-		//
-		// // If the command was sent in json for with one or more other commands, look for it in the port's console log.
-		// if (!this.consoleLog.updateCmd(P, { Id: refId, Status: 'Completed', UpdateRelated: true })) {
-		// 	this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' });
-		// }
-
 		const safePort = this.makePortSafe(P);
-		const refId = Id.split('-part')[0];
+		const [ refId ] = Id.split('-part');
 
-		if (refId && this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Completed', UpdateRelated: true })) return;
-		if (refId && this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' })) return;
+		let matchFound = false;
+
+		refId && ({ matchFound } = this.consoleLog.updateCmd(safePort, { Id: refId, Status: 'Completed', UpdateRelated: true }));
+
+		if (matchFound) return true;
+
+		refId && ({ matchFound } = this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Completed' }));
+
+		if (matchFound) return true;
 
 		// The message could be from a recent sendNoBuf command.
 		const refMsg = `sendnobuf ${P}`;
+		const { logData, cmdMap, verifyMap } = this.consoleLog.SPJS;
 
-		const cmdMap = this.consoleLog.SPJS.cmdMap;
-		const verifyMap = this.consoleLog.SPJS.verifyMap;
-		const logData = this.consoleLog.SPJS.logData;
+		if (refId === '' && verifyMap && verifyMap.length) {
 
-		// console.log('cmdMap:', cmdMap, '\nverifyMap:', verifyMap);
+			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: logData.length - 1, SearchBackwards: true, IndexMap: verifyMap }));
 
-		if (refId === '' && verifyMap && verifyMap.length && this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Completed', SearchFrom: 1 - logData.length, IndexMap: verifyMap })) return;
+		}
+
+		if (matchFound) return true;
 
 		console.log(`No match was found for Id: '${Id}'`);
 
+		return false;
+
 	},
 	onErrorText: function (data) {
+
 		const { Error } = data;
 
 		// Ex. { "Error": "We could not find the serial port 10 that you were trying to apply the feedrate override to. This error is ok actually because it just means you have not opened the serial port yet." }
@@ -3064,6 +3318,7 @@ return { // eslint-disable-line indent
 
 		// If the error message has a colon in it, then it has the origional message in it, use that to find the origional message in the console log.
 		if (Error.includes(':')) {
+
 			refMsg = Error.substring(Error.indexOf(':') + 2);
 			console.log(`refMsg: '${refMsg}'`);
 
@@ -3071,6 +3326,7 @@ return { // eslint-disable-line indent
 
 		// If the message is in response to a non existent port, the message has the port name in it, use that to find the origional message in the console log.
 		} else if (Error.includes('serial port') && Error.includes('that you were trying')) {
+
 			let a = Error.indexOf('serial port') + 12;
 			let b = Error.indexOf('that you were trying') - 1;
 
@@ -3082,29 +3338,33 @@ return { // eslint-disable-line indent
 		} else {
 
 			// If the verifyBuffer has anything in it, make the most recent command have a status of error.
-			const verifyMap = this.consoleLog.SPJS.verifyMap;
+			const { verifyMap } = this.consoleLog.SPJS;
 
 			// TODO: Test to make sure this does not error.
-			verifyMap.length && this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], IndexMap: verifyMap, Status: 'Error', Comment: 'Syntax Error' });
+			if (verifyMap.length) this.consoleLog.updateCmd('SPJS', { Index: verifyMap[verifyMap.length - 1], IndexMap: verifyMap, Status: 'Error', Comment: 'Syntax Error' });
 
 		}
 
 	},
 	onErrorJson: function (data) {
+
 		const { Cmd } = data;
 
 		console.log('SPJS -ErrorJson-\n ', data);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
+
 	},
 	onSystemAlarm: function (data) {
+
 		const { er } = data;
+
 		// Ex. { "er": { "fb": 78.02, "st": 27, "msg": "System alarmed", "val": 1 } }
 
 		const { Label, Desc } = this.lookupStatusCode(er.st);
 
-		console.log('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${ Desc ? `\n  Desc: ${Desc}` : ''}`);
+		console.log('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${Desc ? `\n  Desc: ${Desc}` : ''}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -3130,17 +3390,21 @@ return { // eslint-disable-line indent
 
 	},
 	onFeedRateOverride: function (data) {
+
 		const { Cmd, Desc, Port, FeedRateOverride, IsOn } = data;
+
 		// Ex. { "Cmd": "FeedRateOverride", "Desc": "Successfully set the feedrate override.", "Port": "COM10", "FeedRateOverride": 3, "IsOn": true }
 
 		console.log(`SPJS -FeedRateOverride-\n  Desc: ${Desc}\n  Port: ${Port}\n  FeedRateOverride: ${FeedRateOverride}\n  IsOn: ${IsOn}\n  Cmd: ${Cmd}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
+
 		this.consoleLog.updateCmd('SPJS', { PartMsg: 'fro ', Status: 'Executed' });
 
 	},
 	onRawPortData: function (data) {
+
 		const { P, D } = data;
 
 		// Ex. { "P": "COM10", "D": "{"r":{"fv":0.970,"fb":78.02,"cv":5,"hp":3,"hv":0,"…"02130215d42","msg":"SYSTEM READY" }, "f": [1,0,0]}\n" }
@@ -3158,7 +3422,7 @@ return { // eslint-disable-line indent
 		const safePort = this.makePortSafe(port);
 
 		// If the dataRecvBuffer object for this port is not defined, define it.
-		if (this.dataRecvBuffer[safePort] === undefined) {
+		if (typeof this.dataRecvBuffer[safePort] == 'undefined') {
 			this.dataRecvBuffer[safePort] = '';
 		}
 
@@ -3166,18 +3430,16 @@ return { // eslint-disable-line indent
 		this.dataRecvBuffer[safePort] += data.D;
 
 		// If there is at least one full line of raw data in the data buffer and this port is open, parse the data in the raw data buffer.
-		if (this.dataRecvBuffer[safePort].match(/\n/) && this.consoleLog.openLogs.indexOf(safePort) != -1) {
+		if (this.dataRecvBuffer[safePort].match(/\n/) && this.consoleLog.openLogs.includes(safePort)) {
 			// console.log('  ...parsing raw data.');
 			this.parseRawPortData(safePort);
 
-		// If this port is not open yet.
-		} else if (this.consoleLog.openLogs.indexOf(safePort) == -1) {
-			// console.log('  ...port not open yet.');
 		}
 
 	},
 	parseRawPortData: function (port) {
 		// This is a seperate method from onRawPortData so that it can be called after this port has been opened if raw data was received before it was opened.
+
 		console.groupCollapsed(`Parsing raw port data.\n  Port: ${port}`);
 
 		// See if received newline.
@@ -3186,16 +3448,20 @@ return { // eslint-disable-line indent
 			let tokens = this.dataRecvBuffer[port].split('\n');
 			// 	let line = tokens.shift() + '\n';
 			let line = tokens.shift();
+			let lineObj;
+
 			this.dataRecvBuffer[port] = tokens.join('\n');
 
 			line = line.replace(/\t/g, '').replace(/\r/g, '').replace(/\v/g, '').replace(/\f/g, '');
-			let lineObj;
 
 			console.log(`line character length: ${line.length}\ncharCode: ${line.charCodeAt(0)}`);
 
 			if (line === '') {
+
 				console.log('This line is an empty string.');
+
 				continue;
+
 			}
 
 			// HACK: Do some last minute cleanup.
@@ -3203,32 +3469,41 @@ return { // eslint-disable-line indent
 			// THIS IS ALSO NOT THE RIGHT SPOT SINCE THIS SERIAL PORT WIDGET IS SUPPOSED
 			// TO BE GENERIC. Remove when TinyG has no problems.
 			if (line.match(/\{"sr"\{"sr"\:/) || line.match(/\{"r"\{"sr"\:/)) {
+
 				// console.warn(`Got corrupted raw port data: '${line}'`);
+
 				line = line.replace(/\{"sr"\{"sr"\:/, '{"sr":');
 				line = line.replace(/\{"r"\{"sr"\:/, '{"sr":');
+
 			}
 
 			console.log(`line: ${line}`);
+
 			// Add the raw data to the respective port's console log.
 			this.consoleLog.appendMsg(port, { Msg: line, Type: 'RawPortData' });
 
 			// Try parsing line and if it errors, it is a string. Eitherwise, it is an object that we want information from.
 			try {
+
 				lineObj = JSON.parse(line);
 
 			} catch (err) {
+
 				// There was an error parsing line therefore it is a string.
 				lineObj = line;
 
 				// If the line was an error message.
 				// Ex. "tinyg [mm] err: Unrecognized command or config name: helloworld \n".
 				if (/tinyg \[\w{2}\] err:/g.test(line)) {
+
 					console.log('Got error message.');
+
 					const a = line.indexOf(':', 15) + 2;
 					const b = line.length - 1;
 					const refMsg = line.substring(a, b);
 
 					console.log(`RefMsg: '${refMsg}'`);
+
 					const { matchId } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
 					if (matchId) {
@@ -3241,23 +3516,27 @@ return { // eslint-disable-line indent
 				// If the device only uses text output (such as the arduino uno).
 				} else if (/error: /.test(line)) {
 
-					const cmdMap = this.consoleLog[port].cmdMap;
+					const { cmdMap } = this.consoleLog[port];
 
 					cmdMap.length && this.consoleLog.updateCmd(port, { Index: cmdMap[cmdMap.length - 1], Status: 'Error', Comment: 'Syntax Error' });
 
 				}
+
 			}
 
 			console.log('lineObj:', lineObj);
 
 			// Look through received data for useful info.
 
+			// If there is a footer in the data.
 			if (lineObj.f) {
 
 				const [ pv, sc, rx ] = lineObj.f;
 				console.log(`Footer:\n  pv: ${pv}\n  sc: ${sc}\n  rx: ${rx}`);
+
 				// If there is a warning or error status code.
 				if (sc) {
+
 					console.log('sc !== 0');
 
 					const { Code, Label, Desc } = this.lookupStatusCode(sc);
@@ -3269,18 +3548,19 @@ return { // eslint-disable-line indent
 					// If the lineObj data was an error message.
 					if (lineObj.r && lineObj.r.err) {
 						// Ex. { "r": {"err":"{sv}"}, "f": [1,108,4] }.
-						console.log('Got error data.');
 
 						const refMsg = lineObj.r.err;
+
+						console.log('Got error data.');
 						console.log(`  RefMsg: '${refMsg}'`);
 
 						let Comment = Code ? Label : 'Syntax Error';
 
-						if (!this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment, UpdateRelated: true })) {
-							console.log('Found no match. idk wtf to do.');
-						}
+						let { matchFound } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment, UpdateRelated: true });
 
-					} else if (lineObj.r && typeof lineObj.r === 'string') {
+						if (!matchFound) console.log('Found no match. idk wtf to do.');
+
+					} else if (typeof lineObj.r == 'string') {
 
 						console.log(`lineObj.r is a string\n  r: ${lineObj.r}`);
 
@@ -3288,8 +3568,11 @@ return { // eslint-disable-line indent
 						// let Comment = statusMeta.Code ? statusMeta.Label : '';
 						// let Comment = statusMeta.Label;
 
+						let { matchFound } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment: `${Label} refMsg`, UpdateRelated: true });
+
 						// If no matching message was found and there was a footer message, look for a message with a matching length to the rx received by the device.
-						if (!this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment: `${Label} refMsg`, UpdateRelated: true }) && footer !== undefined && statusMeta.Code) {
+						if (!matchFound) {
+
 							console.log('  No matching message was found. Searching for matching message using rx received by the device.');
 
 							// NOTE: This is probably not a good idea cuz it may highlight the incorrect message as having an error since the search criteria is very vague.
@@ -3297,39 +3580,37 @@ return { // eslint-disable-line indent
 
 						}
 
-					} else if (typeof lineObj.r === 'object' && Object.keys(lineObj.r).length === 0) {
+					} else if (typeof lineObj.r == 'object' && Object.keys(lineObj.r).length === 0) {
 
 						console.log('lineObj.r is an empty object.');
 
 						this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true });
 
-
-					} else if (typeof lineObj.r === 'object'){
+					} else if (typeof lineObj.r == 'object') {
 
 						console.log('lineObj.r is an object.');
 
 						let rStr = JSON.stringify(lineObj.r);
-						// let refMsg = new RegExp(rStr.substring(0, rStr.indexOf(':')).replace(/\W/, ''), 'gi');
 						let refMsg = rStr.substring(0, rStr.indexOf(':')).replace(/\W/g, '');
+						// let refMsg = new RegExp(rStr.substring(0, rStr.indexOf(':')).replace(/\W/, ''), 'gi');
+
 						console.log(`refMsg: ${refMsg}`);
 
-						let { matchMsg, matchId } = this.consoleLog.updateCmd(port, { PartMsg: refMsg, Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true });
+						let { matchFound } = this.consoleLog.updateCmd(port, { PartMsg: rStr, Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true });
 
-						console.log(matchId);
+						matchFound || ({ matchFound } = this.consoleLog.updateCmd(port, { PartMsg: rStr, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
-						if (!matchId) {
-							console.log('No match was found for the partMsg and msg length given.');
-						}
+						matchFound || ({ matchFound } = this.consoleLog.updateCmd(port, { PartMsg: refMsg, Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
-						// If no match is found or the length does not match.
-						// if (!matchId || matchMsg.length != rx) {
-						// 	this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: `${Label} length`, UpdateRelated: true });
-						// }
+						matchFound || ({ matchFound } = this.consoleLog.updateCmd(port, { PartMsg: refMsg, Status: 'Warning', Comment: Label, UpdateRelated: true }));
+
+						if (!matchFound) console.log('No match was found for the partMsg and msg length given.');
 
 					} else {
+
 						console.log('lineObj.r is unrecognized.');
 
-						throw 'Make lineObj.r recognized and do something with it.';
+						throw new Error('Make lineObj.r recognized and do something with it.');
 
 					}
 
@@ -3338,13 +3619,15 @@ return { // eslint-disable-line indent
 			}
 
 			// Let the other modules handle the data received.
-			publish(`/${this.id}/recvRawPortData`, port, { Msg: line, Data: lineObj });
+			publish(`/${this.id}/recvPortData`, port, { Msg: line, Data: lineObj });
+
 		}
 
 		console.groupEnd();
 
 	},
 	onQueueCnt: function (data) {
+
 		const { QCnt } = data;
 
 		console.log(`SPJS -QueueCnt-\n  QCnt: ${QCnt}`);
@@ -3353,6 +3636,7 @@ return { // eslint-disable-line indent
 
 	},
 	onGarbageCollection: function (data) {
+
 		const { gc } = data;
 
 		console.log(`SPJS -GarbageCollection-\n  Status: ${gc}`);
@@ -3361,11 +3645,14 @@ return { // eslint-disable-line indent
 			starting: 'Written',
 			done: 'Completed'
 		};
+
 		this.consoleLog.updateCmd('SPJS', { Msg: 'gc', Status: statusMeta[gc] });
 
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'GarbageCollection' });
+
 	},
 	onGarbageHeap: function (data) {
+
 		const { Alloc, TotalAlloc, Sys, Lookups, Mallocs, Frees, HeapAlloc, HeapSys, HeapIdle, HeapInuse, HeapReleased, HeapObjects, StackInuse, StackSys, MSpanInuse, MSpanSys, MCacheInuse, MCacheSys, BuckHashSys, GCSys, OtherSys, NextGC, LastGC, PauseTotalNS, PauseNS, PauseEnd, NumGC, GCCPUFraction, EnableGC, DebugGC, BySize } = data;
 
 		console.log('SPJS -GarbageCollectionHeap-');
@@ -3377,12 +3664,15 @@ return { // eslint-disable-line indent
 
 	},
 	onExecRuntimeStatus: function (data) {
+
 		const { ExecRuntimeStatus, OS, Arch, Goroot, NumCpu } = data;
 
 		// The ExecRuntimeStatus message is a result of calling the 'execruntime' command.
 		// Ex. { "ExecRuntimeStatus": "Done", "OS": "windows", "Arch": "amd64", "Goroot": "/usr/local/go", "NumCpu": 4 }
 
 		console.log('SPJS -ExecRuntimeStatus-');
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'ExecRuntimeStatus' });
 
 		const statusMeta = {
@@ -3393,12 +3683,16 @@ return { // eslint-disable-line indent
 
 	},
 	onExecStatus: function (data) {
+
+		const { ExecStatus, Id, Cmd, Args, Output } = data;
+
 		// Ex. { "ExecStatus": "Error", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "cd thermika" ], "Output": "Error trying to execute terminal command. No user/pass provided or command line switch was not specified to allow exec command. Provide a valied username/password or restart spjs with -allowexec command line option to exec command." }
 		// Ex. { "ExecStatus": "Progress", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
 		// Ex. { "ExecStatus": "Done", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
-		const { ExecStatus, Id, Cmd, Args, Output } = data;
 
 		console.log('SPJS -ExecStatus-');
+
+		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'ExecStatus' });
 
 		const statusMeta = {
@@ -3428,30 +3722,59 @@ return { // eslint-disable-line indent
 
 	},
 	onParseError: function (data) {
+
 		// Ex. { "Error" : "Problem decoding json. giving up. json: {"P":"COM11","Data":[{"D":"Hi ","Id":"mdi-com11log0"}]}, err:invalid character '\n' in string literal" }
 
 		console.group(`SPJS -ParseError-\n  Error: ${Error}`);
 
 		if (data.includes('Problem decoding json. giving up. json: ') && data.includes(', err:')) {
 
-			let a = data.indexOf('json: ') + 6;
-			let b = data.indexOf(', err:');
+			const a = data.indexOf('json: ') + 6;
+			const b = data.indexOf(', err:');
 
 			const refMsg = data.substring(a, b);
 			console.log(`refMsg: ${refMsg}`);
 
-			if (!this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'JSON Error' })) {
+			let { matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'JSON Error' });
+
+			// If no match was found, try to parse the Id from the error message so that it can be used to try and find the responsible message in the log.
+			if (!matchFound && data.includes('"Id":"') && (/\"[\}\]]+,/).test(data)) {
 
 				console.log('Match not found.\nTrying to get Id from error report.');
 
-				if (data.includes('"Id":"') && (/\"[\}\]]+,/).test(data)) {
+				const c = data.indexOf('"Id":"') + 6;
+				const d = data.indexOf(data.match(/\"[\}\]]+,/)[0]);
+				const refId = data.substring(c, d);
 
-					let a = data.indexOf('"Id":"') + 6;
-					let b = data.indexOf(data.match(/\"[\}\]]+,/)[0]);
+				console.log(`refId: ${refId}`);
 
-					// console.log(`match: ${data.match(/\"[\}\]]+,/)}\nStartIndex: ${a}\nEndIndex: ${b}`);
+				({ matchFound } = this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Error', Comment: 'JSON Error' }));
 
-					const refId = data.substring(a, b);
+			}
+
+			// If no match was found, try to parse the Id from the error message (again but in a slightly different way) so that it can be used to try and find the responsible message in the log.
+			if (!matchFound && data.includes('"Id":"')) {
+
+				const c = data.indexOf('"Id":"') + 6;
+				let d = 0;
+
+				for (let i = c; i < data.length; i++) {
+
+					if (data[i] === '"') {
+
+						d = i;
+
+						break;
+
+					}
+
+				}
+
+				// If a valid range was found, try finding a command with a matching Id.
+				if (d > c) {
+
+					const refId = data.substring(c, d);
+
 					console.log(`refId: ${refId}`);
 
 					this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Error', Comment: 'JSON Error' });
@@ -3465,7 +3788,7 @@ return { // eslint-disable-line indent
 		console.groupEnd();
 
 	},
-	makePortSafe(unsafePortName) {
+	makePortSafe: function (unsafePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
 		const portList = this.SPJS.portList;
@@ -3481,25 +3804,47 @@ return { // eslint-disable-line indent
 
 				// If the ports match case-insensitive.
 				if (port.toLowerCase() === safePortName.toLowerCase()) {
+
 					safePortName = port;
 					// console.log(`The safePortName: '${safePortName}' not found in the serial ports list.\nChanged safePortName to: '${safePortName}'.`);
 
 					break;
+
 				}
 
 			}
+
 		}
 
 		return safePortName;
+
 	},
-	makePortUnSafe(safePortName) {
+	makePortUnSafe: function (safePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
 		let unsafePortName = safePortName ? safePortName.replace(/fs-|-fs-/g, '/') : safePortName;
 
 		return unsafePortName;
+
 	},
 
+	/**
+	 *  Sends messages to the SPJS.
+	 *
+	 *  @method newspjsSend
+	 *
+	 *  @param  {string}    Msg               The message that is to be sent to the SPJS.
+	 *  @param  {string}    Id                (opt) The unique identifier that will be attached to this message in the console log.
+	 *  @param  {string}    IdPrefix          (opt) If Id is omitted but IdPrefix is provided, a new identifier based on the IdPrefix, port, and line number will be created.
+	 *  @param  {string}    [Type='Command']  (opt) The type of message that is to be sent. (eg. 'Command' or 'MdiCommand')
+	 *  @param  {string}    Status            (opt) The status of the message when it is added to the console log.
+	 *  @param  {string}    Comment           (opt) The comment that will be displayed beside the message in the console log.
+	 *  @param  {object}    Related           [description]
+	 *  @param  {Array}     [Meta=[]]         [description]
+	 *  @param  {number}    [recursionDepth=0]              Counter used internally by this method to keep track of recursion depth to prevent infinite looping.
+	 *
+	 *  @return {string}    cmdId             The id that was used for the message in the console log.
+	 */
 	newspjsSend: function ({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [], recursionDepth = 0 }) {
 		// Arg. recursionDepth - Counter used by this method internally to keep track of recursion depth to prevent infinite looping.
 
@@ -3517,6 +3862,7 @@ return { // eslint-disable-line indent
 			console.log('The SPJS is not open.');
 
 			Comment = Comment ? `${Comment}] [SPJS Closed` : 'SPJS Closed';
+
 			const { cmdId } = this.consoleLog.appendMsg('SPJS', { Msg, Id, IdPrefix, Type, Status: 'Error', Comment, Related, Meta });
 
 			return false;
@@ -3540,15 +3886,17 @@ return { // eslint-disable-line indent
 
 				// Limit the number of recursion events to prevent infinite loop.
 				if (recursionDepth >= 15) {
-					throw 'The newspjsSend method may be stuck in an infinite loop trying to send a \'list\' command.';
+					throw new Error('The newspjsSend method may be stuck in an infinite loop trying to send a \'list\' command.');
 				}
 
 				// Try sending the list command again as there may me multiple pending list commands in the SPJS that may or may not be stale.
 				recursionDepth += 1;
-				return newspjsSend({ Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta, recursionDepth });
+
+				return this.newspjsSend({ Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta, recursionDepth });
 
 			} else if (matchFound) {
 				console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
+
 				return false;
 
 			}
@@ -3563,14 +3911,18 @@ return { // eslint-disable-line indent
 
 		// Since there was an error sending the command, show the error in the log and return false.
 		} catch (err) {
+
 			console.log(`Could not send command to the SPJS.\nError: ${err}`);
+
 			this.consoleLog.updateCmd('SPJS', { Id: cmdId, Status: 'Error', Comment: 'SPJS Closed' });
 
 			return false;
+
 		}
 
 		// Return the command id to indicate that the command was sent successfully.
 		return { cmdId };
+
 	},
 	newportSend: function (port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
 
@@ -3703,7 +4055,7 @@ return { // eslint-disable-line indent
 						let idItemZeros = idDeltaLen > 0 ? idDeltaLen : 0;
 
 						item.Id = `${idBase}${'0'.repeat(idItemZeros)}${idItemSuffix}`;
-						console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDataLen: ${idDataLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
+						console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDeltaLen: ${idDeltaLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
 
 					}
 
@@ -3931,23 +4283,53 @@ return { // eslint-disable-line indent
 		}
 
 	},
+	portFeedstop(port) {
+
+		const { waitQueueFlushOnFeedstop, waitCycleResumeOnFeedstop } = this.SPJS;
+
+		// helloworld
+		// this.newportSendNoBuf(port, { Msg: '!' });
+		this.newportSendJson(port, { Msg: '!\n' });
+
+		setTimeout(() => {
+
+			// Queue Flush.
+			this.newportSendJson(port, { Msg: '%\n' });
+
+		}, waitQueueFlushOnFeedstop);
+
+		// setTimeout(() => {
+		//
+		// 	// Cycle Resume.
+		// 	this.newportSendJson(port, { Msg: '~' });
+		//
+		// }, waitQueueFlushOnFeedstop + waitCycleResumeOnFeedstop);
+
+	},
 
 	// Deprecated Jan. 07, 2017:
 	spjsSend: function (cmd, id, Related, Status, Comment, Meta) {
+
 		console.log('SPJS Send:\n  ' + cmd);
 
 		// If the cmd argument is 'list' and the SPJS is already processing a 'list' command, exit this method.
 		if (cmd === 'list') {
+
 			const { matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap });
 			const deltaTime = matchTime && Date.now() - matchTime;
 			// console.log(`matchTime: ${matchTime}\ndeltaTime: ${deltaTime}\nstaleCmdLimit: ${this.consoleLog.staleCmdLimit}`);
 
 			if (matchTime && deltaTime > this.consoleLog.staleCmdLimit) {
+
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
+
 			} else if (matchTime) {
+
 				console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
 				return false;
+
 			}
+
 		}
 
 		const Type = (id === 'mdi') ? 'MdiCommand' : 'Command';
@@ -4112,27 +4494,29 @@ return { // eslint-disable-line indent
 	// 	// Return false so that the caller knows that no matching command was found.
 	// 	return false;
 	// },
-	truncateLog: function (port) {
-		// This method removes excess lines of the respective console log to prevent performance issues. This gets called once a console log reaches consoleLog.maxLineLimit and truncates the log to consoleLog.minLineLimit.
-		// Arg. port - The console log to be truncated.
 
-		// console.groupCollapsed("Truncate Log" + gui.parseObject(arguments, 2));
-		const logPanel = $('#' + this.id + ' .console-log-panel .log-' + port);
-		var portLog = this.consoleLog[port];
+	// Phase Out: Mar. 13, 2017
+	// truncateLog: function (port) {
+	// 	// This method removes excess lines of the respective console log to prevent performance issues. This gets called once a console log reaches consoleLog.maxLineLimit and truncates the log to consoleLog.minLineLimit.
+	// 	// Arg. port - The console log to be truncated.
+	//
+	// 	// console.groupCollapsed("Truncate Log" + gui.parseObject(arguments, 2));
+	// 	const logPanel = $('#' + this.id + ' .console-log-panel .log-' + port);
+	// 	var portLog = this.consoleLog[port];
+	//
+	//  var logHtml = logPanel.html();
+	// 	var logHtmlArray = logHtml.split('<br>').slice(this.consoleLog.minLineLimit * -1);
+	// 	logHtml = logHtmlArray.join('<br>');
+	//
+	//
+	// 	$('#' + this.id + ' .console-log-panel .log-' + port).html(logHtml);
+	//
+	// 	portLog.lineCount = this.consoleLog.minLineLimit;
+	//
+	// 	// console.log("logHtmlArray:" + gui.parseObject(logHtmlArray, 2));
+	// 	// console.groupEnd();
+	// },
 
-		var logHtml = logPanel.html();
-		var logHtmlArray = logHtml.split('<br>').slice(this.consoleLog.minLineLimit * -1);
-		logHtml = logHtmlArray.join('<br>');
-
-		// console.log("msgCount: " + portLog.msgCount + "\nlogHtmlArray.length: " + logHtmlArray.length);
-
-		$('#' + this.id + ' .console-log-panel .log-' + port).html(logHtml);
-
-		portLog.lineCount = this.consoleLog.minLineLimit;
-
-		// console.log("logHtmlArray:" + gui.parseObject(logHtmlArray, 2));
-		// console.groupEnd();
-	},
 	// FIXME: Fix how input values are taken... cuz its shit atm.
 	// FIXME: When the active log changes, scroll to the bottom of that log if it was previously scrolled to the bottom.
 	// FIXME: Do not allow SPJS commands to be sent from the input field if not connected to a SPJS.
@@ -4246,5 +4630,6 @@ return { // eslint-disable-line indent
 		$(consoleLogPanel).scrollTop($(consoleLogPanel).prop('scrollHeight'));
 		// console.log(activeLog + gui.parseObject(this.consoleLog, 2));
 	}
-};	/* return */
-});	/* define */
+
+})  /* arrow-function */
+);	/* define */

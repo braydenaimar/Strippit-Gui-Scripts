@@ -39,7 +39,7 @@ code.text-default {
 	border-bottom: 1px solid #ddd;
 }
 .panel > .panel-body {
-	padding: 0px;
+	padding: 0;
 }
 .panel > .panel-footer {
 	border-top: 1px solid #ddd;
@@ -48,7 +48,7 @@ code.text-default {
 	margin: 0;
 }
 .pagination-sm > li > span {
-	padding: 0px 7px;
+	padding: 0 7px;
 	font-size: 12px;
 }
 
@@ -122,7 +122,7 @@ h1, h2, h3, h4, h4, h5, h6 {
 /* Widget Label */
 #header-widget-label {
 	font-size: 20px;
-	margin: 1px 0px;
+	margin: 1px 0;
 	padding-left: 4px;
 }
 #header-widget-icon {
@@ -157,7 +157,7 @@ h1, h2, h3, h4, h4, h5, h6 {
 	padding: 0;
 	/*padding: 10px 6px 6px 6px;*/
 	margin-bottom: 10px;
-	border-radius: 0px;
+	border-radius: 0;
 }
 
 #sidebar .btn div:first-child {
@@ -187,8 +187,8 @@ h1, h2, h3, h4, h4, h5, h6 {
 	/*-webkit-app-region: drag;*/
 	position: fixed;
 	top: 33px;
-	left: 0px;
+	left: 0;
 	right: 90px;
-	bottom: 0px;
-	padding: 0px;
+	bottom: 0;
+	padding: 0;
 }

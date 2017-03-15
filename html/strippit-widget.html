@@ -23,7 +23,7 @@
 		</span>
 
 		<!-- DRO Value -->
-		<div class="well dro-well dro-pos-well" data-axis="x">
+		<div class="well dro-well dro-pos-well flat-left" data-axis="x">
 
 			<h2 class="dro-pos">
 				<table style="font-size: 28px"><tr><td style="width:70px; text-align:right"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table>
@@ -45,7 +45,7 @@
 		</span>
 
 		<!-- DRO Value -->
-		<div class="well dro-well dro-pos-well" data-axis="y">
+		<div class="well dro-well dro-pos-well flat-left" data-axis="y">
 			<h2 class="dro-pos"><table style="font-size: 28px;"><tr><td style="width:70px;text-align:right;"><span class="xyz-negpos xyz-dimmed" >-</span><span class="xyz-intgray xyz-dimmed">00</span><span class="xyz-intblack">0</span></td><td>.<span class="xyz-decimal">000</span></td></tr></table></h2>
 			<div class="dro-dim">mm</div>
 		</div>
@@ -57,14 +57,14 @@
 
 	<div class="btn-header">
 
-		<div class="btn-group step-btns">
+		<div class="btn-group-vertical step-btns">
 
-			<span class="btn btn-md btn-default btn-stepbck flatright" btn-signal="control" btn-data="prev"><span class="glyphicon glyphicon-step-backward"></span></span>
-			<span class="btn btn-md btn-default btn-stepfwd flatleft" btn-signal="control" btn-data="next"><span class="glyphicon glyphicon-step-forward"></span></span>
+			<span class="btn btn-xl btn-default btn-stepfwd" btn-signal="control" btn-data="next"><span class="glyphicon glyphicon-step-forward"></span></span>
+			<span class="btn btn-xl btn-default btn-stepbck" btn-signal="control" btn-data="prev"><span class="glyphicon glyphicon-step-backward"></span></span>
 
 		</div>
 
-		<div class="btn-group control-btns">
+		<div class="btn-group-vertical control-btns">
 
 			<span class="btn btn-xl btn-default btn-saveto" btn-signal="control" btn-data="save"><span class="glyphicon glyphicon-floppy-disk"></span></span>
 			<span class="btn btn-xl btn-default btn-delete" btn-signal="control" btn-data="delete"><span class="glyphicon glyphicon-floppy-remove"></span></span>
@@ -75,46 +75,28 @@
 	</div>
 
 	<div class="left-btns">
+
 		<span class="btn btn-xl btn-default pos-1" btn-signal="position" btn-data="1">1</span>
 		<span class="btn btn-xl btn-default pos-3" btn-signal="position" btn-data="3">3</span>
 		<span class="btn btn-xl btn-default pos-5" btn-signal="position" btn-data="5">5</span>
 		<span class="btn btn-xl btn-default pos-7" btn-signal="position" btn-data="7">7</span>
 		<span class="btn btn-xl btn-default pos-9" btn-signal="position" btn-data="9">9</span>
 		<span class="btn btn-xl btn-default pos-11" btn-signal="position" btn-data="11">11</span>
+
 	</div>
 
 	<div class="right-btns">
+
 		<span class="btn btn-xl btn-default pos-2" btn-signal="position" btn-data="2">2</span>
 		<span class="btn btn-xl btn-default pos-4" btn-signal="position" btn-data="4">4</span>
 		<span class="btn btn-xl btn-default pos-6" btn-signal="position" btn-data="6">6</span>
 		<span class="btn btn-xl btn-default pos-8" btn-signal="position" btn-data="8">8</span>
 		<span class="btn btn-xl btn-default pos-10" btn-signal="position" btn-data="10">10</span>
 		<span class="btn btn-xl btn-default pos-12" btn-signal="position" btn-data="12">12</span>
+
 	</div>
 
 </div>
-
-<!-- Jog Controls -->
-<!-- <div id="strippit-jog" class="hidden">
-	<div class="jog-left-btns">
-		<div class="btn-group">
-			<button type="button" class="btn btn-xs btn-default btn-jog-pt25">1/4</button>
-			<button type="button" class="btn btn-xs btn-default btn-jog-1">1</button>
-		</div>
-		<button type="button" class="btn btn-md btn-default btn-jog-x"><span class="glyphicon glyphicon-plus"></span> X</button>
-	</div>
-	<div class="jog-middle-btns">
-		<button type="button" class="btn btn-md btn-default btn-jog-y"><span class="glyphicon glyphicon-plus"></span> Y</button>
-		<button type="button" class="btn btn-md btn-default btn-jog-yneg"><span class="glyphicon glyphicon-minus"></span> Y</button>
-	</div>
-	<div class="jog-right-btns">
-		<div class="btn-group">
-			<button type="button" class="btn btn-xs btn-default btn-jog-6">6</button>
-			<button type="button" class="btn btn-xs btn-default btn-jog-12">12</button>
-		</div>
-		<button type="button" class="btn btn-md btn-default btn-jog btn-jog-xneg"><span class="glyphicon glyphicon-minus"></span> X</button>
-	</div>
-</div> -->
 
 <!-- Calculator -->
 <div id="strippit-calc">
@@ -128,6 +110,7 @@
 
 	<!-- Calculator Buttons -->
 	<div class="calc-buttons">
+
 		<!-- Calc Btn Column 1 -->
 		<div class="column-1">
 
@@ -160,7 +143,7 @@
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="9">9</span>
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="6">6</span>
 			<span class="btn btn-md btn-default btn-number" btn-signal="number" btn-data="3">3</span>
-			<span class="btn btn-md btn-default btn-unavailable" btn-signal="function" btn-data="equal">=</span>
+			<span class="btn btn-md btn-default btn-unavailable hidden" btn-signal="function" btn-data="equal">=</span>
 
 		</div>
 
