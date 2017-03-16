@@ -2425,7 +2425,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 		// If there are no ports on SPJS and requestListDelay is set, request a new list.
-		if (!data.length && requestListDelay !== null) {
+		if (!this.SPJS.openPorts.length && requestListDelay) {
 
 			setTimeout(() => that.newspjsSend({ Msg: 'list', Comment: 'Auto List' }), requestListDelay);
 
