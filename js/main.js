@@ -292,7 +292,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		});
 
-		// subscribe(`/${this.ws.id}/all-widgets-loaded`, this, updateGitRepo.bind(this));
+		subscribe(`/${this.ws.id}/all-widgets-loaded`, this, updateGitRepo.bind(this));
 
 		// Tells widgets that visibility has been changed so they can stop/resume dom updates if required
 		subscribe(`/${this.ws.id}/make-widget-visible`, this, makeWidgetVisible.bind(this));
