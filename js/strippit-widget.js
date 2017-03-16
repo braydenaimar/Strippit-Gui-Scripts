@@ -9,6 +9,8 @@
  *  @author Brayden Aimar
  */
 
+
+define([ 'jquery' ], $ => ({
 	id: 'strippit-widget',
 	name: 'Strippit Punch Press',
 	shortName: 'Strippit',
