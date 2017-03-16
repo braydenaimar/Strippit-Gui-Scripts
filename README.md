@@ -57,6 +57,8 @@ If you are having issues, you may need to add the program to the list of exclusi
 11. Select the `serial-port-json-server.exe` file (Note, depending on your computer, this file may show as `serial-port-json-server` with a file type of 'Application').
 12. Select `Exclude this file`.
 
+To clone a different branch run `git clone -b <branch> https://github.com/braydenaimar/Strippit-Gui-Scripts.git`.
+
 File Tree
 -----
 Below a snapshot of the structure of files and folders of the application after installation on Windows.
