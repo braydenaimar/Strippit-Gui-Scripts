@@ -48,8 +48,8 @@ define([ 'jquery' ], $ => ({
 	 *  @type {Object}
 	 */
 	machLimits: {
-		x: [ 6.5, 104.3 ],
-		y: [ 0, 28.67 ]
+		x: [ 6.5, 102.5 ],
+		y: [ 0.125, 28.125 ]
 	},
 
 	// Stores the latest machine position.
@@ -57,14 +57,6 @@ define([ 'jquery' ], $ => ({
 		x: 0,
 		y: 0
 	},
-
-	/**
-	 *  Stores a count of the number of commands have been sent to a device on the SPJS from this widget.
-	 *  This is used to send line numers with GCode move commands.
-	 *
-	 *  @type {number}
-	 */
-	commandCount: 0,
 
 	initBody() {
 
@@ -610,7 +602,7 @@ define([ 'jquery' ], $ => ({
 
 	setAxis(axis) {
 
-		const { port, commandCount } = this;
+		const { port } = this;
 		let [ lowLimit, highLimit ] = this.machLimits[axis];
 		const { value } = this.calc;
 
@@ -641,12 +633,18 @@ define([ 'jquery' ], $ => ({
 		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;
 
 		// Note that the z-axis is used instead of the x-axis.
-		const Msg = `N${commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`;
+		// const Msg = `N${commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`;
 
-		publish('/connection-widget/port-sendjson', port, { Msg });
+		const Data = [
+			{ Msg: 'M08', Pause: 150 },
+			{ Msg: `N${this.savepos.commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`, Pause: 100 },
+			{ Msg: 'M09', Pause: 150 }
+		];
+
+		publish('/connection-widget/port-sendjson', port, { Data });
 
 		// Keep track of the number of commands that have been sent.
-		this.commandCount += 1;
+		this.savepos.commandCount += 1;
 
 		// Clear the value in the calculator so that the next value can be entered.
 		this.calc.updateDOM('');
@@ -667,6 +665,13 @@ define([ 'jquery' ], $ => ({
 		saveSelection: false,
 		clearSelection: false,
 		savedPos: [],
+		/**
+		 *  Stores a count of the number of commands have been sent to a device on the SPJS from this widget.
+		 *  This is used to send line numers with GCode move commands.
+		 *
+		 *  @type {number}
+		 */
+		commandCount: 1,
 
 		setPrevPos(port) {
 
@@ -726,9 +731,17 @@ define([ 'jquery' ], $ => ({
 			// If this is an invalid update, skip the update.
 			if (this.savedPos[pos - 1] === null) return false;
 
+			const Data = [
+				{ Msg: 'M08', Pause: 150 },
+				{ Msg: `N${this.commandCount} G0 Z${this.savedPos[pos - 1]}`, Pause: 100 },
+				{ Msg: 'M09', Pause: 150 }
+			];
+
 			// Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis).
-			const Msg = `g0 z${this.savedPos[pos - 1]}`;
-			publish('/connection-widget/port-sendjson', port, { Msg });
+			publish('/connection-widget/port-sendjson', port, { Data });
+
+			// Keep track of the number of commands that have been sent.
+			this.commandCount += 1;
 
 			// If another position slot is active, deactivate the currently active position slot.
 			if (this.currentPos !== null) {

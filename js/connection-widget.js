@@ -286,10 +286,45 @@ define([ 'jquery' ], $ => ({
 			],
 			'pause': 100
 		},
+		{   // Punch Press TinyG
+			// 'SerialNumber': '',
+			'Buffer': 'tinyg',
+			'script': [
+				{ Msg: '{"ec":0}', Pause: 50 }, // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+				{ Msg: '{"ej":1}', Pause: 50 }, // Enable JSON Mode [ 0 = text, 1 = JSON ]
+				{ Msg: '{"js":1}', Pause: 50 }, // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+				{ Msg: '{"jv":4}', Pause: 200 }, // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+				{ Msg: '{"si":250}', Pause: 50 }, // Status Interval [ms]
+				{ Msg: '{"sv":1}', Pause: 50 }, // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
+				{ Msg: '{"sr":{"line":t,"posx":t,"posy":t,"posz":t,"vel":t,"unit":t,"stat":t,"feed":t,"coor":t,"momo":t,"plan":t,"path":t,"dist":t,"mpox":t,"mpoy":t,"mpoz":t}}', Pause: 200 },
+				{ Msg: '{"qv":1}', Pause: 50 }, // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
+				// { Msg: 'G17', Pause: 200 }, // XY Work Plane
+				// { Msg: 'G94', Pause: 200 }, // Units per Minute Feedrate Mode
+				// { Msg: 'G90', Pause: 200 }, // Absolute Distance Mode
+				{ Msg: 'G21', Pause: 300 }, // Millimeters Mode
+				{ Msg: '{"z":{"am":1,"vm":14500,"fr":14500,"tn":0,"tm":2440,"jm":230,"jh":800}}', Pause: 1000 }, // X-Axis Settings
+				{ Msg: '{"z":{"jd":0.05,"sn":1,"sx":0,"sv":2000,"lv":200,"lb":25,"zb":0.254}}', Pause: 1000 },
+				{ Msg: '{"y":{"am":1,"vm":3800,"fr":3800,"tn":0,"tm":720,"jm":15,"jh":100}', Pause: 1000 },	// Y-Axis Settings
+				{ Msg: '{"y":{"jd":0.05,"sn":1,"sx":0,"sv":1000,"lv":200,"lb":100,"zb":6.35}}', Pause: 1000 },
+				{ Msg: 'G20', Pause: 300 }, // Inches Mode
+				{ Msg: '{"2":{"ma":2,"sa":1.8,"tr"0.5233:,"mi":8,"po":1,"pm":3}}', Pause: 500 },
+				{ Msg: '{"3":{"ma":1,"sa":1.8,"tr":1.1515,"mi":8,"po":1,"pm":3}}', Pause: 500 },
+				{ Msg: 'M08', Pause: 200 }, // Lift the Finger Solenoid
+				{ Msg: 'G28.2 Y0 Z0', Pause: 2000 }, // Home Axes
+				{ Msg: 'M09', Pause: 200 }, // Drop the Finger Solenoid
+				{ Msg: 'G10 L2 P1 Y-3.601 Z-6.526', Pause: 200 }, // Set the G54 Work Offsets
+				// { Msg: '{hp:n}', Pause: 200 }, // Request Hardware Platform
+				// { Msg: '{fb:n}', Pause: 200 }, // Request Firmware Build
+				{ Msg: '{"sr":n}', Pause: 50 }, // Request Status Report
+				{ Msg: '{"qr":n}', Pause: 50 } // Request Queue Report
+			],
+			'pause': 500
+		},
 		{   // Arduino Due
 			'Buffer': 'tinygg2',
 			'script': [
-				'{sv:1}',
+				{ Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t,mpox:t,mpoy:t,mpoz:t}}', Pause: 200 },
+				'{sv:1}', // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
 				'{si:250}',
 				'{qv:2}',
 				'{jv:4}',
@@ -3117,32 +3152,38 @@ define([ 'jquery' ], $ => ({
 
 			console.log(`i: ${i}`);
 
-			let misMatch = 0;
-			let scriptItem = this.initScripts[i];
+			const scriptItem = this.initScripts[i];
+			const scriptItemKeys = Object.keys(scriptItem);
 
-			Object.keys(scriptItem).forEach((key, index) => {
+			let matchFound = true;
 
-				// key: the name of the object key
-				// index: the ordinal position of the key within the object
+			// Check if this init script should be used.
+			for (let j = 0; j < scriptItemKeys.length; j++) {
 
-				console.log(`key: ${key}`);
+				const keyItem = scriptItemKeys[j];
+				const keyItemValue = scriptItem[keyItem];
 
-				if (key !== 'script' && key !== 'pause') {
+				console.log(`keyItem: ${keyItem}`);
 
-					if ((key === 'Friendly' || key === 'Baud' || key === 'Buffer') && meta[key] !== scriptItem[key]) {
-						misMatch += 1;
+				if (keyItem !== 'script' && keyItem !== 'pause') {
 
-					} else if (key === 'SerialNumber' && portData[key] !== scriptItem[key]) {
-						misMatch += 1;
+					if ((keyItem === 'Friendly' || keyItem === 'Baud' || keyItem === 'Buffer') && scriptItem[keyItem] !== meta[keyItem]) {
+						matchFound = false;
+
+					} else if (keyItem === 'SerialNumber' && scriptItem[keyItem] !== portData[keyItem]) {
+						matchFound = false;
+
+					} else if (keyItem === 'HostName' && scriptItem[keyItem] !== hostMeta.hostName) {
+						matchFound = false;
 
 					}
 
 				}
 
-			});
+			}
 
-			// If there is no mis-matching info, send the script.
-			if (!misMatch) {
+			// If all the conditions of this script match, send this script to this port.
+			if (matchFound) {
 
 				console.groupEnd();
 
@@ -4072,7 +4113,10 @@ define([ 'jquery' ], $ => ({
 		// If the id ends in a number, the following id's will be increments of that number. Otherwise add '-0', '-1', '-2', ... '-n' to the end of each id (ie. 'init-0').
 		// An Id must be passed to this method either in each Data array element or the Id argument.
 		// Arg. Data [string] or [arrray[string]] [array[array[string/int]]] - If only sending one command, the id and pause values must be passed into their respective arguments and not in the form of [array[string/int]] as the parser will read that as an array of commands.
-		// 	Ex. [ [msg0,(id0),(pause0)], [msg1,(id1),(pause1)], ..., [msgn,(idn),(pausen)] ]
+		// 	 The Data argument can also take Status, Comment, and Meta arguments.
+		// 	 Ex. Data: [ [msg0,(id0),(pause0)], [msg1,(id1),(pause1)], ..., [msgn,(idn),(pausen)] ]
+		//   Ex. Data: [ { Msg:msg0, Id:id0 }, { Msg:msg1, Id:id1 }, ..., { Msg:msgn, Id:idn } ]
+		//   Ex. Data: [ { Msg:msg0, Id:id0, Pause:pause0 }, { Msg:msg1, Id:id1, Pause:pause1 }, ..., { Msg:msgn, Id:idn, Pause:pausen } ]
 		// Arg. Msg [string] - Can be used instead of Data for single line commands.
 		// Arg. Id [string] - If there are multiple msgs and the id ends with a number, the number will be incremented automatically for each msg. Otherwise, a suffix (ie. '-0', '-1', '-2', ... '-n') will be added to the end of each id.
 
@@ -4090,7 +4134,7 @@ define([ 'jquery' ], $ => ({
 		let idBase;
 		let idSuffix;
 
-		if (typeof port == 'undefined') throw 'The port argument was not passed properly.';
+		if (typeof port == 'undefined') throw new Error('The port argument was not passed properly.');
 
 		// Msg argument can be used instead of Data argument to pass a single command.
 		if (typeof Data == 'undefined' && typeof Msg != 'undefined') {
@@ -4142,11 +4186,11 @@ define([ 'jquery' ], $ => ({
 
 					}
 
-					item.Pause = Data[i].Pause !== undefined ? Data[i].Pause : Pause;
-					item.Status = Data[i].Status !== undefined ? Data[i].Status : Status;
-					item.Comment = Data[i].Comment !== undefined ? Data[i].Comment : Comment;
+					item.Pause = typeof Data[i].Pause != 'undefined' ? Data[i].Pause : Pause;
+					item.Status = typeof Data[i].Status != 'undefined' ? Data[i].Status : Status;
+					item.Comment = typeof Data[i].Comment != 'undefined' ? Data[i].Comment : Comment;
 					// item.Related = Data[i].Related !== undefined ? Data[i].Related : Related;
-					item.Meta = Data[i].Meta !== undefined ? Data[i].Meta : Meta;
+					item.Meta = typeof Data[i].Meta != 'undefined' ? Data[i].Meta : Meta;
 
 				// The Data argument is [array[string]].
 				// Eg. Data: [ msg0, msg1, ..., msgn ], Id: id0, Pause: pause0
