@@ -3683,7 +3683,7 @@ define([ 'jquery' ], $ => ({
 
 					}
 
-					const logBotMsg = `${Label} [${port}:${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
+					const logBotMsg = `${Label} [${port}${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
 
 					// Add a log bot message to the port's console log.
 					if (logBotPort) this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
