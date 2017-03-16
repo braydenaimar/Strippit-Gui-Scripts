@@ -101,7 +101,7 @@ define([ 'jquery' ], $ => ({
 		 *
 		 *  @type {number}
 		 */
-		wsReconnectDelay: 2000,
+		wsReconnectDelay: 4000,
 		/**
 		 *  Sets if a new spjs is launched after an exit command is issued to the current spjs.
 		 *  If false, a new spjs may be launched based on the setting of wsReconnectDelay.
@@ -132,13 +132,13 @@ define([ 'jquery' ], $ => ({
 		// The maximum number of instructions that can be sent to the SPJS at a time.
 		maxLinesAtATime: 100,
 		/**
-		 *  The time (milliseconds) that is waited before sending a queue flush command to a device after the feedstop command.
+		 *  The time (ms) that is waited before sending a queue flush command to a device after the feedstop command.
 		 *
 		 *  @type {number}
 		 */
 		waitQueueFlushOnFeedstop: 2000,
 		/**
-		 *  The time (milliseconds) that is waited before sending a cycle resume command to a device after the queue flush command.
+		 *  The time (ms) that is waited before sending a cycle resume command to a device after the queue flush command.
 		 *
 		 *  @type {number}
 		 */
@@ -415,17 +415,15 @@ define([ 'jquery' ], $ => ({
 		 */
 		logBotOnPortOpen: true,
 		/**
-		 *  Set this to have the log bot add a message below port data messages in the port's console log that contain abnormal status codes in the footer message.
+		 *  Set this to enable/disable the log bot messages in the port and SPJS console logs when there is a abnormal status code.
+		 *  'off' - Do not the messages in any logs.
+		 *  'port' - Only show the messages in the port's console log.
+		 *  'spjs' - Only show the messages in the SPJS console log.
+		 *  'both' - Only show the messages in both the port's and the SPJS console log.
 		 *
-		 *  @type {Boolean}
+		 *  @type {string}
 		 */
-		logBotOnStatusCodeInPort: true,
-		/**
-		 *  Set this to have the log bot add a message below port data messages in the SPJS console log that contain abnormal status codes in the footer message.
-		 *
-		 *  @type {Boolean}
-		 */
-		logBotOnStatusCodeInSPJS: true,
+		logBotOnStatusCode: 'both',
 		// Set the default line ending to be used for messages sent to ports on the SPJS. This is over-ridden by lineEnding inside each port's respective deviceMeta object.
 		//  NONE: No line ending characters are added to port messages.
 		//  CR: Add a carriage-return character '\r'.
@@ -2397,12 +2395,18 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		// If SPJS has 'no list -> list' or 'list -> no list', show/hide the warning in the port list DOM.
+		// If SPJS has 'no list -> list', hide the warning in the port list DOM.
 		if (diffs.SPJS && diffs.SPJS[0] === 'no list -> list') {
+
 			$(`#${this.id} .serialport-connection-warning`).addClass('hidden');
+
 		}
+
+		// If SPJS has 'list -> no list', show the warning in the port list DOM.
 		if (diffs.SPJS && diffs.SPJS[0] === 'list -> no list') {
+
 			$(`#${this.id} .serialport-connection-warning`).removeClass('hidden');
+
 		}
 
 		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
@@ -2424,18 +2428,12 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		// If there are no ports on SPJS and requestListDelay is set, request a new list.
-		if (!this.SPJS.openPorts.length && requestListDelay) {
-
-			setTimeout(() => that.newspjsSend({ Msg: 'list', Comment: 'Auto List' }), requestListDelay);
-
-		}
-
 		// Build the portMeta object based on the portList and deviceMeta objects.
 		this.buildPortMeta();
 
 		// If just connected to a SPJS that already had ports open on it, try to send connectScripts to those devices.
 		if (diffs.SPJS && diffs.SPJS[0] === 'no list -> list' && this.SPJS.go === null) {
+
 			this.sendConnectScript(this.SPJS.openPorts);
 
 		}
@@ -2443,7 +2441,7 @@ define([ 'jquery' ], $ => ({
 		// Publish the new portList object, portMeta object, and diffs object so that other widgets can react to these changes.
 		publish(`/${this.id}/recvPortList`, { PortList: dataObj, PortMeta: this.SPJS.portMeta, Diffs: diffs });
 
-		// If any ports have been added/removed, call the portListDomUpdate method.
+		// If any ports have been added to the SPJS port list, call the update the serial port list in the DOM and try to auto connect to ports.
 		if (diffs.added) {
 
 			this.portListDomUpdate();
@@ -2452,14 +2450,25 @@ define([ 'jquery' ], $ => ({
 			this.SPJS.openPorts.length || this.autoConnectPorts();
 
 		}
+
+		// If any ports have been removed from the SPJS port list, call the update the serial port list in the DOM.
 		if (diffs.removed) {
 
 			this.portListDomUpdate();
 
 		}
 
+		// If there are no ports on SPJS and requestListDelay is set, request a new list.
+		if (!this.SPJS.openPorts.length && requestListDelay) {
+
+			setTimeout(() => that.newspjsSend({ Msg: 'list', Comment: 'Auto List' }), requestListDelay);
+
+		}
+
 		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
 		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+
+		return true;
 
 	},
 	validifyPortList(data) {
@@ -2817,8 +2826,6 @@ define([ 'jquery' ], $ => ({
 
 		this.portConnected(safePort);
 		this.sendPortInits(safePort);
-
-		// publish(`/${this.id}/port-open`, port);
 
 		// Get port list to keep the portList object up to date.
 		// Use a delay to avoid getting corrupted port list data.
@@ -3601,7 +3608,7 @@ define([ 'jquery' ], $ => ({
 					console.log('sc !== 0');
 
 					const { Code, Label, Desc } = this.lookupStatusCode(sc);
-					const { logBotOnStatusCodeInPort: logBotPort, logBotOnStatusCodeInSPJS: logBotSPJS } = this.consoleLog;
+					const { logBotOnStatusCode } = this.consoleLog;
 
 					let matchFound = false;
 					let matchIndex;
@@ -3683,13 +3690,13 @@ define([ 'jquery' ], $ => ({
 
 					}
 
-					const logBotMsg = `${Label} [${port}${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
+					const logBotMsg = `${Label} [${this.makePortUnSafe(port)}${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
 
-					// Add a log bot message to the port's console log.
-					if (logBotPort) this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
+					// If log bot status code messages is enabled in settings, add a log bot status code message to the port's console log.
+					if (logBotOnStatusCode === 'port' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
 
-					// Add a log bot message to the SPJS console log.
-					if (logBotSPJS) this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
+					// If log bot status code messages is enabled in settings, add a log bot status code message to the SPJS console log.
+					if (logBotOnStatusCode === 'spjs' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
 
 				}
 

@@ -11,6 +11,7 @@
 
 
 define([ 'jquery' ], $ => ({
+
 	id: 'strippit-widget',
 	name: 'Strippit Punch Press',
 	shortName: 'Strippit',
@@ -37,6 +38,25 @@ define([ 'jquery' ], $ => ({
 
 	// Stores the current unit mode (eg. 'inch' or 'mm').
 	unit: '',
+	intomm: 25.4,
+	mmtoin: 0.0393700787401575,
+
+	/**
+	 *  These are the physical hardware limits of the machine (inch).
+	 *  Travel outside these position values will cause a crash.
+	 *
+	 *  @type {Object}
+	 */
+	machLimits: {
+		x: [ 6.5, 104.3 ],
+		y: [ 0, 28.67 ]
+	},
+
+	// Stores the latest machine position.
+	machPosition: {
+		x: 0,
+		y: 0
+	},
 
 	/**
 	 *  Stores a count of the number of commands have been sent to a device on the SPJS from this widget.
@@ -374,7 +394,8 @@ define([ 'jquery' ], $ => ({
 
 		if (updateUnit) {
 
-			const factor = (this.unit === 'mm') ? 25.4 : 0.0393700787401575;
+			// const factor = (this.unit === 'mm') ? 25.4 : 0.0393700787401575;
+			const convFactor = (this.unit === 'mm') ? this.intomm : this.mmtoin;
 			const { posMax, savedPos } = this.savepos;
 
 			// Perform a unit conversion on each position slot.
@@ -383,7 +404,7 @@ define([ 'jquery' ], $ => ({
 				// If this position slot is empty, skip the unit conversion on this position slot.
 				if (savedPos[i] === null) continue;
 
-				this.savepos.savedPos[i] = savedPos[i] * factor;
+				this.savepos.savedPos[i] = savedPos[i] * convFactor;
 
 			}
 
@@ -396,12 +417,6 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-	},
-
-	// Stores the latest machine position.
-	machPosition: {
-		x: 0,
-		y: 0
 	},
 
 	dro: {
@@ -482,10 +497,6 @@ define([ 'jquery' ], $ => ({
 
 		}
 	},
-
-	// Store the value as a string.
-	calcVal: '',
-	calcValDom: $('#strippit-calc > div.calc-display-well > h2.calc-value'),
 
 	calc: {
 
@@ -600,13 +611,32 @@ define([ 'jquery' ], $ => ({
 	setAxis(axis) {
 
 		const { port, commandCount } = this;
+		let [ lowLimit, highLimit ] = this.machLimits[axis];
 		const { value } = this.calc;
+
+		// If the units mode is in mm, convert the machine limits from inches to mm.
+		if (this.unit === 'mm') {
+
+			lowLimit *= this.intomm;
+			highLimit *= this.intomm;
+
+		}
+
+		const valInt = Number(value);
 
 		// If the port name is not valid, do not set the position.
 		if (!port) return false;
 
 		// If the value is empty, do not set the position.
 		if (value === '' || value === '-') return false;
+
+		if (valInt < lowLimit || valInt > highLimit) {
+
+			// Flash a warning.
+
+			return false;
+
+		}
 
 		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;
 
