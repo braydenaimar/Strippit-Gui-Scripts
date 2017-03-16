@@ -255,6 +255,8 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 				alert(errorLog);
 
+				ipc.send('open-dev-tools');
+
 			} else {
 
 				console.log('  check non-resultant');
