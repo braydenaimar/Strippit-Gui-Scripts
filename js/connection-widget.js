@@ -582,7 +582,7 @@ define([ 'jquery' ], $ => ({
 			MdiCommand: true,
 			LogBot: true // Messages that are create by the console log to provide the user with information on important log events.
 		},
-		appendMsg: function (port, { Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta }) {
+		appendMsg(port, { Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta }) {
 			// This method gets called when a message is received from the SPJS and ports on the SPJS.
 			// If Id is provided, it will be used for the message's id.
 			// If Id is omitted but IdPrefix is provided, a new id based on the IdPrefix, port number, and line number will be created.
@@ -662,7 +662,7 @@ define([ 'jquery' ], $ => ({
 					Id = `${IdPrefix}-${port.toLowerCase().replace(/com/i, 'p').replace(/fs-dev-fs-tty/i, '')}n${Line}`;
 
 				} else {
-					Id = Id ? Id : `${port.toLowerCase().replace(/com/i, 'p').replace(/fs-dev-fs-tty/i, '')}n${Line}`;
+					Id = Id || `${port.toLowerCase().replace(/com/i, 'p').replace(/fs-dev-fs-tty/i, '')}n${Line}`;
 				}
 
 				if (this.commentCmdId) {
@@ -739,7 +739,7 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		},
-		buildMsgHTML: function (port, { Msg, Id, IdPrefix, Line, Type, Status, Comment, Related, Meta }) {
+		buildMsgHTML(port, { Msg, Id, IdPrefix, Line, Type, Status, Comment, Related, Meta }) {
 
 			// If the style object says that this message should not be shown, abort this method.
 			if (!this[port].msgShow[Type]) return false;
@@ -755,7 +755,7 @@ define([ 'jquery' ], $ => ({
 			const domMsg = Msg.replace(/\n/g, '').replace(/\r/g, '').replace(/\\"/g, '\"');
 
 			// Build DOM element for the line number and left margin.
-			let msgHTML = `<span class="text-muted" style="font-size: 8px; margin-right: ${(Type === 'Command' || Type === 'MdiCommand') ? '3px':'19px'}; margin-left: 0px;">${domLineNumber}</span>`;
+			let msgHTML = `<span class="text-muted" style="font-size: 8px; margin-right: ${(Type === 'Command' || Type === 'MdiCommand') ? '3px' : '19px'}; margin-left: 0px;">${domLineNumber}</span>`;
 
 			// If this is a command, build DOM elements for command.
 			if (Type === 'Command' || Type === 'MdiCommand') {
@@ -779,13 +779,13 @@ define([ 'jquery' ], $ => ({
 			return msgHTML;
 
 		},
-		truncateLog: function (port) {
+		truncateLog(port) {
 
 			// Have to re-assign index values in the cmdMap and verifyMap objects to point to new locations of items in the logData object and remove pointers to items that have been truncated.
 			// Re-build the port's log using this.buildLog(port).
 
 			// If the port argument is not valid, throw an error.
-			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw 'The port argument is invalid.';
+			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw new Error('The port argument is invalid.');
 
 			const { maxLineLimit, minLineLimit } = this;
 			const { logData, cmdMap, verifyMap } = this[port];
@@ -832,7 +832,7 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		},
-		rebuildLog: function (port) {
+		rebuildLog(port) {
 
 			console.log(`Build the '${port}' log.`);
 
@@ -851,7 +851,8 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		},
-		makeRegExpSafe: function (str) {
+		makeRegExpSafe(str) {
+
 			console.log(`String: ${str}`);
 
 			let safeString = '';
@@ -862,7 +863,7 @@ define([ 'jquery' ], $ => ({
 					safeString += str[i];
 
 				} else {
-					safeString += '\\' + str[i];
+					safeString += `\\${str[i]}`;
 
 				}
 			}
@@ -872,7 +873,7 @@ define([ 'jquery' ], $ => ({
 			return safeString;
 
 		},
-		checkMatchItem: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
+		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
 			// The checkMatchItem method checks for a match between an item in the log and given search criteria.
 
 			console.log('LogItem: %O', LogItem);
@@ -932,8 +933,9 @@ define([ 'jquery' ], $ => ({
 			}
 
 			return true;
+
 		},
-		findItem: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0, SearchBackwards = false }) {
+		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0, SearchBackwards = false }) {
 			// Return logData item of matched command within the specified search space.
 			// Defaults to searching entire logData object, use IndexMap to narrow that search.
 			// Arg. IndexMap [array] (optional) - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
@@ -1094,13 +1096,13 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			console.log(`No match found in '${port}' log for ${ Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))))}: ${data}`);
+			console.log(`No match found in '${port}' log for ${Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))))}: ${data}`);
 			console.groupEnd();
 
 			return { matchFound };
 
 		},
-		updateCmd: function (port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards = false, Status, Comment, PrevComment = 'left', UpdateRelated }) {
+		updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards = false, Status, Comment, PrevComment = 'left', UpdateRelated }) {
 			// This method updates the status of commands in the SPJS console log.
 			// Matches to command data can be partial and are not cose sensitive but matches to command id's have to be exact.
 			// Arg. port - Specifies the console log (eg. "SPJS" or "COM7").
@@ -1121,7 +1123,7 @@ define([ 'jquery' ], $ => ({
 				// return { matchFound: false };
 			}
 
-			console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`))))) }`);
+			console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`)))))}`);
 			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
 			console.log(CSON.stringify(arguments));
 
@@ -1168,7 +1170,7 @@ define([ 'jquery' ], $ => ({
 			if (Status && this.verifyPrecidence.indexOf(matchStatus) < this.verifyPrecidence.indexOf(Status)) {
 
 				// let removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || (Status === 'Completed' && !matchMeta.includes('NumberedGCode'))) ? true : false;
-				const removeItem = (Status === 'Error' || Status === 'Warning' || Status === 'Executed' || Status === 'Completed') ? true : false;
+				const removeItem = !!((Status === 'Error' || Status === 'Warning' || Status === 'Executed' || Status === 'Completed'));
 
 				const bufferLength = this[port].verifyMap.length;
 
@@ -1192,7 +1194,7 @@ define([ 'jquery' ], $ => ({
 					if (this.commentTimeToVerify && (!matchMeta.includes('portSendJson') || (matchMeta.includes('portSendJson') && (port === 'SPJS' || matchMeta.includes('1of1'))))) {
 						const deltaTime = Date.now() - matchTime;
 
-						console.log('Time to ' + Status + ': ' + deltaTime + 'ms');
+						console.log(`Time to ${Status}: ${deltaTime}ms`);
 
 						const timeStr = `${deltaTime}`;
 						let timeComment = 'ms';
@@ -1234,7 +1236,7 @@ define([ 'jquery' ], $ => ({
 						console.log('Item was removed from the verifyMap.');
 
 					} else {
-						throw 'Item was not successfully removed from the verifyMap.';
+						throw new Error('Item was not successfully removed from the verifyMap.');
 
 					}
 
@@ -1260,10 +1262,9 @@ define([ 'jquery' ], $ => ({
 
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex + 1, Status, Comment, PrevComment, UpdateRelated });
 
-				} else {
-					console.log('Redundant Status Update.');
-
 				}
+				console.log('Redundant Status Update.');
+
 
 			}
 
@@ -1362,7 +1363,7 @@ define([ 'jquery' ], $ => ({
 
 	},
 
-	initBody: function () {
+	initBody() {
 
 		console.group(`${this.name}.initBody()`);
 
@@ -1394,7 +1395,7 @@ define([ 'jquery' ], $ => ({
 
 	},
 	// FIXME: Get the settings from a cson file.
-	initSettings: function () {
+	initSettings() {
 
 		const that = this;
 
@@ -1426,7 +1427,7 @@ define([ 'jquery' ], $ => ({
 		//
 		// }
 
-		CSON.parseCSONFile('config/connection-widget_Settings.cson', function (err, result) {
+		CSON.parseCSONFile('config/connection-widget_Settings.cson', (err, result) => {
 
 			console.log('Error:', err, '\nResult:', result);
 
@@ -1485,12 +1486,12 @@ define([ 'jquery' ], $ => ({
 		// console.log('connectScripts:', this.connectScripts);
 
 	},
-	initStatusCodes: function () {
+	initStatusCodes() {
 		// Synchronous file read.
 		const that = this;
 		console.log('Loading Status Codes from cson file.');
 
-		CSON.parseCSONFile('config/TinyG_Status_Codes.cson', function (err, result) {
+		CSON.parseCSONFile('config/TinyG_Status_Codes.cson', (err, result) => {
 			// console.log('Error:', err, '\nResult:', result);
 			that.tinygStatusMeta = result;
 
@@ -1499,19 +1500,19 @@ define([ 'jquery' ], $ => ({
 		// console.log('tinygStatusMeta:', this.tinygStatusMeta);
 
 	},
-	initClickEvents: function () {
+	initClickEvents() {
 
 		const that = this;
 
 		// Console log tab events.
-		$(`#${this.id} .console-log-panel .nav-tabs`).on('click', 'span', function(evt) {
+		$(`#${this.id} .console-log-panel .nav-tabs`).on('click', 'span', function (evt) {
 			// console.log("evt:", evt);
 			// console.log("View " + $(this).attr("evt-data") + " log.");
 			that.consoleLogChangeView($(this).attr('evt-data'));
 		});
 
 		// Serial port list header button events.
-		$(`#${this.id} .splist-panel .panel-heading .btn-group`).on('click', 'span.btn', function(evt) {
+		$(`#${this.id} .splist-panel .panel-heading .btn-group`).on('click', 'span.btn', function (evt) {
 			// console.log("evt:", evt, "\nthis:", this);
 			// console.log("  evt-signal: " + $(evt.currentTarget).attr("evt-signal"));
 			// console.log("  evt-data: " + $(evt.currentTarget).attr("evt-data"));
@@ -1552,7 +1553,7 @@ define([ 'jquery' ], $ => ({
 		});
 
 		// Click events for each port in the serial port list.
-		$('#' + this.id + ' .splist-panel table.serial-port-list').on('click', 'tr', function(evt) {
+		$(`#${this.id} .splist-panel table.serial-port-list`).on('click', 'tr', function (evt) {
 
 			const port = $(this).attr('evt-data');
 			const portMeta = that.SPJS.portMeta;
@@ -1562,7 +1563,7 @@ define([ 'jquery' ], $ => ({
 			const unsafePort = that.makePortUnSafe(port);
 
 			if (that.consoleLog.openLogs.includes(port)) {
-				console.log('Port ' + unsafePort + ' selected.\n  ...closing port.');
+				console.log(`Port ${unsafePort} selected.\n  ...closing port.`);
 
 				// Prevent the port from autoconnecting again.
 				that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
@@ -1570,7 +1571,7 @@ define([ 'jquery' ], $ => ({
 				Msg = `close ${unsafePort}`;
 
 			} else {
-				console.log('Port ' + unsafePort + ' selected.\n  ...opening port.');
+				console.log(`Port ${unsafePort} selected.\n  ...opening port.`);
 
 				// Allow the port to autoconnecting again if it was dissabled by a manual port close.
 				// that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
@@ -1583,11 +1584,11 @@ define([ 'jquery' ], $ => ({
 
 		});
 	},
-	initConsoleInput: function () {
+	initConsoleInput() {
 		// SPJS and serial port inputs.
 		// TODO: Recall past commands by pressing the arrow keys.
-		var that = this;
-		var consoleInputDom = '#' + this.id + ' .console-log-panel .console-input input';
+		let that = this;
+		let consoleInputDom = `#${this.id} .console-log-panel .console-input input`;
 
 		// backspace		8
 		// tab				9
@@ -1629,16 +1630,16 @@ define([ 'jquery' ], $ => ({
 		// close braket:	221
 		// single quote:	222
 
-		$(consoleInputDom).on('keydown', function(evt) {
+		$(consoleInputDom).on('keydown', (evt) => {
 			// console.log("keyCode: " + evt.keyCode);
 			// console.log("key: " + evt.key);
 			// TODO: Set cursor to end of text in the input field after recalling a previous command from the history list.
-			var activeLog = that.consoleLog.activeLog;
-			var activeConsoleLog = that.consoleLog[activeLog];
-			var historyRecallIndex = activeConsoleLog.historyRecallIndex;
+			let activeLog = that.consoleLog.activeLog;
+			let activeConsoleLog = that.consoleLog[activeLog];
+			let historyRecallIndex = activeConsoleLog.historyRecallIndex;
 
-			var key = Number(evt.keyCode);
-			var inputData = $(consoleInputDom).val();
+			let key = Number(evt.keyCode);
+			let inputData = $(consoleInputDom).val();
 
 			// If the 'backspace' key was pressed.
 			if (evt.keyCode == '8') {
@@ -1655,51 +1656,65 @@ define([ 'jquery' ], $ => ({
 
 			// If the 'up-arrow' was pressed.
 			} else if (evt.keyCode == '38') {
-				var history = activeConsoleLog.history;
+
+				let history = activeConsoleLog.history;
 
 				if (historyRecallIndex === null && history.length) {
+
 					activeConsoleLog.historyRecallIndex = 0;
 					$(consoleInputDom).val(activeConsoleLog.history[activeConsoleLog.historyRecallIndex]);
 
 				} else if (historyRecallIndex < history.length - 1) {
-					activeConsoleLog.historyRecallIndex++;
+
+					activeConsoleLog.historyRecallIndex += 1;
 					$(consoleInputDom).val(activeConsoleLog.history[activeConsoleLog.historyRecallIndex]);
+
 				}
 				// activeConsoleLog.historyRecallIndex = (historyRecallIndex === null) ? 0:++historyRecallIndex;
 				// console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
 
 			// If the 'down-arrow' was pressed.
 			} else if (evt.keyCode == '40') {
+
 				if (historyRecallIndex === null) {
 					// $(consoleInputDom).val(this.consoleLog[activeLog].value);
+
 				} else if (historyRecallIndex === 0) {
+
 					activeConsoleLog.historyRecallIndex = null;
 					$(consoleInputDom).val(activeConsoleLog.value);
+
 				} else {
-					activeConsoleLog.historyRecallIndex--;
+
+					activeConsoleLog.historyRecallIndex -= 1;
 					$(consoleInputDom).val(activeConsoleLog.history[activeConsoleLog.historyRecallIndex]);
+
 				}
 				// console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
 
 			// If a character key was pressed.
-			} else if (evt.key.length == 1) {
+			} else if (evt.key.length === 1) {
+
 				// TODO: Fix issue with inserting text into middle of string in input field.
 				inputData += evt.key;
+
 			}
 
 			if (evt.keyCode != '13' && evt.keyCode != '38' && evt.keyCode != '40') {
+
 				activeConsoleLog.value = inputData;
 				activeConsoleLog.historyRecallIndex = null;
 				// console.log(activeLog + ":" + gui.parseObject(that.consoleLog, 2));
 				// console.log(activeLog + " Log:" + gui.parseObject(activeConsoleLog, 2));
+
 			}
 
 		});
 
 	},
 	// FIXME: If the console log was scrolled to the bottom when widget resized, scroll to bottom of log after resize.
-	resizeWidgetDom: function () {
-		// console.group("Resize " + this.id + " window");
+	resizeWidgetDom() {
+
 		// If widget is not visible, do not update the size of DOM elements.
 		if (!this.widgetVisible) return false;
 
@@ -1710,41 +1725,42 @@ define([ 'jquery' ], $ => ({
 		// currentvalue - Receives the current attribute value of the selected elements.
 		// Put the .attr() function inside of a $.each() loop.
 
-		$.each(this.widgetDom, function(setIndex, setItem) {
+		$.each(this.widgetDom, (setIndex, setItem) => {
 			// console.log("setIndex:", setIndex, "\nsetItem:", setItem);
-			var that1 = that;
-			var containerElement = null;
-			var containerHeight = null;
-			var marginSpacing = 0;
-			var panelSpacing = 0;
+			let that1 = that;
+			let containerElement = null;
+			let containerHeight = null;
+			let marginSpacing = 0;
+			let panelSpacing = 0;
 
-			$.each(setItem, function(panelIndex, panelItem) {
+			$.each(setItem, (panelIndex, panelItem) => {
 				// console.log("  panelIndex:", panelIndex, "\n  panelItem:", panelItem);
 				// If panelItem is the container element, skip it.
 				if (!panelIndex) {
-					containerElement = '#' + that1.id + panelItem;
+					containerElement = `#${that1.id}${panelItem}`;
 					containerHeight = $(containerElement).height();
 					// console.log("    Container: " + containerElement + "\n    Height: " + containerHeight);
 					return true;
 				}
 
-				var elementItem = containerElement + panelItem;
+				let elementItem = containerElement + panelItem;
 				marginSpacing += Number($(elementItem).css('margin-top').replace(/px/g, ''));
 
 				// Last element in array, set it's height.
-				if (panelIndex == setItem.length - 1) {
+				if (panelIndex === setItem.length - 1) {
 
 					marginSpacing += Number($(elementItem).css('margin-bottom').replace(/px/g, ''));
 
-					var panelHeight = containerHeight - (marginSpacing + panelSpacing);
+					let panelHeight = containerHeight - (marginSpacing + panelSpacing);
 
-					$(elementItem).css({ 'height': (panelHeight) + 'px' });
+					$(elementItem).css({ 'height': `${panelHeight}px` });
 					// console.log("    panelHeight: " + panelHeight);
 
-				// If it is not last element in array, read it's height.
+				// If this is not the last element in the array, read the element's height.
 				} else {
-					// console.log("    panelHeight: " + $(elementItem).css("height").replace(/px/g, ""));
+
 					panelSpacing += Number($(elementItem).css('height').replace(/px/g, ''));
+
 				}
 
 			});
@@ -1753,21 +1769,28 @@ define([ 'jquery' ], $ => ({
 		$('#connection-widget div.console-log-panel div.panel-body div').width($('#connection-widget div.console-log-panel div.panel-body').width() - 10);
 
 	},
-	visibleWidget: function (wgtVisible, wgtHidden) {
-		// console.log("visibleWidget()\n  wgtVisible: " + wgtVisible + "\n  wgtHidden: " + wgtHidden + "\n this.id: " + this.id);
-		if (wgtVisible == this.id) {
-			console.log(this.id + ' is now visible.');
+	visibleWidget(wgtVisible, wgtHidden) {
+
+		if (wgtVisible === this.id) {
+
+			console.log(`${this.id} is now visible.`);
+
 			this.widgetVisible = true;
+
 			this.resizeWidgetDom();
-		} else if (wgtHidden == this.id) {
-			console.log(this.id + ' is now hidden.');
+
+		} else if (wgtHidden === this.id) {
+
+			console.log(`${this.id} is now hidden.`);
+
 			this.widgetVisible = false;
+
 		}
+
 	},
 
-	wsConnect: function () {
+	wsConnect() {
 		// This method creates a new WebSocket connection to the SPJS and is called by the '/main/all-widgets-loaded' subscribe line.
-		// NOTE: Try connecting to a SPJS before creating one incase the ui was restarted.
 
 		// console.log("Attempting to connect to the SPJS now.");
 		// console.log("Web Socket (before calling 'new WebSocket()'):" + gui.parseObject(this.SPJS.ws, 2, { keep: ["CONNECTING", "OPEN", "CLOSING", "CLOSED", "url", "readyState", "bufferedAmount"] }));
@@ -1777,22 +1800,14 @@ define([ 'jquery' ], $ => ({
 
 		this.SPJS.ws = new WebSocket(socketUrl);
 
-		let that = this;
-		this.SPJS.ws.onopen = function () {
-			that.onSpjsOpen();
-		};
-		this.SPJS.ws.onmessage = function (evt) {
-			that.onSpjsMessage(evt.data);
-		};
-		this.SPJS.ws.onerror = function (error) {
-			that.onSpjsError(error);
-		};
-		this.SPJS.ws.onclose = function () {
-			that.onSpjsClose();
-		};
+		this.SPJS.ws.onopen = () => this.onSpjsOpen();
+		this.SPJS.ws.onmessage = evt => this.onSpjsMessage(evt.data);
+		this.SPJS.ws.onerror = error => this.onSpjsError(error);
+		this.SPJS.ws.onclose = () => this.onSpjsClose();
 
 	},
-	launchSpjs: function () {
+	launchSpjs() {
+
 		console.log('Launching a new SPJS.');
 
 		// If on a Raspberry Pi.
@@ -1808,12 +1823,14 @@ define([ 'jquery' ], $ => ({
 				this.SPJS.gpio = spawn('lxterminal --command "sudo json-server/linux_arm/gpio-json-server"', [], { shell: true });
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
+
 					console.log(`GPIO Server. stdout: ${data}`);
 
 					let msg = `${data}`;
 					let msgBuffer = msg.split('\n');
 
 					for (let i = 0; i < msgBuffer.length; i++) {
+
 						msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
 
 					}
@@ -1821,12 +1838,14 @@ define([ 'jquery' ], $ => ({
 				});
 
 				this.SPJS.gpio.stderr.on('data', (data) => {
+
 					console.log(`GPIO Server. stderr: ${data}`);
 
 					let msg = `${data}`;
 					let msgBuffer = msg.split('\n');
 
 					for (let i = 0; i < msgBuffer.length; i++) {
+
 						msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
 
 					}
@@ -1842,6 +1861,7 @@ define([ 'jquery' ], $ => ({
 
 		// If the host is on a windows platform.
 		} else if (hostMeta.os === 'Windows') {
+
 			// Launch the SPJS in max garbage collection mode.
 			this.SPJS.go = spawn('cd json_server/windows_x64 && serial-port-json-server.exe', [ '-gc max', '-allowexec' ], { shell: true });
 
@@ -1851,12 +1871,14 @@ define([ 'jquery' ], $ => ({
 		// this.SPJS.go = spawn(`cd json_server && serial-port-json-server.exe`, ['-gc max', '-v'], { shell: true });
 
 		this.SPJS.go.stdout.on('data', (data) => {
+
 			console.log(`SPJS. stdout: ${data}`);
 
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
 
 			for (let i = 0; i < msgBuffer.length; i++) {
+
 				msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stdout' });
 
 			}
@@ -1864,12 +1886,14 @@ define([ 'jquery' ], $ => ({
 		});
 
 		this.SPJS.go.stderr.on('data', (data) => {
+
 			console.log(`SPJS. stderr: ${data}`);
 
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
 
 			for (let i = 0; i < msgBuffer.length; i++) {
+
 				msgBuffer[i] && this.consoleLog.appendMsg('SPJS', { Msg: msgBuffer[i], Type: 'stderr' });
 
 			}
@@ -1877,12 +1901,14 @@ define([ 'jquery' ], $ => ({
 		});
 
 		this.SPJS.go.on('close', (code) => {
+
 			console.log(`SPJS. Child precess exited with the code: ${code}`);
 
 		});
 
 	},
-	onSpjsOpen: function () {
+	onSpjsOpen() {
+
 		// If the SPJS is already in an 'open' state, skip DOM updates.
 		if (this.SPJS.wsState === 'open') return false;
 
@@ -1905,7 +1931,7 @@ define([ 'jquery' ], $ => ({
 		console.groupEnd();
 
 	},
-	onSpjsMessage: function (msg) {
+	onSpjsMessage(msg) {
 		// This method receives all messages from the SPJS and sends each message to it's respective method.
 
 		if (msg.match(/^\{/)) {
@@ -2016,7 +2042,7 @@ define([ 'jquery' ], $ => ({
 
 			} else {
 
-				console.error('Did nothing with JSON.\n  msg: ' + msg + '\n  data:' + gui.parseObject(data, 4));
+				console.error(`Did nothing with JSON.\n  msg: ${msg}\n  data:${gui.parseObject(data, 4)}`);
 
 				this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
@@ -2024,7 +2050,7 @@ define([ 'jquery' ], $ => ({
 
 		} else if (msg.match(/We could not find the serial port/)) {
 
-			console.error('SPJS Recv (error):\n  ' + msg);
+			console.error(`SPJS Recv (error):\n  ${msg}`);
 			console.error('SPJS -Port Not Found-');
 
 			this.consoleLog.appendMsg('SPJS', { Msg: msg, Type: 'Error' });
@@ -2042,7 +2068,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 	},
-	onSpjsError: function (error) {
+	onSpjsError(error) {
 
 		// If the SPJS is already in an 'error' or 'closed' state, skip DOM updates.
 		if (this.SPJS.wsState === 'error' || this.SPJS.wsState === 'closed') {
@@ -2069,7 +2095,7 @@ define([ 'jquery' ], $ => ({
 
 	},
 	// IDEA: If the SPJS does not respond to a restart command, force an exit and launch a new SPJS instance.
-	onSpjsClose: function () {
+	onSpjsClose() {
 
 		const that = this;
 		const { wsState, wsReconnectDelay, wsReconnectOnExitCmd } = this.SPJS;
@@ -2190,7 +2216,7 @@ define([ 'jquery' ], $ => ({
 		return true;
 	},
 
-	onVersion: function (data) {
+	onVersion(data) {
 
 		const { Version } = data;
 
@@ -2205,7 +2231,7 @@ define([ 'jquery' ], $ => ({
 		this.SPJS.version = parseFloat(Version);
 
 	},
-	onCommands: function (data) {
+	onCommands(data) {
 		const { Commands } = data;
 		// Ex. { "Commands" : [ "list", "open [portName] [baud]", ... ] }
 
@@ -2217,7 +2243,7 @@ define([ 'jquery' ], $ => ({
 		this.SPJS.commands = Commands;
 
 	},
-	onBufferAlgorithm: function (data) {
+	onBufferAlgorithm(data) {
 		const { BufferAlgorithm } = data;
 
 		console.log(`SPJS -BufferAlgorithm-\n BufferAlgorithm: ${BufferAlgorithm}`);
@@ -2227,7 +2253,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { Msg: 'bufferalgorithms', Status: 'Executed' });
 
 	},
-	onBaudRate: function (data) {
+	onBaudRate(data) {
 		const { BaudRate } = data;
 		console.log(`SPJS -BaudRate-\n BaudRate: ${BaudRate}`);
 
@@ -2236,7 +2262,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { Msg: 'baudrates', Status: 'Executed' });
 
 	},
-	onHostname: function (data) {
+	onHostname(data) {
 		const { Hostname } = data;
 		// Ex. { "Hostname": "Braydens-Laptop" }
 
@@ -2251,7 +2277,7 @@ define([ 'jquery' ], $ => ({
 		this.newspjsSend({ Msg: 'list' });
 
 	},
-	onSerialPorts: function (data) {
+	onSerialPorts(data) {
 		// This method parses the port list data received from the SPJS.
 
 		// Add the message to the SPJS log.
@@ -2263,9 +2289,7 @@ define([ 'jquery' ], $ => ({
 		const that = this;
 
 		// Sort the portList data array by ascending port number. Technically this is not really needed... but ocd ;)
-		data = data.SerialPorts.sort((a, b) => {
-			return Number(a.Name.substring(3)) - Number(b.Name.substring(3));
-		});
+		data = data.SerialPorts.sort((a, b) => Number(a.Name.substring(3)) - Number(b.Name.substring(3)));
 
 		let dataObj = {};
 		// Make the port list data into an object.
@@ -2347,9 +2371,7 @@ define([ 'jquery' ], $ => ({
 			this.SPJS.openPorts = [ ...this.SPJS.openPorts, ...diffs.opened ];
 
 			// Sort the openPorts list by port number.
-			this.SPJS.openPorts = this.SPJS.openPorts.sort((a, b) => {
-				return Number(a.substring(3)) - Number(b.substring(3));
-			});
+			this.SPJS.openPorts = this.SPJS.openPorts.sort((a, b) => Number(a.substring(3)) - Number(b.substring(3)));
 
 			for (let i in diffs.opened) {
 
@@ -2440,7 +2462,7 @@ define([ 'jquery' ], $ => ({
 		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 	},
-	validifyPortList: function (data) {
+	validifyPortList(data) {
 		// This method checks that port list data received from the SPJS is not corrupted.
 		console.log('Validating port list data.');
 
@@ -2448,8 +2470,8 @@ define([ 'jquery' ], $ => ({
 		const requiredProp = [ 'SerialNumber', 'UsbPid', 'UsbVid' ];
 
 		// Check that each property in the requiredProp array has an associated value for each port in the portList object.
-		for(let i in data) {
-			for(let x = 0; x < requiredProp.length; x++) {
+		for (let i in data) {
+			for (let x = 0; x < requiredProp.length; x++) {
 				// If port list data is corrupted, return 'false'.
 				if (!data[i][requiredProp[x]]) {
 					return false;
@@ -2460,7 +2482,7 @@ define([ 'jquery' ], $ => ({
 		// Return 'true' to indicate that data is valid.
 		return true;
 	},
-	buildPortListDiffs: function (data) {
+	buildPortListDiffs(data) {
 		console.log('Finding diffs in list data.'); // ...since 1903
 		// console.log("this.SPJS.portList:", this.SPJS.portList);
 
@@ -2471,7 +2493,7 @@ define([ 'jquery' ], $ => ({
 		let dataCount = 0;
 		let portListCount = 0;
 
-		for(let port in data) {
+		for (let port in data) {
 			dataCount++;
 			// If this port is not in portList, port was added.
 			if (!portList[port]) {
@@ -2479,7 +2501,7 @@ define([ 'jquery' ], $ => ({
 				diffs.added.push(port);
 			}
 
-			for(let i in data[port]) {
+			for (let i in data[port]) {
 				// console.log("  " + i + ": " + gui.parseObject(data[port][i], ""));
 				if (i == 'IsOpen' && data[port][i] && (!portList[port] || !portList[port][i])) {
 					if (!diffs.opened) diffs.opened = [];
@@ -2494,7 +2516,7 @@ define([ 'jquery' ], $ => ({
 			}
 		}
 
-		for(let port in portList) {
+		for (let port in portList) {
 			portListCount++;
 			// If this port is not in the new port list, the port was removed.
 			if (!data[port]) {
@@ -2514,7 +2536,7 @@ define([ 'jquery' ], $ => ({
 
 		return diffs;
 	},
-	buildPortMeta: function () {
+	buildPortMeta() {
 		// console.group("building portMeta");
 		console.groupCollapsed('Building portMeta');
 		// Builds the portMeta object based on the portList object and using information from the deviceMeta object.
@@ -2533,11 +2555,11 @@ define([ 'jquery' ], $ => ({
 
 			// Loop through each meta in the deviceMeta object and check if it matches the current port in the serial ports list.
 			metaLoop: for (let i = 0; i < deviceMeta.length; i++) {
-				console.log('  i: ' + i);
+				console.log(`  i: ${i}`);
 
 				// Loop through each Vid/Pid in the current deviceMeta and check for match against Vid/Pid in received port data.
 				for (let x = 0; x < deviceMeta[i].VidPids.length; x++) {
-					console.log('    x: ' + x);
+					console.log(`    x: ${x}`);
 
 					// If the Vid/Pids from the deviceMeta match the received port's Vid/Pids.
 					if (deviceMeta[i].VidPids[x].Vid.toLowerCase() == portList[port].UsbVid.toLowerCase() && deviceMeta[i].VidPids[x].Pid.toLowerCase() == portList[port].UsbPid.toLowerCase()) {
@@ -2568,7 +2590,7 @@ define([ 'jquery' ], $ => ({
 					// If the Vid/Pid are empty strings, set the meta as the default meta data.
 					} else if (deviceMeta[i].VidPids[x].Vid === '' && deviceMeta[i].VidPids[x].Pid === '') {
 						matchIndex = i;
-						console.log('      default. [' + deviceMeta[matchIndex].Friendly + ']');
+						console.log(`      default. [${deviceMeta[matchIndex].Friendly}]`);
 					}
 				}
 			}
@@ -2604,11 +2626,11 @@ define([ 'jquery' ], $ => ({
 
 		portListUpdate && this.portListDomUpdate();
 
-		console.log('Built -portMeta-' + gui.parseObject(this.SPJS.portMeta, 2));
+		console.log(`Built -portMeta-${gui.parseObject(this.SPJS.portMeta, 2)}`);
 		console.groupEnd();
 
 	},
-	portListDomUpdate: function () {
+	portListDomUpdate() {
 		// TODO: Make portListDomUpdate accept arguments to make updates more efficient. (aka. only update what is needing to be changed rather that rebuilding the entire DOM list everytime.)
 		console.groupCollapsed('Updating port list DOM');
 
@@ -2647,7 +2669,7 @@ define([ 'jquery' ], $ => ({
 		console.groupEnd();
 
 	},
-	autoConnectPorts: function () {
+	autoConnectPorts() {
 		console.groupCollapsed('Auto-Connect Ports');
 
 		const that = this;
@@ -2676,7 +2698,7 @@ define([ 'jquery' ], $ => ({
 
 		console.groupEnd();
 	},
-	sendConnectScript: function (data) {
+	sendConnectScript(data) {
 		// The sendConnectScript method sends connect scripts to devices that were already opened on an SPJS that was just connected to.
 		// Connect scripts are used to get information or the status of the device that may not be received otherwise since the device was already opened on the SPJS.
 		// This method uses recursion to send scripts to multiple ports passed in the data argument as an array.
@@ -2725,7 +2747,7 @@ define([ 'jquery' ], $ => ({
 			let misMatch = 0;
 			let scriptItem = this.connectScripts[i];
 
-			Object.keys(scriptItem).forEach(function (key, index) {
+			Object.keys(scriptItem).forEach((key, index) => {
 			    // key: the name of the object key
 			    // index: the ordinal position of the key within the object
 				console.log(`key: ${key}`);
@@ -2733,10 +2755,10 @@ define([ 'jquery' ], $ => ({
 				// Check for a match if this is device info.
 				if (key !== 'script' && key !== 'pause') {
 
-					if ((key === 'Friendly' || key === 'Baud' || key === 'Buffer') && portMeta[key] !== scriptItem[key] ) {
+					if ((key === 'Friendly' || key === 'Baud' || key === 'Buffer') && portMeta[key] !== scriptItem[key]) {
 						misMatch += 1;
 
-					} else if (key === 'SerialNumber' && portData[key] !== scriptItem[key] ) {
+					} else if (key === 'SerialNumber' && portData[key] !== scriptItem[key]) {
 						misMatch += 1;
 
 					}
@@ -2761,7 +2783,7 @@ define([ 'jquery' ], $ => ({
 		return false;
 
 	},
-	onPortOpen: function (data) {
+	onPortOpen(data) {
 
 		const { Cmd, Desc, Port, IsPrimary, Baud, BufferType } = data;
 
@@ -2803,7 +2825,7 @@ define([ 'jquery' ], $ => ({
 		setTimeout(() => this.newspjsSend({ Msg: 'list' }), 250);
 
 	},
-	portConnected: function (port) {
+	portConnected(port) {
 		// The portConnected method handles all the DOM and object updates required whenever a port is connected.
 
 		let nextPort = null;
@@ -2815,12 +2837,12 @@ define([ 'jquery' ], $ => ({
 		// If the port argument is 'SPJS', exit the method.
 		if (port === 'SPJS') return false;
 
-		console.groupCollapsed('Port Connected: ' + port);
+		console.groupCollapsed(`Port Connected: ${port}`);
 		const that = this;
 
 		// If this port is already initiated (ie. this method was called redundantly), skip all DOM and object updates.
 		if (typeof this.consoleLog[port] != 'undefined' && this.consoleLog.openLogs.indexOf(port) !== -1) {
-			console.log('portConnected was already called for this port.' + gui.parseObject(this.consoleLog, 2));
+			console.log(`portConnected was already called for this port.${gui.parseObject(this.consoleLog, 2)}`);
 
 		// If this method was not called redundantly, update objects and DOM elements.
 		} else {
@@ -2828,9 +2850,9 @@ define([ 'jquery' ], $ => ({
 			// }
 
 			// Remove any hilites on the port in the serial device list.
-			$('#' + this.id + ' .splist .port-' + port).removeClass('success warning');
+			$(`#${this.id} .splist .port-${port}`).removeClass('success warning');
 			// Change the toggle-on button into a toggle-off button in the serial device list.
-			$('#' + this.id + ' .splist .port-' + port + ' .port-toggle-btn > span').removeClass('fa-toggle-on').addClass('fa-toggle-off');
+			$(`#${this.id} .splist .port-${port} .port-toggle-btn > span`).removeClass('fa-toggle-on').addClass('fa-toggle-off');
 
 			// If this port's console log is visible, make the spjs' console log visible.
 			if (port === this.consoleLog.activeLog) {
@@ -2839,20 +2861,20 @@ define([ 'jquery' ], $ => ({
 			}
 
 			// Remove the respective port's console log output <div> element.
-			$('#' + this.id + ' .console-log-panel .nav-tabs .list-tab-' + port).remove();
+			$(`#${this.id} .console-log-panel .nav-tabs .list-tab-${port}`).remove();
 			// Remove the respective port's console log tab.
-			$('#' + this.id + ' .console-log-panel .panel-body .log-' + port).remove();
+			$(`#${this.id} .console-log-panel .panel-body .log-${port}`).remove();
 
 			// Hilite the port green in the serial devices list.
-			$('#' + this.id + ' .splist .port-' + port).addClass('success');
+			$(`#${this.id} .splist .port-${port}`).addClass('success');
 			// Change the toggle-off button into a toggle-on button in the serial devices list.
-			$('#' + this.id + ' .splist .port-' + port + ' .port-toggle-btn > span').removeClass('fa-toggle-off').addClass('fa-toggle-on');
+			$(`#${this.id} .splist .port-${port} .port-toggle-btn > span`).removeClass('fa-toggle-off').addClass('fa-toggle-on');
 
 			// Update and sort the openLogs object. Sort the SPJS element to the end of the array.
 			// IDEA: Use .splice() to add this port to the openLogs array so it does not need to be sorted everytime and use .localCompare() to know where it should be added.
 			this.consoleLog.openLogs.unshift(port);
 
-			this.consoleLog.openLogs = this.consoleLog.openLogs.sort(function(a, b) {
+			this.consoleLog.openLogs = this.consoleLog.openLogs.sort((a, b) => {
 
 				const x = (a === 'SPJS') ? 999 : Number(a.substring(3));
 				const y = (b === 'SPJS') ? 999 : Number(b.substring(3));
@@ -2867,19 +2889,19 @@ define([ 'jquery' ], $ => ({
 
 			// HTML for the console log tab.
 			let consoleLogTabHtml = '';
-			consoleLogTabHtml += '<li role="presentation" class="list-tab-' + port + '">';
-			consoleLogTabHtml += '<span evt-data="' + port + '" class="console-log-tab">' + this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, '')) + '</span></li>';
+			consoleLogTabHtml += `<li role="presentation" class="list-tab-${port}">`;
+			consoleLogTabHtml += `<span evt-data="${port}" class="console-log-tab">${this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, ''))}</span></li>`;
 
 			// HTML for the console log panel.
-			let consoleLogOutputHtml = '<div class="console-log-output log-' + port + ' hidden"></div>';
+			let consoleLogOutputHtml = `<div class="console-log-output log-${port} hidden"></div>`;
 
 			// Build the console log DOM based on the openLogs array.
 			for (let i = this.consoleLog.openLogs.indexOf(port) + 1; i < this.consoleLog.openLogs.length; i++) {
 				// console.log("openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
 				publish('/statusbar-widget/add', port, this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, '')), 'success', that.consoleLog.openLogs[i]);
 
-				$('#' + that.id + ' .console-log-panel .nav-tabs .list-tab-' + that.consoleLog.openLogs[i]).before(consoleLogTabHtml);
-				$('#' + that.id + ' .console-log-panel .panel-body .log-' + that.consoleLog.openLogs[i]).before(consoleLogOutputHtml);
+				$(`#${that.id} .console-log-panel .nav-tabs .list-tab-${that.consoleLog.openLogs[i]}`).before(consoleLogTabHtml);
+				$(`#${that.id} .console-log-panel .panel-body .log-${that.consoleLog.openLogs[i]}`).before(consoleLogOutputHtml);
 
 				break;
 
@@ -2904,7 +2926,7 @@ define([ 'jquery' ], $ => ({
 			// Call a  resize on the DOM elements so that 'style="height: ---px;"' is added to the console log's DOM element to ensure that scroll bars are created properly..
 			this.resizeWidgetDom();
 
-			console.log('openLogs: ' + gui.parseObject(this.consoleLog.openLogs));
+			console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 			// If this port's raw data buffer is undefined, define it.
 			if (typeof this.dataRecvBuffer[port] == 'undefined') {
@@ -2929,7 +2951,7 @@ define([ 'jquery' ], $ => ({
 		// If the port argument was passed as [array], run the portConnected method for the next element in the port array.
 		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portConnected(nextPort);
 	},
-	portDisconnected: function (port) {
+	portDisconnected(port) {
 		let nextPort = null;
 
 		// If the port argument is [array], this function will be ran once for each port in the array.
@@ -2940,20 +2962,20 @@ define([ 'jquery' ], $ => ({
 		// If the port argument is 'SPJS', exit the method.
 		if (port == 'SPJS') return false;
 
-		console.groupCollapsed('Port Disconnected: ' + port);
+		console.groupCollapsed(`Port Disconnected: ${port}`);
 		// The portDisconnected method handles all of the DOM and object updates required whenever a port is disconnected.
-		var that = this;
+		let that = this;
 
 		// If this port is already un-initiated (aka. this function was called redundantly), skip all DOM and object updates.
 		if (this.consoleLog[port] === undefined && this.consoleLog.openLogs.indexOf(port) == -1) {
-			console.log('portDisconnected has already been called for this port.' + gui.parseObject(this.consoleLog, 2));
+			console.log(`portDisconnected has already been called for this port.${gui.parseObject(this.consoleLog, 2)}`);
 
 		// If this method was not redundantly called, update objects and DOM elements.
 		} else {
 			// Update the openPorts array.
 			// IDEA: Use .splice() to remove this port from the openLogs array.
 			let openLogs = [];
-			for (var i = 0; i < this.consoleLog.openLogs.length; i++) {
+			for (let i = 0; i < this.consoleLog.openLogs.length; i++) {
 				// console.log("consoleLog.openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
 				if (that.consoleLog.openLogs[i] != port) {
 					// console.log("  ...concat-ing");
@@ -2998,7 +3020,7 @@ define([ 'jquery' ], $ => ({
 		console.groupEnd();
 		if (nextPort && nextPort.length && nextPort != 'SPJS') this.portDisconnected(nextPort);
 	},
-	onPortOpenFail: function (data) {
+	onPortOpenFail(data) {
 
 		const { Cmd, Port, Baud, Desc } = data;
 
@@ -3030,7 +3052,7 @@ define([ 'jquery' ], $ => ({
 		requestListDelay && setTimeout(() => this.newspjsSend({ Msg: 'list' }), requestListDelay);
 
 	},
-	onPortClose: function (data) {
+	onPortClose(data) {
 
 		const { Cmd, Desc, Port, Baud } = data;
 
@@ -3074,7 +3096,7 @@ define([ 'jquery' ], $ => ({
 		setTimeout(() => this.newspjsSend({ Msg: 'list' }), 250);
 
 	},
-	sendPortInits: function (port) {
+	sendPortInits(port) {
 
 		console.groupCollapsed('Sending init scripts to device.');
 		console.log(`Init scripts for ${port}.`);
@@ -3129,7 +3151,7 @@ define([ 'jquery' ], $ => ({
 		return false;
 
 	},
-	onBroadcast: function (data) {
+	onBroadcast(data) {
 
 		const { Cmd, Msg } = data;
 
@@ -3143,7 +3165,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { PartMsg: 'broadcast', Status: 'Executed' });
 
 	},
-	onWipedQueue: function (data) {
+	onWipedQueue(data) {
 
 		const { Cmd, QCnt, Port } = data;
 
@@ -3157,7 +3179,7 @@ define([ 'jquery' ], $ => ({
 		const safePort = this.makePortSafe(Port);
 
 	},
-	onQueuedJson: function (data) {
+	onQueuedJson(data) {
 
 		const { Cmd, QCnt, P, Data } = data;
 
@@ -3200,7 +3222,7 @@ define([ 'jquery' ], $ => ({
 
 	},
 	// TODO: Test that it works when receiving multiple commands at a time where a list of data and ids are received.
-	onQueuedText: function (data) {
+	onQueuedText(data) {
 
 		const { Cmd, QCnt, Ids, D, Port } = data;
 
@@ -3241,7 +3263,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-	onWriteJson: function (data) {
+	onWriteJson(data) {
 
 		const { Cmd, QCnt, Id, P } = data;
 
@@ -3292,10 +3314,9 @@ define([ 'jquery' ], $ => ({
 		// Look for and try to verify the command in the SPJS console log using the received Id.
 		({ matchFound } = this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Written' }));
 
-		return;
 
 	},
-	onCompleteJson: function (data) {
+	onCompleteJson(data) {
 
 		const { Cmd, Id, P } = data;
 
@@ -3339,7 +3360,7 @@ define([ 'jquery' ], $ => ({
 		return false;
 
 	},
-	onErrorText: function (data) {
+	onErrorText(data) {
 
 		const { Error } = data;
 
@@ -3386,7 +3407,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-	onErrorJson: function (data) {
+	onErrorJson(data) {
 
 		const { Cmd } = data;
 
@@ -3396,7 +3417,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
 	},
-	onSystemAlarm: function (data) {
+	onSystemAlarm(data) {
 
 		const { er } = data;
 
@@ -3410,7 +3431,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
 
 	},
-	lookupStatusCode: function (code) {
+	lookupStatusCode(code) {
 		// Return the label and description of a given status code.
 		// Uses the lookup table retreived from the 'TinyG_Status_Codes.cson' file.
 
@@ -3429,7 +3450,7 @@ define([ 'jquery' ], $ => ({
 		return { Code: code, Label, Desc };
 
 	},
-	onFeedRateOverride: function (data) {
+	onFeedRateOverride(data) {
 
 		const { Cmd, Desc, Port, FeedRateOverride, IsOn } = data;
 
@@ -3443,7 +3464,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { PartMsg: 'fro ', Status: 'Executed' });
 
 	},
-	onRawPortData: function (data) {
+	onRawPortData(data) {
 
 		const { P, D } = data;
 
@@ -3477,7 +3498,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-	parseRawPortData: function (port) {
+	parseRawPortData(port) {
 		// This is a seperate method from onRawPortData so that it can be called after this port has been opened if raw data was received before it was opened.
 
 		console.groupCollapsed(`Parsing raw port data.\n  Port: ${port}`);
@@ -3682,7 +3703,7 @@ define([ 'jquery' ], $ => ({
 		console.groupEnd();
 
 	},
-	onQueueCnt: function (data) {
+	onQueueCnt(data) {
 
 		const { QCnt } = data;
 
@@ -3691,7 +3712,7 @@ define([ 'jquery' ], $ => ({
 		this.SPJS.queueCount = Number(QCnt);
 
 	},
-	onGarbageCollection: function (data) {
+	onGarbageCollection(data) {
 
 		const { gc } = data;
 
@@ -3707,7 +3728,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'GarbageCollection' });
 
 	},
-	onGarbageHeap: function (data) {
+	onGarbageHeap(data) {
 
 		const { Alloc, TotalAlloc, Sys, Lookups, Mallocs, Frees, HeapAlloc, HeapSys, HeapIdle, HeapInuse, HeapReleased, HeapObjects, StackInuse, StackSys, MSpanInuse, MSpanSys, MCacheInuse, MCacheSys, BuckHashSys, GCSys, OtherSys, NextGC, LastGC, PauseTotalNS, PauseNS, PauseEnd, NumGC, GCCPUFraction, EnableGC, DebugGC, BySize } = data;
 
@@ -3719,7 +3740,7 @@ define([ 'jquery' ], $ => ({
 		console.log(`GCCPUFraction: ${(GCCPUFraction * 100).toFixed(10)}%`);
 
 	},
-	onExecRuntimeStatus: function (data) {
+	onExecRuntimeStatus(data) {
 
 		const { ExecRuntimeStatus, OS, Arch, Goroot, NumCpu } = data;
 
@@ -3738,7 +3759,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { Msg: 'execruntime', Status: statusMeta[ExecRuntimeStatus] });
 
 	},
-	onExecStatus: function (data) {
+	onExecStatus(data) {
 
 		const { ExecStatus, Id, Cmd, Args, Output } = data;
 
@@ -3777,7 +3798,7 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog.updateCmd('SPJS', { Msg, Status: statusMeta[ExecStatus], Comment });
 
 	},
-	onParseError: function (data) {
+	onParseError(data) {
 
 		// Ex. { "Error" : "Problem decoding json. giving up. json: {"P":"COM11","Data":[{"D":"Hi ","Id":"mdi-com11log0"}]}, err:invalid character '\n' in string literal" }
 
@@ -3844,7 +3865,7 @@ define([ 'jquery' ], $ => ({
 		console.groupEnd();
 
 	},
-	makePortSafe: function (unsafePortName) {
+	makePortSafe(unsafePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
 		const portList = this.SPJS.portList;
@@ -3875,7 +3896,7 @@ define([ 'jquery' ], $ => ({
 		return safePortName;
 
 	},
-	makePortUnSafe: function (safePortName) {
+	makePortUnSafe(safePortName) {
 		// The linux platform gives port names like 'dev/ttyAMA0' which messes up the object names and the dom operations.
 
 		let unsafePortName = safePortName ? safePortName.replace(/fs-|-fs-/g, '/') : safePortName;
@@ -3901,7 +3922,7 @@ define([ 'jquery' ], $ => ({
 	 *
 	 *  @return {string}    cmdId             The id that was used for the message in the console log.
 	 */
-	newspjsSend: function ({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [], recursionDepth = 0 }) {
+	newspjsSend({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [], recursionDepth = 0 }) {
 
 		console.log(`SPJS Send\n  Msg: ${Msg}`);
 
@@ -3979,7 +4000,7 @@ define([ 'jquery' ], $ => ({
 		return { cmdId };
 
 	},
-	newportSend: function (port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
+	newportSend(port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
 
 		// If the Meta argument is not an array, split it into an array.
 		if (!Array.isArray(Meta)) {
@@ -4004,7 +4025,7 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return cmdId;
 	},
-	newportSendNoBuf: function (port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
+	newportSendNoBuf(port, { Msg, IdPrefix, Type = 'Command', Status, Comment, Meta = [] }) {
 		// To reset tinyg board, send it a '\u0018\n' command.
 
 		// If the Meta argument is not an array, split it into an array.
@@ -4035,7 +4056,7 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return true;
 	},
-	newportSendJson: function (port, { Data, Msg, Id, IdPrefix, Pause = 0, Type = 'Command', Status, Comment, Meta = [] }) {
+	newportSendJson(port, { Data, Msg, Id, IdPrefix, Pause = 0, Type = 'Command', Status, Comment, Meta = [] }) {
 		// This method sends JSON messages to specified ports on the SPJS.
 		// Ex. portSendJson [port] [cmd] [id]
 		// Ex. portSendJson [port] [ [cmd], [cmd1], ..., [cmdn] ] [id]
@@ -4088,7 +4109,7 @@ define([ 'jquery' ], $ => ({
 
 			for (let i = 0; i < Data.length; i++) {
 
-				cmdBuffer.push({ Msg: Data[i], Id, IdPrefix, Pause, Status, Comment, Meta: i < Data.length - 1 ? [ 'portSendJson' ].concat(`${ i + 1 }of${Data.length}`, Meta) : [ 'portSendJson' ].concat(`${ i + 1 }of${Data.length}`, 'final', Meta) });
+				cmdBuffer.push({ Msg: Data[i], Id, IdPrefix, Pause, Status, Comment, Meta: i < Data.length - 1 ? [ 'portSendJson' ].concat(`${i + 1}of${Data.length}`, Meta) : [ 'portSendJson' ].concat(`${i + 1}of${Data.length}`, 'final', Meta) });
 				let item = cmdBuffer[i];
 
 				// The Data argument is [array[object[string/int]]].
@@ -4199,7 +4220,7 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return spjsId;
 	},
-	portSendBuffered: function (port, { Data }) {
+	portSendBuffered(port, { Data }) {
 		// Receive message data the same way as the portSendJson method.
 		// Add message data to the buffer object.
 
@@ -4234,7 +4255,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-	sendBuffered: function (port, { Data }) {
+	sendBuffered(port, { Data }) {
 
 		const unsafePort = this.makePortUnSafe(port);
 		let cmd = `sendjson {"P":"${unsafePort}","Data":[`;
@@ -4266,7 +4287,7 @@ define([ 'jquery' ], $ => ({
 
 		return cmd;
 	},
-	mdiSend: function (port, { Msg }) {
+	mdiSend(port, { Msg }) {
 		// Send a command comming from a MDI (Manual Data Input) from the user.
 
 		const that = this;
@@ -4363,9 +4384,9 @@ define([ 'jquery' ], $ => ({
 	},
 
 	// Deprecated Jan. 07, 2017:
-	spjsSend: function (cmd, id, Related, Status, Comment, Meta) {
+	spjsSend(cmd, id, Related, Status, Comment, Meta) {
 
-		console.log('SPJS Send:\n  ' + cmd);
+		console.log(`SPJS Send:\n  ${cmd}`);
 
 		// If the cmd argument is 'list' and the SPJS is already processing a 'list' command, exit this method.
 		if (cmd === 'list') {
@@ -4408,12 +4429,12 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return true;
 	},
-	portSend: function (port, msg) {
+	portSend(port, msg) {
 		// Append the command to this port's log and use the returned id as the id for the SPJS log as well.
 		// If the id argument was omitted, the appendMsg method will make one up.
 		const { cmdId } = this.consoleLog.appendMsg(port, { type: 'Command', message: msg });
 
-		var cmd = 'send ' + port + ' ' + msg;
+		let cmd = `send ${port} ${msg}`;
 
 		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
 		if (!this.newspjsSend({ Msg: cmd, Id: cmdId })) {
@@ -4428,14 +4449,14 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return true;
 	},
-	portSendNoBuf: function (port, msg) {
+	portSendNoBuf(port, msg) {
 		// To reset tinyg board, send it a '\u0018\n' command.
 
 		// Append the command to this port's log and use the returned id as the id for the SPJS log as well.
 		// If the id argument was omitted, the appendMsg method will make one up.
 		const { cmdId } = this.consoleLog.appendMsg(port, { type: 'Command', message: msg });
 
-		var cmd = 'sendnobuf ' + port + ' ' + msg;
+		let cmd = `sendnobuf ${port} ${msg}`;
 
 		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
 		if (!this.spjsSend(cmd, cmdId)) {
@@ -4445,7 +4466,7 @@ define([ 'jquery' ], $ => ({
 		// Return true to indicate that the command was sent successfully.
 		return true;
 	},
-	portSendJson: function (port, msg, id, pause) {
+	portSendJson(port, msg, id, pause) {
 		// This method sends JSON messages to specified ports on the SPJS.
 		// Ex. portSendJson [port] [cmd] [id]
 		// Ex. portSendJson [port] [ [cmd], [cmd1], ..., [cmdn] ] [id]
@@ -4453,7 +4474,7 @@ define([ 'jquery' ], $ => ({
 
 		// Append the command to this port's log and use the returned id as the id for the SPJS log as well.
 		// If the id argument was omitted, the appendMsg method will make one up.
-		const Type = (id === 'mdi') ? 'MdiCommand':'Command';
+		const Type = (id === 'mdi') ? 'MdiCommand' : 'Command';
 		const { cmdId } = this.consoleLog.appendMsg(port, { Msg: msg, IdPrefix: id, Type });
 
 		if (!(/\\n$/).test(msg) && !(/[%!]/).test(msg)) {
@@ -4480,106 +4501,14 @@ define([ 'jquery' ], $ => ({
 		return true;
 	},
 
-	// Phased Out: Dec. 22, 2016
-	// logCmdStatus: function (port, { Cmd, Id }, Status, remove) {
-	//
-	// 	return this.consoleLog.updateCmd(port, { Msg: Cmd, Id, Status });
-	//
-	// 	// This method updates the status of commands in the SPJS console log.
-	// 	// Matches to command data can be partial and are not cose sensitive but matches to command id's have to be exact.
-	// 	// Arg. port - Specifies the console log (eg. "SPJS" or "COM7").
-	// 	// Arg. data - Either the command or the id of the command (eg. "list" or "appendCmd3").
-	// 	// Arg. status - Specifies the new status to apply to a matched command (eg. "Written" or "Executed").
-	//
-	// 	// Check if command is in this port's verify buffer.
-	// 	const {matchIndex, matchCmd, matchId, matchStatus, matchTime} = this.logCmdInBuffer(port, {Cmd, Id});
-	//
-	// 	let portLog = this.consoleLog[port];
-	// 	const verifyStyle = this.consoleLog.verifyStyle;
-	//
-	// 	// FIXME: If the status is completed, only keep the data in the verifyBuffer if it is not a Gcode command with a line number.
-	// 	let removeMatch = (remove || status == "Completed" || status == "Executed" || status == "Error") ? true:false;
-	//
-	// 	if (matchIndex !== undefined) {
-	// 		console.groupCollapsed("Command status." + gui.parseObject(arguments, 2));
-	// 		// console.log("removeMatch:", removeMatch, "\npartialMatch:", partialMatch);
-	//
-	// 		const bufferLength = portLog.verifyBuffer.length;
-	// 		const bufferItem = portLog.verifyBuffer[matchIndex];
-	//
-	// 		console.log("Found verify match.");
-	// 		console.log("verifyBuffer", gui.parseObject(portLog.verifyBuffer, 2));
-	// 		console.log("bufferItem" + matchIndex + ": " + gui.parseObject(bufferItem, 2));
-	//
-	// 		// Update the style of the respective command's check-mark DOM element (ie. remove previous style and add new style).
-	// 		$('#' + this.id + ' .console-log-panel .log-' + port + ' span.fa.' + bufferItem.Id).removeClass(verifyStyle[bufferItem.Status]).addClass(verifyStyle[status]);
-	//
-	// 		portLog.verifyBuffer[matchIndex].Status = status;
-	//
-	// 		console.log("Update status.");
-	// 		console.log("bufferItem" + matchIndex + ": " + gui.parseObject(bufferItem, 2));
-	//
-	// 		// If removeMatch is true, remove the matched command from the verifyBuffer object.
-	// 		if (removeMatch) {
-	// 			let deltaTime = Date.now() - bufferItem.Time;
-	// 			console.log("Time to " + status + ": " + deltaTime + "ms");
-	//
-	// 			// Remove the item from the verifyBuffer object.
-	// 			portLog.verifyBuffer.splice(matchIndex, 1);
-	//
-	// 			// Double check that the item has been removed from the verifyBuffer object.
-	// 			if (portLog.verifyBuffer.length + 1 == bufferLength) {
-	// 				console.log("Command removed.");
-	//
-	// 			} else {
-	// 				console.error("Command was not removed successfully");
-	// 			}
-	// 		}
-	//
-	// 		console.log("verifyBuffer", gui.parseObject(portLog.verifyBuffer, 2));
-	//
-	// 		console.groupEnd();
-	//
-	// 		// Exit this method and return the matched Id so that the caller knows if a match was found.
-	// 		return bufferItem.Id;
-	// 	}
-	//
-	// 	console.log(`No cmd match found in ${port} for: '${(Id) ? Id:Cmd}'`);
-	//
-	// 	// Return false so that the caller knows that no matching command was found.
-	// 	return false;
-	// },
-
-	// Phase Out: Mar. 13, 2017
-	// truncateLog: function (port) {
-	// 	// This method removes excess lines of the respective console log to prevent performance issues. This gets called once a console log reaches consoleLog.maxLineLimit and truncates the log to consoleLog.minLineLimit.
-	// 	// Arg. port - The console log to be truncated.
-	//
-	// 	// console.groupCollapsed("Truncate Log" + gui.parseObject(arguments, 2));
-	// 	const logPanel = $('#' + this.id + ' .console-log-panel .log-' + port);
-	// 	var portLog = this.consoleLog[port];
-	//
-	//  var logHtml = logPanel.html();
-	// 	var logHtmlArray = logHtml.split('<br>').slice(this.consoleLog.minLineLimit * -1);
-	// 	logHtml = logHtmlArray.join('<br>');
-	//
-	//
-	// 	$('#' + this.id + ' .console-log-panel .log-' + port).html(logHtml);
-	//
-	// 	portLog.lineCount = this.consoleLog.minLineLimit;
-	//
-	// 	// console.log("logHtmlArray:" + gui.parseObject(logHtmlArray, 2));
-	// 	// console.groupEnd();
-	// },
-
 	// FIXME: Fix how input values are taken... cuz its shit atm.
 	// FIXME: When the active log changes, scroll to the bottom of that log if it was previously scrolled to the bottom.
 	// FIXME: Do not allow SPJS commands to be sent from the input field if not connected to a SPJS.
-	consoleLogGetInputValue: function (logName) {
+	consoleLogGetInputValue(logName) {
 		// If the logName argument is omitted, the input value of the activeLog will be returned.
 		if (!logName) logName = this.consoleLog.activeLog;
 
-		var consoleLogItem = this.consoleLog[logName];
+		let consoleLogItem = this.consoleLog[logName];
 
 		if (consoleLogItem.historyRecallIndex !== null) {
 			return consoleLogItem.history[consoleLogItem.historyRecallIndex];
@@ -4589,7 +4518,7 @@ define([ 'jquery' ], $ => ({
 		return consoleLogItem.value;
 
 	},
-	consoleLogParseInput: function (data) {
+	consoleLogParseInput(data) {
 		const consoleInputDom = `#${this.id} .console-log-panel .console-input input`;
 		const port = this.consoleLog.activeLog;
 
@@ -4621,9 +4550,9 @@ define([ 'jquery' ], $ => ({
 		this.consoleLog[port].cmdCount++;
 		$(consoleInputDom).val('');
 	},
-	consoleLogInputStatus: function (status) {
-		var port = this.consoleLog.activeLog;
-		var portLog = this.consoleLog[port];
+	consoleLogInputStatus(status) {
+		let port = this.consoleLog.activeLog;
+		let portLog = this.consoleLog[port];
 
 		// If status has not changed, exit this method to avoid unnecessary DOM updates.
 		if (portLog.inputStatus == status) return false;
@@ -4631,52 +4560,52 @@ define([ 'jquery' ], $ => ({
 		if (status == 'error') {
 			console.log('Console log input error.');
 
-			var errorData = portLog.history.shift();
-			console.log('errorData: ' + errorData);
+			let errorData = portLog.history.shift();
+			console.log(`errorData: ${errorData}`);
 
 			portLog.value = errorData;
 			portLog.historyRecallIndex = null;
 
-			$('#' + this.id + ' .console-log-panel .console-input input').val(errorData);
-			$('#' + this.id + ' .console-log-panel .console-input').addClass('has-error');
+			$(`#${this.id} .console-log-panel .console-input input`).val(errorData);
+			$(`#${this.id} .console-log-panel .console-input`).addClass('has-error');
 
 		} else if (status === null) {
-			$('#' + this.id + ' .console-log-panel .console-input').removeClass('has-error');
+			$(`#${this.id} .console-log-panel .console-input`).removeClass('has-error');
 
 		}
 
 		portLog.inputStatus = status;
 	},
-	consoleLogChangeView: function (logName) {
+	consoleLogChangeView(logName) {
 		// console.log("Change visible console log: " + logName);
-		var activeLog = this.consoleLog.activeLog;
-		var consoleLogPanel = '#' + this.id + ' .console-log-panel .console-log-output.log-' + activeLog;
+		let activeLog = this.consoleLog.activeLog;
+		let consoleLogPanel = `#${this.id} .console-log-panel .console-log-output.log-${activeLog}`;
 
 		// Set focus to the input field.
-		$('#' + this.id + ' .console-log-panel .console-input input').focus();
+		$(`#${this.id} .console-log-panel .console-input input`).focus();
 
 		// If the log panel of the selected tab is already visible, skip DOM updates.
 		if (this.consoleLog.activeLog == logName) return false;
 
 		// Hide the console log output that is currently visible.
-		$('#' + this.id + ' .console-log-panel .log-' + activeLog).addClass('hidden');
+		$(`#${this.id} .console-log-panel .log-${activeLog}`).addClass('hidden');
 
 		// Make the selected console log panel visible.
-		$('#' + this.id + ' .console-log-panel .log-' + logName).removeClass('hidden');
+		$(`#${this.id} .console-log-panel .log-${logName}`).removeClass('hidden');
 
 		// Make the <li> element of the selected tab 'active'.
-		$('#' + this.id + ' .console-log-panel .nav-tabs > .list-tab-' + activeLog).removeClass('active');
-		$('#' + this.id + ' .console-log-panel .nav-tabs > .list-tab-' + logName).addClass('active');
+		$(`#${this.id} .console-log-panel .nav-tabs > .list-tab-${activeLog}`).removeClass('active');
+		$(`#${this.id} .console-log-panel .nav-tabs > .list-tab-${logName}`).addClass('active');
 
 		if (this.consoleLog[logName].value != this.consoleLog[activeLog]) {
-			$('#' + this.id + ' .console-log-panel .console-input input').val(this.consoleLogGetInputValue(logName));
+			$(`#${this.id} .console-log-panel .console-input input`).val(this.consoleLogGetInputValue(logName));
 		}
 		if (this.consoleLog[logName].inputStatus != this.consoleLog[activeLog].inputStatus) {
-			$('#' + this.id + ' .console-log-panel .console-input').removeClass(this.consoleLog[activeLog].inputStatus).addClass(this.consoleLog[logName].inputStatus);
+			$(`#${this.id} .console-log-panel .console-input`).removeClass(this.consoleLog[activeLog].inputStatus).addClass(this.consoleLog[logName].inputStatus);
 		}
 
 		// Change the placeholder of the <input> element.
-		$('#' + this.id + ' .console-log-panel .console-input input').attr('placeholder', this.consoleLog[logName].placeholder);
+		$(`#${this.id} .console-log-panel .console-input input`).attr('placeholder', this.consoleLog[logName].placeholder);
 
 		// Set the activeLog property to the logName argument.
 		this.consoleLog.activeLog = logName;
