@@ -101,8 +101,10 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// Mousetrap.bind('esc', function() { console.log('escape'); }, 'keyup');
 		//
 		// // combinations
-		// Mousetrap.bind('command+shift+k', function() { console.log('command shift k'); });
-		//
+
+		// Open the console log.
+		Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
+
 		// // map multiple combinations to the same callback
 		// Mousetrap.bind(['command+k', 'ctrl+k'], function() {
 		//

@@ -12,7 +12,7 @@ console.log('running index.js');
 console.log(`Host Device: '${os.hostname()}'`);
 
 app.on('browser-window-created', (e, window) => {
-	
+
 	window.setMenu(null);
 
 });
