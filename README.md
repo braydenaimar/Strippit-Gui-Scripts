@@ -74,9 +74,7 @@ Strippit-Gui-Scripts/
 │   ├── require-config.js
 │   ├── main.js
 │   ├── strippit-widget.js
-│   ├── settings-widget.js
-│   ├── connection-widget.js
-|   └── help-widget.js
+|   └── connection-widget.js
 ├── css/
 |   ├── fonts/
 │   |   ├── fontawesome-webfont.eot
@@ -88,14 +86,10 @@ Strippit-Gui-Scripts/
 │   |   └── roboto-font.css
 |   ├── main.css
 │   ├── strippit-widget.css
-│   ├── settings-widget.css
-│   ├── connection-widget.css
-|   └── help-widget.css
+|   └── connection-widget.css
 ├── html/
 │   ├── strippit-widget.html
-│   ├── settings-widget.html
-│   ├── connection-widget.html
-|   └── help-widget.html
+|   └── connection-widget.html
 ├── icons/
 |   ├── boards/
 |   |   ├── tinyg.jpg
