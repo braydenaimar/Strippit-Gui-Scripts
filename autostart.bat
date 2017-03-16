@@ -1,3 +1,2 @@
-echo "launching punch press gui"
-git pull
+echo "Launching the Punch Press GUI"
 npm start

@@ -9,6 +9,7 @@ js/help-widget.js
 html/settings-widget.html
 css/settings-widget.css
 js/settings-widget.js
+todo-notes.txt
 .eslintrc.json
 .jshintrc
 

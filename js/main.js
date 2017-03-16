@@ -28,6 +28,12 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	electron = require('electron');
 	ipc = electron.ipcRenderer;
 
+	// Press Ctrl-Shift-I to launch development tools.
+	Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
+
+	// Press Ctrl-Shift-R to reload the program.
+	Mousetrap.bind('ctrl+shift+r', () => location.reload(true));
+
 	// TODO: Clean up the way amplify is imported cuz it is also in module exports.
 	publish = amplify.publish;
 	subscribe = amplify.subscribe;
@@ -49,23 +55,18 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	};
 
 	if (navigator.appVersion.includes('Win')) {
-
 		hostMeta.os = 'Windows';
 
 	} else if (navigator.appVersion.includes('Mac')) {
-
 		hostMeta.os = 'Mac';
 
 	} else if (navigator.appVersion.includes('X11')) {
-
 		hostMeta.os = 'Unix';
 
 	} else if (navigator.appVersion.includes('Linux')) {
-
 		hostMeta.os = 'Linux';
 
 	} else if (navigator.appVersion.includes('SunOs')) {
-
 		hostMeta.os = 'Solaris';
 
 	}
@@ -103,7 +104,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// // combinations
 
 		// Open the console log.
-		Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
+		// Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
 
 		// // map multiple combinations to the same callback
 		// Mousetrap.bind(['command+k', 'ctrl+k'], function() {
@@ -439,17 +440,12 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	};
 
 	updateGitRepo = function () {
-
 		// Pulls the latest repository from the master branch on GitHub.
 
 		let terminal = null;
 
 		// Skip the update if host is my laptop or if there is no internet connection.
-		if (hostMeta.hostName === 'BRAYDENS-LAPTOP' || !navigator.onLine) {
-
-			return false;
-
-		}
+		if (hostMeta.hostName === 'BRAYDENS-LAPTOP' || !navigator.onLine) return false;
 
 		console.log('Pulling latest repo from GitHub.');
 
@@ -469,6 +465,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 					console.log('Repository was updated.');
 
+					// Reload the program to make use of any new updates.
 					location.reload(true);
 
 				}
