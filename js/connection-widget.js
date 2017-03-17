@@ -287,36 +287,37 @@ define([ 'jquery' ], $ => ({
 			'pause': 100
 		},
 		{   // Punch Press TinyG
-			// 'SerialNumber': '',
-			'Buffer': 'tinyg',
+			'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
 			'script': [
-				{ Msg: '{"ec":0}', Pause: 50 }, // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
-				{ Msg: '{"ej":1}', Pause: 50 }, // Enable JSON Mode [ 0 = text, 1 = JSON ]
-				{ Msg: '{"js":1}', Pause: 50 }, // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
-				{ Msg: '{"jv":4}', Pause: 200 }, // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
-				{ Msg: '{"si":250}', Pause: 50 }, // Status Interval [ms]
-				{ Msg: '{"sv":1}', Pause: 50 }, // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
-				{ Msg: '{"sr":{"line":t,"posx":t,"posy":t,"posz":t,"vel":t,"unit":t,"stat":t,"feed":t,"coor":t,"momo":t,"plan":t,"path":t,"dist":t,"mpox":t,"mpoy":t,"mpoz":t}}', Pause: 200 },
-				{ Msg: '{"qv":1}', Pause: 50 }, // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
+				{ Msg: '{ec:0}', Pause: 50 }, // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+				{ Msg: '{ej:1}', Pause: 50 }, // Enable JSON Mode [ 0 = text, 1 = JSON ]
+				{ Msg: '{js:1}', Pause: 50 }, // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+				{ Msg: '{jv:4}', Pause: 200 }, // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+				{ Msg: '{si:250}', Pause: 50 }, // Status Interval [ms]
+				{ Msg: '{sv:1}', Pause: 50 }, // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
+				{ Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
+				// { Msg: '{qv:2}', Pause: 50 }, // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
 				// { Msg: 'G17', Pause: 200 }, // XY Work Plane
 				// { Msg: 'G94', Pause: 200 }, // Units per Minute Feedrate Mode
 				// { Msg: 'G90', Pause: 200 }, // Absolute Distance Mode
-				{ Msg: 'G21', Pause: 300 }, // Millimeters Mode
-				{ Msg: '{"z":{"am":1,"vm":14500,"fr":14500,"tn":0,"tm":2440,"jm":230,"jh":800}}', Pause: 1000 }, // X-Axis Settings
-				{ Msg: '{"z":{"jd":0.05,"sn":1,"sx":0,"sv":2000,"lv":200,"lb":25,"zb":0.254}}', Pause: 1000 },
-				{ Msg: '{"y":{"am":1,"vm":3800,"fr":3800,"tn":0,"tm":720,"jm":15,"jh":100}', Pause: 1000 },	// Y-Axis Settings
-				{ Msg: '{"y":{"jd":0.05,"sn":1,"sx":0,"sv":1000,"lv":200,"lb":100,"zb":6.35}}', Pause: 1000 },
-				{ Msg: 'G20', Pause: 300 }, // Inches Mode
-				{ Msg: '{"2":{"ma":2,"sa":1.8,"tr"0.5233:,"mi":8,"po":1,"pm":3}}', Pause: 500 },
-				{ Msg: '{"3":{"ma":1,"sa":1.8,"tr":1.1515,"mi":8,"po":1,"pm":3}}', Pause: 500 },
+				// { Msg: 'G21', Pause: 300 }, // Millimeters Mode
+				// { Msg: '{z:{jm:230,jh:800}}', Pause: 300 }, // X-Axis Jerk Maximum
+				// { Msg: '{y:{jm:15,jh:100}}', Pause: 300 }, // Y-Axis Jerk Maximum
+				// { Msg: 'G20', Pause: 300 }, // Inches Mode
+				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
+				{ Msg: '{z:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
+				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
+				{ Msg: '{y:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
+				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233:,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: 'M08', Pause: 200 }, // Lift the Finger Solenoid
-				{ Msg: 'G28.2 Y0 Z0', Pause: 2000 }, // Home Axes
+				// { Msg: 'G28.2 Y0 Z0', Pause: 2000 }, // Home Axes
 				{ Msg: 'M09', Pause: 200 }, // Drop the Finger Solenoid
-				{ Msg: 'G10 L2 P1 Y-3.601 Z-6.526', Pause: 200 }, // Set the G54 Work Offsets
+				// { Msg: 'G10 L2 P1 Y-3.601 Z-6.526', Pause: 200 }, // Set the G54 Work Offsets
 				// { Msg: '{hp:n}', Pause: 200 }, // Request Hardware Platform
 				// { Msg: '{fb:n}', Pause: 200 }, // Request Firmware Build
-				{ Msg: '{"sr":n}', Pause: 50 }, // Request Status Report
-				{ Msg: '{"qr":n}', Pause: 50 } // Request Queue Report
+				{ Msg: '{sr:n}', Pause: 50 } // Request Status Report
+				// { Msg: '{qr:n}', Pause: 50 } // Request Queue Report
 			],
 			'pause': 500
 		},
@@ -338,6 +339,12 @@ define([ 'jquery' ], $ => ({
 		{   // TinyG
 			'Buffer': 'tinyg',
 			'script': [
+				{ Msg: '{ec:0}', Pause: 50 }, // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+				{ Msg: '{ej:1}', Pause: 50 }, // Enable JSON Mode [ 0 = text, 1 = JSON ]
+				{ Msg: '{js:1}', Pause: 50 }, // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+				{ Msg: '{jv:5}', Pause: 200 }, // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+				{ Msg: '{si:250}', Pause: 50 }, // Status Interval [ms]
+				{ Msg: '{sv:1}', Pause: 50 }, // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
 				'{sr:n}'
 			],
 			'pause': 100
@@ -419,7 +426,7 @@ define([ 'jquery' ], $ => ({
 		// Sets the number of digits that will be displayed by default. If the line number exceeds this, the number of digits used will be increased.
 		// NOTE: Loaded by cson file.
 		minLineNumberDigits: 3,
-		// FIXME: Set the removeLogOnClose flag to false to prevent a port's log from being closed when the port is closed so that issues can be more easily troubleshooted.
+		// EXPERIMENTAL: Set the removeLogOnClose flag to false to prevent a port's log from being closed when the port is closed so that issues can be more easily troubleshooted.
 		removeLogOnClose: true,
 		// The maximum age of an unverified command that will be set to status error in the log when the SPJS closes (milliseconds).
 		// Set to null for no limit.
@@ -579,8 +586,9 @@ define([ 'jquery' ], $ => ({
 		// 2. Queued - Gcode is queued inside the SPJS and waiting to be sent to the CNC controller's serial buffer.
 		// 3. Written - Gcode has been written to the serial buffer of your CNC controller and removed from the SPJS's buffer.
 		// 4. Completed - Gcode is completed when the CNC controller tells us it read the Gcode from it's serial buffer and placed the Gcode into it's planner buffer (this means the Gcode may only get executed seconds into the future as the planner buffer works it's way through lines).
-		// 5. Executed (optional) - The CNC controller tells us that your Gcode was actually executed. This is the final step. On controllers like TinyG this data only comes back if line numbers are in your Gcode.
-		// 6. Error (optional) - The CNC controller failed to execute the line of Gcode. This could indicate a problem with your Gcode syntax, or that your CNC controller does not understand a particular Gcode command.
+		//    Executed (optional) - The CNC controller tells us that your Gcode was actually executed. This is the final step. On controllers like TinyG this data only comes back if line numbers are in your Gcode.
+		// 	  Warning (optional)
+		//    Error (optional) - The CNC controller failed to execute the line of Gcode. This could indicate a problem with your Gcode syntax, or that your CNC controller does not understand a particular Gcode command.
 		// NOTE: Loaded by cson file.
 		verifyStyle: {
 			New: 'fa-check text-muted',
@@ -906,7 +914,7 @@ define([ 'jquery' ], $ => ({
 			return safeString;
 
 		},
-		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex }) {
+		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, LogItem, LogIndex }) {
 			// The checkMatchItem method checks for a match between an item in the log and given search criteria.
 
 			console.log('LogItem: %O', LogItem);
@@ -923,6 +931,7 @@ define([ 'jquery' ], $ => ({
 			if (typeof Id != 'undefined' && LogItem.Id !== Id) return false;
 			if (typeof Line != 'undefined' && LogItem.Line !== Line) return false;
 			if (typeof Type != 'undefined' && LogItem.Type !== Type) return false;
+			if (typeof StatusCondition !== 'undefined' && LogItem.Status !== StatusCondition) return false;
 
 			const unixNow = Date.now();
 
@@ -942,6 +951,7 @@ define([ 'jquery' ], $ => ({
 				}
 
 				return false;
+
 			}
 
 			// If the command is stale, flag it in the log and return as non-match.
@@ -952,6 +962,7 @@ define([ 'jquery' ], $ => ({
 				this.updateCmd(port, { Index: LogIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
 				return false;
+
 			}
 
 			// Only counts a match as: all elements of Meta array are in the LogItem.Meta array.
@@ -968,7 +979,7 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		},
-		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom = 0, SearchBackwards = false }) {
+		findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, Index, IndexMap, SearchFrom = 0, SearchBackwards = false }) {
 			// Return logData item of matched command within the specified search space.
 			// Defaults to searching entire logData object, use IndexMap to narrow that search.
 			// Arg. IndexMap [array] (optional) - Array of indexes to search for in the logData object (eg. [1, 15, 27, 69]).
@@ -1051,7 +1062,7 @@ define([ 'jquery' ], $ => ({
 					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
 					// Check to see if found a match.
-					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex: logIndex })) {
+					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, LogItem, LogIndex: logIndex })) {
 
 						console.log('  ...got a match.');
 
@@ -1135,7 +1146,7 @@ define([ 'jquery' ], $ => ({
 			return { matchFound };
 
 		},
-		updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards = false, Status, Comment, PrevComment = 'left', UpdateRelated }) {
+		updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, Index, IndexMap, SearchFrom, SearchBackwards, Status, Comment, PrevComment = 'left', UpdateRelated, recursionDepth = 0 }) {
 			// This method updates the status of commands in the SPJS console log.
 			// Matches to command data can be partial and are not cose sensitive but matches to command id's have to be exact.
 			// Arg. port - Specifies the console log (eg. "SPJS" or "COM7").
@@ -1156,6 +1167,8 @@ define([ 'jquery' ], $ => ({
 				// return { matchFound: false };
 			}
 
+			if (recursionDepth >= 50) throw new Error('Infinite loop detected.');
+
 			console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`)))))}`);
 			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
 			console.log(CSON.stringify(arguments));
@@ -1173,11 +1186,13 @@ define([ 'jquery' ], $ => ({
 
 			if (typeof SearchFrom == 'undefined' && (Status === 'Warning' || Status === 'Error')) {
 				SearchFrom = IndexMap[IndexMap.length - 1];
-				SearchBackwards = true;
+				if (typeof SearchBackwards == 'undefined') SearchBackwards = true;
 
 			} else if (typeof SearchFrom == 'undefined') {
 				SearchFrom = 0;
 			}
+
+			if (typeof SearchBackwards == 'undefined') SearchBackwards = false;
 
 			if (typeof UpdateRelated == 'undefined' && port === 'SPJS') {
 				UpdateRelated = true;
@@ -1189,14 +1204,17 @@ define([ 'jquery' ], $ => ({
 
 			// Check if command is in this port's verify buffer.
 			// const matchItem = this.findItem(port, { Msg, PartMsg, Id, Index, IndexMap: this[port].verifyMap });
-			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, Index, IndexMap, SearchFrom, SearchBackwards });
+			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, Index, IndexMap, SearchFrom, SearchBackwards });
 
 			console.log('matchFound:', matchFound, '\nmatchIndex:', matchIndex, '\nmatchMsg:', matchMsg, '\nmatchId:', matchId, '\nmatchLine:', matchLine, '\nmatchType:', matchType, '\nmatchStatus:', matchStatus, '\nmatchComment:', matchComment, '\nmatchRelated:', matchRelated, '\nmatchMeta:', matchMeta, '\nmatchTime:', matchTime);
 
 			if (typeof matchIndex == 'undefined') {
+
 				console.log('No Match Found. Aborting update.');
 				console.groupEnd();
+
 				return { matchFound };
+
 			}
 
 			// If the Status argument was passed and this is not a redundant update, update the status of the command in the log.
@@ -1286,18 +1304,22 @@ define([ 'jquery' ], $ => ({
 					console.groupEnd();
 					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${1 - matchIndex}`);
 
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex - 1, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated });
+					recursionDepth += 1;
+
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex - 1, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
 
 				} else if (Status !== 'Warning' && Status !== 'Error' && SearchFrom < logData.length - 1) {
 
 					console.groupEnd();
 					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndex + 1}`);
 
+					recursionDepth += 1;
+
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex + 1, Status, Comment, PrevComment, UpdateRelated });
 
 				}
-				console.log('Redundant Status Update.');
 
+				console.log('Redundant Status Update.');
 
 			}
 
@@ -1417,6 +1439,8 @@ define([ 'jquery' ], $ => ({
 		subscribe(`/${this.id}/port-sendjson`, this, this.newportSendJson.bind(this));
 		// Sends message to the given port to stop all motion on that device.
 		subscribe(`/${this.id}/port-feedstop`, this, this.portFeedstop.bind(this));
+
+		subscribe('keyboard-shortcut', this, this.keyboardShortcuts);
 
 		this.initSettings();
 		// Import the status codes from the 'TinyG_Status_Codes.json' file as an object.
@@ -1674,6 +1698,12 @@ define([ 'jquery' ], $ => ({
 			let key = Number(evt.keyCode);
 			let inputData = $(consoleInputDom).val();
 
+			// If 'ctrl-pagedown' was pressed, change the visible console log.
+			if (evt.ctrlKey && evt.key === 'PageDown') this.consoleLogChangeView('right');
+
+			// If 'ctrl-pageup' was pressed, change the visible console log.
+			if (evt.ctrlKey && evt.key === 'PageUp') this.consoleLogChangeView('left');
+
 			// If the 'backspace' key was pressed.
 			if (evt.keyCode == '8') {
 				// console.log("evt:", evt);
@@ -1743,6 +1773,13 @@ define([ 'jquery' ], $ => ({
 			}
 
 		});
+
+	},
+	keyboardShortcuts(data) {
+
+		if (data === 'ctrl+pageup') this.consoleLogChangeView('left');
+
+		if (data === 'ctrl+pagedown') this.consoleLogChangeView('right');
 
 	},
 	// FIXME: If the console log was scrolled to the bottom when widget resized, scroll to bottom of log after resize.
@@ -2994,6 +3031,8 @@ define([ 'jquery' ], $ => ({
 		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portConnected(nextPort);
 	},
 	portDisconnected(port) {
+		// The portDisconnected method handles all of the DOM and object updates required whenever a port is disconnected.
+
 		let nextPort = null;
 
 		// If the port argument is [array], this function will be ran once for each port in the array.
@@ -3002,38 +3041,39 @@ define([ 'jquery' ], $ => ({
 			port = nextPort.shift();
 		}
 		// If the port argument is 'SPJS', exit the method.
-		if (port == 'SPJS') return false;
+		if (port === 'SPJS') return false;
 
 		console.groupCollapsed(`Port Disconnected: ${port}`);
-		// The portDisconnected method handles all of the DOM and object updates required whenever a port is disconnected.
+
 		let that = this;
+		const { removeLogOnClose } = this.consoleLog;
 
 		// If this port is already un-initiated (aka. this function was called redundantly), skip all DOM and object updates.
-		if (this.consoleLog[port] === undefined && this.consoleLog.openLogs.indexOf(port) == -1) {
+		if (typeof this.consoleLog[port] == 'undefined' && !this.consoleLog.openLogs.includes(port)) {
 			console.log(`portDisconnected has already been called for this port.${gui.parseObject(this.consoleLog, 2)}`);
 
 		// If this method was not redundantly called, update objects and DOM elements.
 		} else {
+
 			// Update the openPorts array.
 			// IDEA: Use .splice() to remove this port from the openLogs array.
 			let openLogs = [];
+
 			for (let i = 0; i < this.consoleLog.openLogs.length; i++) {
-				// console.log("consoleLog.openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
-				if (that.consoleLog.openLogs[i] != port) {
-					// console.log("  ...concat-ing");
+
+				if (that.consoleLog.openLogs[i] !== port) {
+
 					openLogs = openLogs.concat(that.consoleLog.openLogs[i]);
+
 				}
-				// console.log("openLogs: " + gui.parseObject(openLogs));
+
 			}
+
 			this.consoleLog.openLogs = openLogs;
 
 			// Remove the respective port from the statusbar.
 			publish('/statusbar-widget/remove', port);
 			// publish('/statusbar-widget/hilite', "serialport-a", "danger");
-
-			// // If the removeLogOnClose flag is false, the following DOM updates will be done if/when the port is next opened (in the portConnected method).
-			// if (this.consoleLog.removeLogOnClose) {
-			// }
 
 			// Remove any hilites on the port in the serial device list.
 			$(`#${this.id} .splist .port-${port}`).removeClass('success warning');
@@ -3042,25 +3082,35 @@ define([ 'jquery' ], $ => ({
 
 			// If this port's console log is visible, make the spjs' console log visible.
 			if (port === this.consoleLog.activeLog) {
-				// console.log("This port's console log was visible.");
+
 				this.consoleLogChangeView('SPJS');
+
 			}
 
-			// Remove the respective port's console log output <div> element.
-			$(`#${this.id} .console-log-panel .nav-tabs .list-tab-${port}`).remove();
-			// Remove the respective port's console log tab.
-			$(`#${this.id} .console-log-panel .panel-body .log-${port}`).remove();
+			// If the removeLogOnClose flag is false, the following DOM updates will be done if/when the port is next opened (in the portConnected method).
+			if (removeLogOnClose) {
 
-			// Delete the respective port's consoleLog and dataRecvBuffer objects.
-			delete this.consoleLog[port];
-			delete this.dataRecvBuffer[port];
+				// Remove the respective port's console log output <div> element.
+				$(`#${this.id} .console-log-panel .nav-tabs .list-tab-${port}`).remove();
+				// Remove the respective port's console log tab.
+				$(`#${this.id} .console-log-panel .panel-body .log-${port}`).remove();
+
+				// Delete the respective port's consoleLog and dataRecvBuffer objects.
+				delete this.consoleLog[port];
+				delete this.dataRecvBuffer[port];
+
+			}
 
 			// console.log("openLogs: " + gui.parseObject(this.consoleLog.openLogs));
 			// console.log("openLogs: ", this.consoleLog);
 			// console.log("consoleLog.length: ", this.consoleLog.length);
+
 		}
+
 		console.groupEnd();
-		if (nextPort && nextPort.length && nextPort != 'SPJS') this.portDisconnected(nextPort);
+
+		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portDisconnected(nextPort);
+
 	},
 	onPortOpenFail(data) {
 
@@ -3636,6 +3686,44 @@ define([ 'jquery' ], $ => ({
 
 			console.log('lineObj:', lineObj);
 
+			if (lineObj.sr || (lineObj.r && lineObj.r.sr)) {
+
+				this.consoleLog.updateCmd(port, { Msg: '{sr:n}', Status: 'Executed', UpdateRelated: true });
+
+			}
+
+			if (lineObj.r) {
+
+				// Queue Report.
+				if (typeof lineObj.r.qr != 'undefined') {
+
+					// qr
+
+				}
+
+			}
+
+			// Queue Report.
+			if (lineObj.qr) {
+
+				// qr
+
+			}
+
+			// Queue In.
+			if (lineObj.qi) {
+
+				// qi
+
+			}
+
+			// Queue Out.
+			if (lineObj.qo) {
+
+				// qo
+
+			}
+
 			// If there is a footer in the data.
 			if (lineObj.f) {
 
@@ -3698,6 +3786,7 @@ define([ 'jquery' ], $ => ({
 
 						console.log('lineObj.r is an empty object.');
 
+						// ({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 						({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
 					} else if (typeof lineObj.r == 'object') {
@@ -4628,6 +4717,27 @@ define([ 'jquery' ], $ => ({
 		portLog.inputStatus = status;
 	},
 	consoleLogChangeView(logName) {
+
+		if (logName === 'left') {
+
+			const curIndex = this.consoleLog.openLogs.indexOf(this.consoleLog.activeLog);
+
+			if (curIndex === 0) return false;
+
+			logName = this.consoleLog.openLogs[curIndex - 1];
+
+		}
+
+		if (logName === 'right') {
+
+			const curIndex = this.consoleLog.openLogs.indexOf(this.consoleLog.activeLog);
+
+			if (curIndex === this.consoleLog.openLogs.length - 1) return false;
+
+			logName = this.consoleLog.openLogs[curIndex + 1];
+
+		}
+
 		// console.log("Change visible console log: " + logName);
 		let activeLog = this.consoleLog.activeLog;
 		let consoleLogPanel = `#${this.id} .console-log-panel .console-log-output.log-${activeLog}`;

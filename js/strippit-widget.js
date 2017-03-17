@@ -79,6 +79,16 @@ define([ 'jquery' ], $ => ({
 
 		publish('/main/widget-loaded', this.id);
 
+		// Wait for the DOM to load before editing the min/max labels in the DOM.
+		setTimeout(() => {
+
+			this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
+			this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+			this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
+			this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+
+		}, 1000);
+
 		return true;
 
 	},
@@ -415,21 +425,29 @@ define([ 'jquery' ], $ => ({
 		// Stores the position values from the last update (used to prevent redundant DOM updates).
 		x: 0,
 		y: 0,
+
+		$xPos: $('#strippit-dro .x-axis .dro-pos-well'),
+		$xLimitLabel: $('#strippit-dro .x-axis .dro-pos-well .axis-limits-label'),
+		$yPos: $('#strippit-dro .y-axis .dro-pos-well'),
+		$yLimitLabel: $('#strippit-dro .y-axis .dro-pos-well .axis-limits-label'),
+
 		// Stores JQuery DOM references to make updating the DRO more efficient.
-		xValDOM: $('#strippit-dro > div.x-axis > div.dro-pos-well > h2.dro-pos table tr'),
-		yValDOM: $('#strippit-dro > div.y-axis > div.dro-pos-well > h2.dro-pos table tr'),
-		xDOM: {
-			negpos: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-negpos'),
-			intgray: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intgray'),
-			intblack: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intblack'),
-			intdecimal: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intdecimal')
-		},
-		yDOM: {
-			negpos: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-negpos'),
-			intgray: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intgray'),
-			intblack: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intblack'),
-			intdecimal: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intdecimal')
-		},
+		$xValDOM: $('#strippit-dro > div.x-axis > div.dro-pos-well > h2.dro-pos table tr'),
+		$yValDOM: $('#strippit-dro > div.y-axis > div.dro-pos-well > h2.dro-pos table tr'),
+
+		// xDOM: {
+		// 	negpos: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-negpos'),
+		// 	intgray: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intgray'),
+		// 	intblack: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intblack'),
+		// 	intdecimal: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intdecimal')
+		// },
+		// yDOM: {
+		// 	negpos: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-negpos'),
+		// 	intgray: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intgray'),
+		// 	intblack: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intblack'),
+		// 	intdecimal: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intdecimal')
+		// },
+
 		// Specifies how many digits should be shown before the decimal place by default.
 		intgrayDigits: 3,
 		// Updates the DRO values in the DOM.
@@ -479,8 +497,8 @@ define([ 'jquery' ], $ => ({
 			yValHTML += `<span class="xyz-intblack">${yIntblack}</span></td>`; // intblack
 			yValHTML += `<td>.<span class="xyz-decimal">${yDecimal}</span></td>`; // decimal
 
-			this.xValDOM.html(xValHTML);
-			this.yValDOM.html(yValHTML);
+			this.$xValDOM.html(xValHTML);
+			this.$yValDOM.html(yValHTML);
 
 			this.x = x;
 			this.y = y;
@@ -600,6 +618,23 @@ define([ 'jquery' ], $ => ({
 		}
 	},
 
+	flashLimitWarning(axis) {
+
+		// The number of times to flash the warning on and off.
+		const flashTimes = 4;
+		const delay = 250;
+		const warningClass = 'bg-danger';
+		const $limitLabel = this.dro[`$${axis}LimitLabel`];
+
+		for (let i = 0; i < flashTimes; i++) {
+
+			setTimeout(() => $limitLabel.addClass(warningClass), delay * 2 * i);
+			setTimeout(() => $limitLabel.removeClass(warningClass), delay * ((2 * i) + 1));
+
+		}
+
+	},
+
 	setAxis(axis) {
 
 		const { port } = this;
@@ -625,6 +660,7 @@ define([ 'jquery' ], $ => ({
 		if (valInt < lowLimit || valInt > highLimit) {
 
 			// Flash a warning.
+			this.flashLimitWarning(axis);
 
 			return false;
 

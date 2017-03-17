@@ -10,6 +10,10 @@
 	font-weight: normal;
 }
 
+#strippit-widget .hilite-red {
+	background-color: #8b0000;
+}
+
 /* -- in/mm Button -- */
 #strippit-inmm {
 	position: absolute;
@@ -103,8 +107,31 @@
 	border: 1px solid black;
 	padding: 3px 16px 0px 16px;
 }
+#strippit-dro .axis-limits-label {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 90px;
+	height: 100%;
+	font-size: 14px;
+}
+#strippit-dro .axis-limits-label span {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+}
 #strippit-dro .dro-pos-well h2 span {
 	font-size: 32px;
+}
+#strippit-dro .min-limit-label {
+	top: 0;
+}
+#strippit-dro .max-limit-label {
+	bottom: 0;
+}
+#strippit-dro .text-limit-label {
+	top: 16px;
+	font-size: 9px;
 }
 #strippit-dro .y-axis .dro-pos-well {
 	margin-top: 6px;

@@ -28,16 +28,19 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	electron = require('electron');
 	ipc = electron.ipcRenderer;
 
+	// TODO: Clean up the way amplify is imported cuz it is also in module exports.
+	publish = amplify.publish;
+	subscribe = amplify.subscribe;
+	unsubscribe = amplify.unsubscribe;
+
 	// Press Ctrl-Shift-I to launch development tools.
 	Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
 
 	// Press Ctrl-Shift-R to reload the program.
 	Mousetrap.bind('ctrl+shift+r', () => location.reload(true));
 
-	// TODO: Clean up the way amplify is imported cuz it is also in module exports.
-	publish = amplify.publish;
-	subscribe = amplify.subscribe;
-	unsubscribe = amplify.unsubscribe;
+	Mousetrap.bind('ctrl+pageup', () => publish('keyboard-shortcut', 'ctrl+pageup'));
+	Mousetrap.bind('ctrl+pagedown', () => publish('keyboard-shortcut', 'ctrl+pagedown'));
 
 	// Store information about the system.
 	hostMeta = {
@@ -196,7 +199,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	// Ex. [ false, false, ..., false ]
 	wgtLoaded = [];
 	// wgtVisible = 'connection-widget';
-	wgtVisible = 'strippit-widget';
+	wgtVisible = 'connection-widget';
 	// Stores startup info and scope references for each widget
 	// IDEA: Take each of the widget refs and move them outside of the widget object.
 	// IDEA: Build each port's object during the program execution.
