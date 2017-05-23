@@ -410,6 +410,22 @@ define([ 'jquery' ], $ => ({
 
 			}
 
+			if (this.unit === 'mm') {  // Units are mm
+
+				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0] * convFactor);
+				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1] * convFactor);
+				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0] * convFactor);
+				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1] * convFactor);
+
+			} else {  // Units are inches
+
+				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
+				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
+				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+
+			}
+
 			// Update the unit in the DRO.
 			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(this.unit);
 			$('#strippit-dro .y-axis .dro-pos-well .dro-dim').text(this.unit);

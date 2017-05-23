@@ -22,7 +22,7 @@ app.on('ready', () => {
 	let win = null;
 
 	// If running this on braydens laptop, open it in development mode.
-	if (os.hostname() === 'BRAYDENS-LAPTOP') {
+	if (os.hostname() === 'BRAYDENS-LENOVO') {
 
 		console.log('Opening in development mode.');
 		console.log('electron', electron);
@@ -33,7 +33,7 @@ app.on('ready', () => {
 			height: 620,
 			// fullscreen: true,
 			// kiosk: true,
-			// frame: false,
+			// frame: true,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
 			// webPreferences: {
@@ -51,7 +51,8 @@ app.on('ready', () => {
 			// width: 1650,
 			// height: 950,
 			// fullscreen: true,
-			kiosk: true,
+			frame: true,
+			// kiosk: true,
 			// frame: false,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
@@ -61,11 +62,13 @@ app.on('ready', () => {
 			icon: `${__dirname}/icon.ico`
 		});
 
+		win.maximize();
+
 	}
 
 	win.loadURL(`file://${__dirname}/main.html`);
 
-	if (os.hostname() === 'BRAYDENS-LAPTOP') win.webContents.openDevTools();
+	if (os.hostname() === 'BRAYDENS-LENOVO') win.webContents.openDevTools();
 
 	win.webContents.on('did-finish-load', () => {
 

@@ -13,6 +13,7 @@
 /* eslint-disable quote-props */
 /* eslint-disable no-unused-vars */
 /* eslint-disable object-shorthand */
+/* eslint-disable import/no-amd */
 /* eslint-disable prefer-const */
 /* eslint-disable no-console */
 /* eslint-disable func-names */
@@ -663,7 +664,7 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw 'The port argument was not passed properly.';
+			if (typeof port == 'undefined' || typeof this[port] == 'undefined') throw new Error('The port argument was not passed properly.');
 
 			// Apply the default values here so that warning messages can be logged.
 			IdPrefix = IdPrefix || '';
@@ -1507,10 +1508,11 @@ define([ 'jquery' ], $ => ({
 
 			// that.initScripts = initScripts;
 			// that.connectScripts = connectScripts;
+			return true;
 
 		});
 
-		if (hostMeta.hostName === 'BRAYDENS-LAPTOP') {
+		if (hostMeta.hostName === 'BRAYDENS-LENOVO') {
 
 			this.SPJS.requestListDelay = null;
 			this.consoleLog.commentCmdId = true;
@@ -2334,7 +2336,7 @@ define([ 'jquery' ], $ => ({
 	},
 	onHostname(data) {
 		const { Hostname } = data;
-		// Ex. { "Hostname": "Braydens-Laptop" }
+		// Ex. { "Hostname": "BRAYDENS-LENOVO" }
 
 		console.log(`SPJS -Hostname-\n  Hostname: ${Hostname}`);
 

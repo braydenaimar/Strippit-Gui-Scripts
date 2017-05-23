@@ -10,6 +10,8 @@
  */
 
 /* eslint-disable no-undef */
+/* eslint-disable import/no-amd */
+/* eslint-disable global-require */
 
 define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
@@ -198,8 +200,8 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	// Gets set to true once respective widget publishes '/widget-loaded'.
 	// Ex. [ false, false, ..., false ]
 	wgtLoaded = [];
+	wgtVisible = 'strippit-widget';
 	// wgtVisible = 'connection-widget';
-	wgtVisible = 'connection-widget';
 	// Stores startup info and scope references for each widget
 	// IDEA: Take each of the widget refs and move them outside of the widget object.
 	// IDEA: Build each port's object during the program execution.
@@ -349,10 +351,11 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			requirejs([ wgt ], (ref) => {
 
-				ref.loadHtml = widget[wgt].loadHtml;
-				ref.sidebarBtn = widget[wgt].sidebarBtn;
+				const temp = ref;
+				temp.loadHtml = widget[wgt].loadHtml;
+				temp.sidebarBtn = widget[wgt].sidebarBtn;
 
-				widget[wgt] = ref;
+				widget[wgt] = temp;
 
 				ref.initBody();
 
@@ -368,9 +371,10 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		requirejs([ wgt ], (ref) => {
 
-			ref.loadHtml = widget[wgt].loadHtml;
-			ref.sidebarBtn = widget[wgt].sidebarBtn;
-			widget[wgt] = ref;
+			const temp = ref;
+			temp.loadHtml = widget[wgt].loadHtml;
+			temp.sidebarBtn = widget[wgt].sidebarBtn;
+			widget[wgt] = temp;
 
 			ref.initBody();
 
@@ -448,7 +452,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		let terminal = null;
 
 		// Skip the update if host is my laptop or if there is no internet connection.
-		if (hostMeta.hostName === 'BRAYDENS-LAPTOP' || !navigator.onLine) return false;
+		if (hostMeta.hostName === 'BRAYDENS-LENOVO' || !navigator.onLine) return false;
 
 		console.log('Pulling latest repo from GitHub.');
 
