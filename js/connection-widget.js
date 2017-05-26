@@ -309,12 +309,12 @@ define([ 'jquery' ], $ => ({
 				{ Msg: '{z:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
 				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
 				{ Msg: '{y:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
-				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233:,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: 'M08', Pause: 200 }, // Lift the Finger Solenoid
 				// { Msg: 'G28.2 Y0 Z0', Pause: 2000 }, // Home Axes
+				{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 }, // Set the G54 Work Offsets
 				{ Msg: 'M09', Pause: 200 }, // Drop the Finger Solenoid
-				// { Msg: 'G10 L2 P1 Y-3.601 Z-6.526', Pause: 200 }, // Set the G54 Work Offsets
 				// { Msg: '{hp:n}', Pause: 200 }, // Request Hardware Platform
 				// { Msg: '{fb:n}', Pause: 200 }, // Request Firmware Build
 				{ Msg: '{sr:n}', Pause: 50 } // Request Status Report
@@ -1298,29 +1298,31 @@ define([ 'jquery' ], $ => ({
 				}
 
 			// If this a redundant status update, look for another match in the log incase this is the wrong command in the log.
-			} else if (Status && this.verifyPrecidence.indexOf(matchStatus) >= this.verifyPrecidence.indexOf(Status)) {
+			} else if (Status && this.verifyPrecidence.indexOf(matchStatus) >= this.verifyPrecidence.indexOf(Status) && (!Comment || (Comment !== 'Stale'))) {
+				
+				console.log('Redundant Status Update.');
 
-				if ((Status === 'Warning' || Status === 'Error') && matchIndex > 0) {
-
-					console.groupEnd();
-					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${1 - matchIndex}`);
-
-					recursionDepth += 1;
-
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex - 1, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
-
-				} else if (Status !== 'Warning' && Status !== 'Error' && SearchFrom < logData.length - 1) {
-
-					console.groupEnd();
-					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${matchIndex + 1}`);
+				if ((Status === 'Warning' || Status === 'Error') && SearchFrom > 0 && SearchFrom !== IndexMap[0]) {
 
 					recursionDepth += 1;
+					const nextSearchIndex = SearchFrom - 1;
 
-					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: matchIndex + 1, Status, Comment, PrevComment, UpdateRelated });
+					console.groupEnd();
+					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${nextSearchIndex}`);
+
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: nextSearchIndex, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
+
+				} else if (Status !== 'Warning' && Status !== 'Error' && SearchFrom < logData.length - 1 && SearchFrom !== IndexMap[IndexMap.length - 1]) {
+
+					recursionDepth += 1;
+					const nextSearchIndex = SearchFrom + 1;
+
+					console.groupEnd();
+					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${nextSearchIndex}`);
+
+					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: nextSearchIndex, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
 
 				}
-
-				console.log('Redundant Status Update.');
 
 			}
 
@@ -4107,7 +4109,8 @@ define([ 'jquery' ], $ => ({
 				// Try sending the list command again as there may me multiple pending list commands in the SPJS that may or may not be stale.
 				recursionDepth += 1;
 
-				return this.newspjsSend({ Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta, recursionDepth });
+				// return this.newspjsSend({ Msg, Id, IdPrefix, Type, Status, Comment, Related, Meta, recursionDepth });
+				return setTimeout(() => this.newspjsSend({ Msg: 'list', Comment, Related, Meta, recursionDepth }), 1000);
 
 			} else if (matchFound) {
 				console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
