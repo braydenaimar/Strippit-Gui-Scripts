@@ -302,14 +302,14 @@ define([ 'jquery' ], $ => ({
 				// { Msg: 'G17', Pause: 200 },  // XY Work Plane
 				// { Msg: 'G94', Pause: 200 },  // Units per Minute Feedrate Mode
 				// { Msg: 'G90', Pause: 200 },  // Absolute Distance Mode
-				{ Msg: 'G21', Pause: 300 },     // Millimeters Mode
-				{ Msg: '{z:{jm:230,jh:800}}', Pause: 300 },  // X-Axis Jerk Maximum
-				{ Msg: '{y:{jm:15,jh:100}}', Pause: 300 },   // Y-Axis Jerk Maximum
-				{ Msg: 'G20', Pause: 300 },  // Inches Mode
+				// { Msg: 'G21', Pause: 300 },     // Millimeters Mode
+				// { Msg: '{z:{jm:230,jh:800}}', Pause: 300 },  // X-Axis Jerk Maximum
+				// { Msg: '{y:{jm:15,jh:100}}', Pause: 300 },   // Y-Axis Jerk Maximum
+				// { Msg: 'G20', Pause: 300 },  // Inches Mode
 				// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
 				// { Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
-				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
-				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
+				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
+				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
 				// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
 				// { Msg: '{z:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
 				// { Msg: '{z:{am:1,vm:14500,fr:14500,tn:0,tm:2440,jm:230,jh:800,jd:0.05,sn:1,sx:0,sv:2000,lv:200,lb:25,zb:0.254}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
