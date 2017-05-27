@@ -288,7 +288,8 @@ define([ 'jquery' ], $ => ({
 			'pause': 100
 		},
 		{   // Punch Press TinyG
-			'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
+			// 'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
+			'SerialNumber': 'DN00Z9XLA',
 			'script': [
 				{ Msg: '{ec:0}', Pause: 50 },    // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
 				{ Msg: '{ej:1}', Pause: 50 },    // Enable JSON Mode [ 0 = text, 1 = JSON ]
