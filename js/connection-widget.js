@@ -287,47 +287,119 @@ define([ 'jquery' ], $ => ({
 			],
 			'pause': 100
 		},
+		// {   // Punch Press TinyG
+		// 	// 'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
+		// 	'SerialNumber': 'DN00Z9XL',
+		// 	'script': [
+		// 		{ Msg: '{ec:0}', Pause: 50 },    // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+		// 		{ Msg: '{ej:1}', Pause: 50 },    // Enable JSON Mode [ 0 = text, 1 = JSON ]
+		// 		{ Msg: '{js:1}', Pause: 50 },    // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+		// 		{ Msg: '{jv:4}', Pause: 200 },   // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+		// 		{ Msg: '{si:250}', Pause: 50 },  // Status Interval [ms]
+		// 		{ Msg: '{sv:1}', Pause: 50 },    // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
+		// 		{ Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
+		// 		{ Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
+		// 		// { Msg: 'G17', Pause: 200 },  // XY Work Plane
+		// 		// { Msg: 'G94', Pause: 200 },  // Units per Minute Feedrate Mode
+		// 		// { Msg: 'G90', Pause: 200 },  // Absolute Distance Mode
+		// 		// { Msg: 'G21', Pause: 300 },     // Millimeters Mode
+		// 		// { Msg: '{z:{jm:230,jh:800}}', Pause: 300 },  // X-Axis Jerk Maximum
+		// 		// { Msg: '{y:{jm:15,jh:100}}', Pause: 300 },   // Y-Axis Jerk Maximum
+		// 		// { Msg: 'G20', Pause: 300 },  // Inches Mode
+		// 		// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
+		// 		// { Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
+		// 		{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
+		// 		{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
+		// 		// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
+		// 		// { Msg: '{z:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
+		// 		// { Msg: '{z:{am:1,vm:14500,fr:14500,tn:0,tm:2440,jm:230,jh:800,jd:0.05,sn:1,sx:0,sv:2000,lv:200,lb:25,zb:0.254}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
+		// 		// { Msg: '{y:{am:1,vm:3800,fr:3800,tn:0,tm:720,jm:15,jh:100,jd:0.05,sn:1,sx:0,sv:1000,lv:200,lb:100,zb:6.35}}', Pause: 1000 }, // Y-Axis Settings jm:9, jh:31
+		// 		// { Msg: '{z:{am:1,vm:14500,fr:14500,tn:0,tm:2440,jm:230,jh:800}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
+		// 		// { Msg: '{z:{jd:0.05,sn:1,sx:0,sv:2000,lv:200,lb:25,zb:0.254}}', Pause: 1000 },
+		// 		// // { Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
+		// 		// // { Msg: '{y:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
+		// 		// { Msg: '{y:{am:1,vm:3800,fr:3800,tn:0,tm:720,jm:15,jh:100}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
+		// 		// { Msg: '{y:{jd:0.05,sn:1,sx:0,sv:1000,lv:200,lb:100,zb:6.35}}', Pause: 1000 },
+		// 		{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
+		// 		{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
+		// 		{ Msg: 'M08', Pause: 200 }, 					   // Lift the Finger Solenoid
+		// 		{ Msg: 'G28.2 Y0 Z0', Pause: 2000 }, 			   // Home Axes
+		// 		{ Msg: 'M09', Pause: 200 },						   // Drop the Finger Solenoid
+		// 		{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 },  // Set the G54 Work Offsets
+		// 		// { Msg: '{hp:n}', Pause: 200 }, // Request Hardware Platform
+		// 		// { Msg: '{fb:n}', Pause: 200 }, // Request Firmware Build
+		// 		{ Msg: '{sr:n}', Pause: 50 },  // Request Status Report
+		// 		{ Msg: '{qr:n}', Pause: 50 }   // Request Queue Report
+		// 	],
+		// 	'pause': 500
+		// },
 		{   // Punch Press TinyG
-			// 'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
-			'SerialNumber': 'DN00Z9XL',
+			'SerialNumber': 'FTDIBUS\\VID_0403+PID_6015+DN00Z9XLA\\0000',
 			'script': [
-				{ Msg: '{ec:0}', Pause: 50 },    // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
-				{ Msg: '{ej:1}', Pause: 50 },    // Enable JSON Mode [ 0 = text, 1 = JSON ]
-				{ Msg: '{js:1}', Pause: 50 },    // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
-				{ Msg: '{jv:4}', Pause: 200 },   // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
-				{ Msg: '{si:250}', Pause: 50 },  // Status Interval [ms]
-				{ Msg: '{sv:1}', Pause: 50 },    // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
-				{ Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
-				{ Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
-				// { Msg: 'G17', Pause: 200 },  // XY Work Plane
-				// { Msg: 'G94', Pause: 200 },  // Units per Minute Feedrate Mode
-				// { Msg: 'G90', Pause: 200 },  // Absolute Distance Mode
-				// { Msg: 'G21', Pause: 300 },     // Millimeters Mode
-				// { Msg: '{z:{jm:230,jh:800}}', Pause: 300 },  // X-Axis Jerk Maximum
-				// { Msg: '{y:{jm:15,jh:100}}', Pause: 300 },   // Y-Axis Jerk Maximum
-				// { Msg: 'G20', Pause: 300 },  // Inches Mode
-				// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
-				// { Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
+				// { Msg: '{ec:0}', Pause: 50 },    // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+				// { Msg: '{ej:1}', Pause: 50 },    // Enable JSON Mode [ 0 = text, 1 = JSON ]
+				// { Msg: '{js:1}', Pause: 50 },    // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+				// { Msg: '{jv:4}', Pause: 200 },   // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+				{ Msg: '%', Pause: 500 },
+				// { Msg: '{si:250}', Pause: 50 },  // Status Interval [ms]
+				// { Msg: '{sv:1}', Pause: 50 },    // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
+				// { Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
+				// { Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
 				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
-				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.250}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
-				// { Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.50}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
-				// { Msg: '{z:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
-				// { Msg: '{z:{am:1,vm:14500,fr:14500,tn:0,tm:2440,jm:230,jh:800,jd:0.05,sn:1,sx:0,sv:2000,lv:200,lb:25,zb:0.254}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
-				// { Msg: '{y:{am:1,vm:3800,fr:3800,tn:0,tm:720,jm:15,jh:100,jd:0.05,sn:1,sx:0,sv:1000,lv:200,lb:100,zb:6.35}}', Pause: 1000 }, // Y-Axis Settings jm:9, jh:31
-				// { Msg: '{z:{am:1,vm:14500,fr:14500,tn:0,tm:2440,jm:230,jh:800}}', Pause: 1000 }, // X-Axis Settings jm:9, jh:31
-				// { Msg: '{z:{jd:0.05,sn:1,sx:0,sv:2000,lv:200,lb:25,zb:0.254}}', Pause: 1000 },
-				// // { Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
-				// // { Msg: '{y:{jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },
-				// { Msg: '{y:{am:1,vm:3800,fr:3800,tn:0,tm:720,jm:15,jh:100}}', Pause: 1000 }, // Y-Axis Settings jm:1, jh:4
-				// { Msg: '{y:{jd:0.05,sn:1,sx:0,sv:1000,lv:200,lb:100,zb:6.35}}', Pause: 1000 },
+				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
+				{ Msg: '%', Pause: 500 },
 				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '%', Pause: 500 },
+				{ Msg: '{g54z:0}', Pause: 200 },
+				{ Msg: '{g54y:0}', Pause: 200 },
+				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
+				{ Msg: 'G0 Y-1 Z-1', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: '%', Pause: 500 },
 				{ Msg: 'M08', Pause: 200 }, 					   // Lift the Finger Solenoid
+				{ Msg: '%', Pause: 500 },
 				{ Msg: 'G28.2 Y0 Z0', Pause: 2000 }, 			   // Home Axes
+				{ Msg: '%', Pause: 500 },
 				{ Msg: 'M09', Pause: 200 },						   // Drop the Finger Solenoid
+				{ Msg: '%', Pause: 500 },
 				{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 },  // Set the G54 Work Offsets
-				// { Msg: '{hp:n}', Pause: 200 }, // Request Hardware Platform
-				// { Msg: '{fb:n}', Pause: 200 }, // Request Firmware Build
+				{ Msg: '{sr:n}', Pause: 50 },  // Request Status Report
+				{ Msg: '{qr:n}', Pause: 50 }   // Request Queue Report
+			],
+			'pause': 500
+		},
+		{   // Punch Press TinyG
+			'SerialNumber': 'DN00Z9XL',
+			'script': [
+				// { Msg: '{ec:0}', Pause: 50 },    // Expand LF to CRLF on TX [ 0 = off, 1 = on ]
+				// { Msg: '{ej:1}', Pause: 50 },    // Enable JSON Mode [ 0 = text, 1 = JSON ]
+				// { Msg: '{js:1}', Pause: 50 },    // JSON Serialize Style [ 0 = relaxed, 1 = strict ]
+				// { Msg: '{jv:4}', Pause: 200 },   // JSON Verbosity [ 0 = silent, 1 = footer, 2 = messages, 3 = configs, 4 = linenum, 5 = verbose ]
+				{ Msg: '%', Pause: 500 },
+				// { Msg: '{si:250}', Pause: 50 },  // Status Interval [ms]
+				// { Msg: '{sv:1}', Pause: 50 },    // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
+				// { Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
+				// { Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
+				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
+				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
+				{ Msg: '%', Pause: 500 },
+				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '%', Pause: 500 },
+				{ Msg: '{g54z:0}', Pause: 200 },
+				{ Msg: '{g54y:0}', Pause: 200 },
+				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
+				{ Msg: 'G0 Y-1 Z-1', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: '%', Pause: 500 },
+				{ Msg: 'M08', Pause: 200 }, 					   // Lift the Finger Solenoid
+				{ Msg: '%', Pause: 500 },
+				{ Msg: 'G28.2 Y0 Z0', Pause: 2000 }, 			   // Home Axes
+				{ Msg: '%', Pause: 500 },
+				{ Msg: 'M09', Pause: 200 },						   // Drop the Finger Solenoid
+				{ Msg: '%', Pause: 500 },
+				{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 },  // Set the G54 Work Offsets
 				{ Msg: '{sr:n}', Pause: 50 },  // Request Status Report
 				{ Msg: '{qr:n}', Pause: 50 }   // Request Queue Report
 			],
