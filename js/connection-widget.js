@@ -353,8 +353,9 @@ define([ 'jquery' ], $ => ({
 				{ Msg: '%', Pause: 500 },
 				{ Msg: '{g54z:0}', Pause: 200 },
 				{ Msg: '{g54y:0}', Pause: 200 },
+				{ Msg: 'G91', Pause: 500 },
 				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
-				{ Msg: 'G0 Y-1 Z-1', Pause: 500 },
+				{ Msg: 'Y-1 Z-1', Pause: 500 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: '%', Pause: 500 },
 				{ Msg: 'M08', Pause: 200 }, 					   // Lift the Finger Solenoid
@@ -364,6 +365,9 @@ define([ 'jquery' ], $ => ({
 				{ Msg: 'M09', Pause: 200 },						   // Drop the Finger Solenoid
 				{ Msg: '%', Pause: 500 },
 				{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 },  // Set the G54 Work Offsets
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
 				{ Msg: '{sr:n}', Pause: 50 },  // Request Status Report
 				{ Msg: '{qr:n}', Pause: 50 }   // Request Queue Report
 			],
@@ -389,8 +393,9 @@ define([ 'jquery' ], $ => ({
 				{ Msg: '%', Pause: 500 },
 				{ Msg: '{g54z:0}', Pause: 200 },
 				{ Msg: '{g54y:0}', Pause: 200 },
+				{ Msg: 'G91', Pause: 500 },
 				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
-				{ Msg: 'G0 Y-1 Z-1', Pause: 500 },
+				{ Msg: 'Y-1 Z-1', Pause: 500 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: '%', Pause: 500 },
 				{ Msg: 'M08', Pause: 200 }, 					   // Lift the Finger Solenoid
@@ -400,6 +405,9 @@ define([ 'jquery' ], $ => ({
 				{ Msg: 'M09', Pause: 200 },						   // Drop the Finger Solenoid
 				{ Msg: '%', Pause: 500 },
 				{ Msg: 'G10 L2 P1 Y-3.578 Z-6.526', Pause: 200 },  // Set the G54 Work Offsets
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
+				{ Msg: 'G90', Pause: 500 },
 				{ Msg: '{sr:n}', Pause: 50 },  // Request Status Report
 				{ Msg: '{qr:n}', Pause: 50 }   // Request Queue Report
 			],
