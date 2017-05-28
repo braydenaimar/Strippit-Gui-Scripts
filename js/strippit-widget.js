@@ -137,6 +137,8 @@ define([ 'jquery' ], $ => ({
 
 		});
 
+		Mousetrap.bind('v', () => this.savepos.setNextPos(this.port));
+
 		// Initialize the Save Position buttons.
 		$('#strippit-savepos').on('click', 'span.btn', (evt) => {
 

@@ -346,7 +346,7 @@ define([ 'jquery' ], $ => ({
 				// { Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
 				// { Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
 				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
-				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
+				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.875,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
 				{ Msg: '%', Pause: 500 },
 				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
