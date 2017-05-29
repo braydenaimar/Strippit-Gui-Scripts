@@ -260,15 +260,10 @@ define([ 'jquery' ], $ => ({
 
 		if (wgtVisible === this.id) {
 
-			console.log(`${this.id} is now visible.`);
-
 			this.widgetVisible = true;
-
 			this.resizeWidgetDom();
 
 		} else if (wgtHidden === this.id) {
-
-			console.log(`${this.id} is now hidden.`);
 
 			this.widgetVisible = false;
 

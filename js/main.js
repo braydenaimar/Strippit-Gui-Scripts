@@ -9,31 +9,69 @@
  *  @author Brayden Aimar
  */
 
-/* eslint-disable no-undef */
-/* eslint-disable import/no-amd */
-/* eslint-disable global-require */
+/* global ws:true, wgtMap:true, wgtLoaded:true, wgtVisible:true, widget:true, initBody:true, widgetLoadCheck:true, createWidgetContainer:true, loadHtmlWidget:true, loadJsWidget:true, createSidebarBtns:true, initWidgetVisible:true, makeWidgetVisible:true, updateGitRepo:true */  // eslint-disable-line no-unused-vars
 
 define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
+	/* eslint-disable no-console*/
 
 	console.log('running main.js');
 	console.log('global:', global);
-	// TODO: require bootstrap javascript
-
-	// TODO: Use module exports for this.
 	CSON = require('cson');
 	fsCSON = require('fs-cson');
 	fs = require('fs');
 	os = require('os');
-	spawn = require('child_process').spawn;
+	({ spawn } = require('child_process'));
 
 	// The ipc module aLlows for communication between the main and render processes.
 	electron = require('electron');
-	ipc = electron.ipcRenderer;
+	({ ipcRenderer: ipc } = electron);
 
-	// TODO: Clean up the way amplify is imported cuz it is also in module exports.
-	publish = amplify.publish;
-	subscribe = amplify.subscribe;
-	unsubscribe = amplify.unsubscribe;
+	({ publish, subscribe, unsubscribe } = amplify);
+	// publish = amplify.publish;
+	// subscribe = amplify.subscribe;
+	// unsubscribe = amplify.unsubscribe;
+
+	const developerHosts = [ 'BRAYDENS-LENOVO' ];  // List of developer host devices
+	inDebugMode = developerHosts.includes(os.hostname());
+
+	DEBUG_ENABLED = true;  // Enable debugging mode
+	debug = {};
+
+	if (DEBUG_ENABLED && inDebugMode && (typeof console != 'undefined')) { // If debug mode is enabled
+		const keys = Object.keys(console);
+
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+
+			if (key === 'memory')
+				debug[key] = console[key];
+
+			else if (key === 'error')
+				debug[key] = ((...args) => { throw new Error(...args); });
+
+			else
+				debug[key] = console[key].bind(console);
+		}
+	}
+	else {
+		const keys = Object.keys(console);
+		const banned = [ 'log', 'info', 'table' ];  // Console log methods that will be ignored
+
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+
+			if (banned.includes(key))  // If not allowed
+				debug[key] = () => false;
+
+			else if (key === 'memory')
+				debug[key] = console[key];
+
+			else
+				debug[key] = console[key].bind(console);
+		}
+	}
+
+	/* eslint-enable no-console*/
 
 	// Press Ctrl-Shift-I to launch development tools.
 	Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
@@ -41,8 +79,11 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	// Press Ctrl-Shift-R to reload the program.
 	Mousetrap.bind('ctrl+shift+r', () => location.reload(true));
 
-	Mousetrap.bind('ctrl+pageup', () => publish('keyboard-shortcut', 'ctrl+pageup'));
-	Mousetrap.bind('ctrl+pagedown', () => publish('keyboard-shortcut', 'ctrl+pagedown'));
+	// Keyboard shortcuts for use throughout the program.
+	Mousetrap.bind('ctrl+pageup', () => publish('keyboard-shortcut', 'ctrl+pageup'));      // Connection Widget: Show device log to the left
+	Mousetrap.bind('ctrl+pagedown', () => publish('keyboard-shortcut', 'ctrl+pagedown'));  // Connection Widget: Show device log to the right
+	Mousetrap.bind('ctrl+o', () => publish('keyboard-shortcut', 'ctrl+o'));  // Load Widget: Open a file
+	Mousetrap.bind('ctrl+s', () => publish('keyboard-shortcut', 'ctrl+s'));  // Load Widget: Save a file
 
 	// Store information about the system.
 	hostMeta = {
@@ -84,95 +125,6 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	console.log(hostMeta);
 
-	(function testCode() {
-
-		console.groupCollapsed('OS Module');
-		console.log('OS:', hostMeta.os);
-		console.log('Platform:', os.platform());
-		console.log('Architecture:', os.arch());
-		console.log('CPUs:', os.cpus());
-		console.log(`Free memory: ${(os.freemem() / 1000000000).toFixed(3)} Gb`); // free memory [bytes]
-		console.log(`Total memory: ${(os.totalmem() / 1000000000).toFixed(3)} Gb`); // total memory [bytes]
-		console.log(`Home directory: ${os.homedir()}`);
-		console.log(`Hostname: ${os.hostname()}`);
-		console.log(`Load average: ${os.loadavg()}`);
-		console.log('Network interfaces:', os.networkInterfaces());
-		console.log(`Up time: ${(os.uptime() / 3600).toFixed(2)} hr`); // uptime [seconds]
-		console.log('User info:', os.userInfo());
-		console.groupEnd();
-
-		// // single keys
-		// Mousetrap.bind('4', function() { console.log('4'); });
-		// Mousetrap.bind("?", function() { console.log('show shortcuts!'); });
-		// Mousetrap.bind('esc', function() { console.log('escape'); }, 'keyup');
-		//
-		// // combinations
-
-		// Open the console log.
-		// Mousetrap.bind('ctrl+shift+i', () => ipc.send('open-dev-tools'));
-
-		// // map multiple combinations to the same callback
-		// Mousetrap.bind(['command+k', 'ctrl+k'], function() {
-		//
-		//     console.log('command k or control k');
-		//
-		//     // return false to prevent default browser behavior
-		//     // and stop event from bubbling
-		//     return false;
-		//
-		// });
-		//
-		// // gmail style sequences
-		// Mousetrap.bind('g i', function() { console.log('go to inbox'); });
-		// Mousetrap.bind('* a', function() { console.log('select all'); });
-		//
-		// // konami code!
-		// Mousetrap.bind('up up down down left right left right b a enter', function() {
-		//     console.log('konami code');
-		//
-		// });
-
-		// console.log(`returned value: ${ 0 || '' || 'helloworld' || 'stuff' }`);
-
-		// const saveBtn = document.getElementById('save-dialog')
-		//
-		// saveBtn.addEventListener('click', function (event) {
-		// 	ipc.send('save-dialog');
-		// })
-		//
-		// ipc.on('saved-file', function (event, path) {
-		// 	if (!path) path = 'No path';
-		// 	document.getElementById('file-saved').innerHTML = `Path selected: ${path}`;
-		// })
-
-		// // Asynchronous file read
-		// fs.readFile('input.txt', function (err, data) {
-		// 	if (err) {
-		//     	return console.error(err);
-		// 	}
-		// 	console.log(`Asynchronous read: ${data.toString()}`);
-		// 	console.log("Going to write into existing file");
-		// 	fs.writeFile('input.txt', data.toString() + 'Simply Easy Learning!',  function(err) {
-		// 	   if (err) {
-		// 	      return console.error(err);
-		// 	   }
-		//
-		// 	   console.log("Data written successfully!");
-		// 	   console.log("Let's read newly written data");
-		// 	   fs.readFile('input.txt', function (err, data) {
-		// 	      if (err) {
-		// 	         return console.error(err);
-		// 		 }
-		// 	      console.log(`Asynchronous read: ${data.toString()}`);
-		// 	   });
-		// 	});
-		// });
-		//
-		// // Synchronous file read
-		// var data = fs.readFileSync('input.txt');
-		// console.log("Synchronous read: " + data.toString());
-
-	}());
 
 	// IDEA: Declare all of these as const and take them out of the 'ws' object.
 	ws = {
@@ -219,9 +171,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// 'help-widget': { loadHtml: true, sidebarBtn: true }
 	};
 
-	wgtLen = wgtMap.length;
-
-	for (let i = 0; i < wgtLen; i++) {
+	for (let i = 0; i < wgtMap.length; i++) {
 
 		this.wgtLoaded.push(false);
 
@@ -333,8 +283,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	};
 
-	createWidgetContainer = function (wgt) {
-
+	createWidgetContainer = function createWidgetContainer(wgt) {
 		// append a div container to dom body
 		console.log('  Creating widget DOM container');
 
@@ -386,35 +335,40 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		console.log('Creating Sidebar Buttons');
 		$.each(widget, (widgetIndex, widgetItem) => {
-
 			// Check if the respective widget wants a sidebar button made
-			console.log(`  ${widgetIndex}`);
-			if (widgetItem.sidebarBtn === undefined || widgetItem.sidebarBtn === null) {
-
-				console.log('    ...jk, not creating sidebar button.');
-
-			} else {
-
-				// var btnHtml = '<span id="btn-' + widgetIndex + '" evt-data="' + widgetIndex + '" class="btn btn-' + widgetItem.ref.btnTheme;
+			debug.log(`  ${widgetIndex}`);
+			if (!widgetItem.sidebarBtn) {
+				debug.log('    ...jk, not creating sidebar button.');
+			}
+			else if (widgetItem.icon.includes('material-icons')) {
 				let btnHtml = `<span id="btn-${widgetIndex}" evt-data="${widgetIndex}" class="btn btn-${widgetItem.btnTheme}`;
 				btnHtml += (widgetItem.sidebarBtn) ? '' : ' hidden';
-				// btnHtml += '"><div><span class="' + widgetItem.ref.icon + '"></span></div><div>';
+				btnHtml += `"><div><span class="material-icons">${widgetItem.icon.split(' ')[1]}</span></div><div>`;
+				btnHtml += (widgetItem.shortName) ? widgetItem.shortName : widgetItem.name;
+				btnHtml += '</div></span>';
+
+				$('#sidebar').append(btnHtml);
+			}
+			else {
+				let btnHtml = `<span id="btn-${widgetIndex}" evt-data="${widgetIndex}" class="btn btn-${widgetItem.btnTheme}`;
+				btnHtml += (widgetItem.sidebarBtn) ? '' : ' hidden';
 				btnHtml += `"><div><span class="${widgetItem.icon}"></span></div><div>`;
 				btnHtml += (widgetItem.shortName) ? widgetItem.shortName : widgetItem.name;
 				btnHtml += '</div></span>';
-				$('#sidebar').append(btnHtml);
 
+				$('#sidebar').append(btnHtml);
 			}
 
+			if (widgetIndex === wgtVisible && widgetItem.sidebarBtn) {
+				$(`#btn-${widgetIndex}`).removeClass('btn-default');
+				$(`#btn-${widgetIndex}`).addClass('btn-primary');
+			}
 		});
-
 	};
 
 	initWidgetVisible = function () {
 
 		// Show the initial widget.
-		console.log(`Show wgt: ${wgtVisible}`);
-
 		$(`#${wgtVisible}`).removeClass('hidden');
 
 		$('#header-widget-label').text(widget[wgtVisible].name); // Set header bar label.
@@ -430,6 +384,12 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// If wgt is already visible, do nothing.
 		if (wgt === wgtVisible) return;
 		// console.log("  wgt: " + wgt + "\n  wgtVisible: " + wgtVisible);
+
+		$(`#btn-${wgt}`).removeClass('btn-default');
+		$(`#btn-${wgt}`).addClass('btn-primary');
+
+		$(`#btn-${wgtVisible}`).removeClass('btn-primary');
+		$(`#btn-${wgtVisible}`).addClass('btn-default');
 
 		// Hide previously visible widget.
 		$(`#${wgtVisible}`).addClass('hidden');
@@ -500,6 +460,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		});
 
+		return true;
 	};
 
 });
