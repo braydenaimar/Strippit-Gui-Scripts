@@ -596,6 +596,8 @@ define([ 'jquery' ], $ => ({
 			// If this is a redundant DOM update, abort the DOM update.
 			if (val === this.value) return false;
 
+			if (val === '100954775') location.reload();  // Passcode for reloading the page.
+
 			const [ valInt, valDec ] = val.split('.');
 			const { intgrayDigits, decgrayDigits } = this;
 

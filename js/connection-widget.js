@@ -1791,6 +1791,9 @@ define([ 'jquery' ], $ => ({
 
 				that.newspjsSend({ Msg: 'restart', Type: 'Command' });
 
+			} else if (evtData === 'reload') {
+				location.reload();
+
 			} else if (evtSignal) {
 				publish(evtSignal, evtData);
 
