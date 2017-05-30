@@ -33,7 +33,7 @@ app.on('ready', () => {
 			height: 620,
 			// fullscreen: true,
 			// kiosk: true,
-			// frame: true,
+			// frame: false,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
 			// webPreferences: {
@@ -51,8 +51,8 @@ app.on('ready', () => {
 			// width: 1650,
 			// height: 950,
 			// fullscreen: true,
-			frame: true,
-			// kiosk: true,
+			// frame: true,
+			kiosk: true,
 			// frame: false,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
@@ -61,8 +61,6 @@ app.on('ready', () => {
 			// }
 			icon: `${__dirname}/icon.ico`
 		});
-
-		win.maximize();
 
 	}
 
