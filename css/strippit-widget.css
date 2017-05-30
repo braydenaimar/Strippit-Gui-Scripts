@@ -1,5 +1,9 @@
 /* Strippit Widget CSS */
 
+#strippit-widget {
+	zoom: 1.4;
+}
+
 /* -- Widget Body -- */
 #strippit-widget span.btn {
 	height: 40px;
@@ -18,9 +22,15 @@
 #strippit-inmm {
 	position: absolute;
 	top: 415px;
-	left: 300px;
-	width: 80px;
+	left: 365px;
+	/*top: 375px;
+	left: 385px;*/
+	/*width: 80px;*/
 }
+/*#strippit-inmm span.btn-home {
+	padding-top: 7px;
+	padding-bottom: 7px;
+}*/
 #strippit-inmm span.btnInMm {
 	padding-top: 8px;
 	padding-bottom: 8px;
@@ -153,16 +163,14 @@
 #strippit-savepos div.btn-header {
 	position: absolute;
 	top: 0;
-	width: 145%;
+	width: 300%;
 	/*border: 1px dashed red;*/
 }
 #strippit-savepos div.step-btns {
 	position: absolute;
-	top: 130px;
-	right: 0;
-	width: 50px;
-	/*width: 58%;*/
-	/*height: 40px;*/
+	top: 250px;
+	left: 150px;
+	/*width: 50px;*/
 	/*border: 1px dashed green;*/
 }
 #strippit-savepos div.step-btns span.btn-stepbck {
@@ -184,9 +192,9 @@
 }*/
 #strippit-savepos .btn-header .control-btns {
 	position: absolute;
-	top: 220px;
-	right: 0;
-	width: 50px;
+	top: 300px;
+	left: 150px;
+	/*width: 50px;*/
 }
 #strippit-savepos div.left-btns,
 #strippit-savepos div.right-btns {
