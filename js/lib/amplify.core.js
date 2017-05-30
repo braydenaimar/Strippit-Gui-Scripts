@@ -8,150 +8,193 @@
  * http://amplifyjs.com
  */
 
-define(['jquery','gui'], function($) {
-	console.log("running amplify.core.js");
+define([ 'jquery', 'gui' ], function ($) {
 
-	(function( global, undefined ) {
+	console.log('running amplify.core.js');
 
-	var slice = [].slice,
-		subscriptions = {};
+	(function (global, undefined) {
 
-	var amplify = global.amplify = {
+		let slice = [].slice,
+			subscriptions = {};
 
-		publish: function( topic ) {
+		const amplify = global.amplify = {
 
-			if ( typeof topic !== "string" ) {
-				throw new Error( "You must provide a valid topic to publish." );
-			}
+			publish(topic) {
 
-			var args = slice.call( arguments, 1 ),
-				topicSubscriptions,
-				subscription,
-				length,
-				i = 0,
-				ret;
+				if (typeof topic !== 'string') {
+
+					throw new Error('You must provide a valid topic to publish.');
+
+				}
+
+				let args = slice.call(arguments, 1),
+					topicSubscriptions,
+					subscription,
+					length,
+					i = 0,
+					ret;
 
 			// console.log("Publish: " + topic + gui.parseObject(args, 2));
-			var publishCallLog = `Publish: ${topic}`;
-			for ( var x = 0; x < args.length; x++) {
-				publishCallLog += `\n  ${x}: `;
+				let publishCallLog = `Publish: ${topic}`;
+				for (let x = 0; x < args.length; x++) {
+
+					publishCallLog += `\n  ${x}: `;
 				// const argLine = (typeof args[x] == "string") ? args[x]:JSON.stringify(args[x]).replace(/\s*/g, "").replace(/\n/g, "");
-				const argLine = (typeof args[x] === 'string') ? args[x] : JSON.stringify(args[x]);
-				publishCallLog += (argLine === undefined) ? 'undefined' : `${argLine.slice(0, 150)}${argLine.length > 150 ? '...' : ''}`;
-			}
+					const argLine = (typeof args[x] === 'string') ? args[x] : JSON.stringify(args[x]);
+					publishCallLog += (argLine === undefined) ? 'undefined' : `${argLine.slice(0, 150)}${argLine.length > 150 ? '...' : ''}`;
 
-			if ( !subscriptions[ topic ] ) {
-				console.error(`There are no subscriptions for ${topic}`);
-				return true;
-			}
+				}
 
-			topicSubscriptions = subscriptions[ topic ].slice();
+				if (!subscriptions[topic]) {
+
+					console.error(`There are no subscriptions for ${topic}`);
+					return true;
+
+				}
+
+				topicSubscriptions = subscriptions[topic].slice();
 
 			// publishCallLog += "\n  subs: " + topicSubscriptions.length;
-			console.log(publishCallLog);
+				console.log(publishCallLog);
 
-			for ( length = topicSubscriptions.length; i < length; i++ ) {
-				subscription = topicSubscriptions[ i ];
+				for (length = topicSubscriptions.length; i < length; i++) {
+
+					subscription = topicSubscriptions[i];
 				// publishCallLog += (topic == 'testline') ? '\n  [0]: ' + topicSubscriptions[i].callback:'';
 				// console.log("  topisSubscription[" + i + "]:", subscription);
-				ret = subscription.callback.apply( subscription.context, args );
-				if ( ret === false ) {
+					ret = subscription.callback.apply(subscription.context, args);
+					if (ret === false) {
 					// break;
-				}
+					}
 				// publishCallLog += '\n  ret: ' + ret;
 				// publishCallLog += '\n  [0] ' + topicSubscriptions[i].callback;
 				// console.log(publishCallLog);
-			}
-			return ret !== false;
-		},
 
-		subscribe: function( topic, context, callback, priority ) {
+				}
+				return ret !== false;
+
+			},
+
+			subscribe(topic, context, callback, priority) {
+
 			// console.log("Subscribe Call:",topic,"\n      callback:",callback,"\n      priority:",priority);
-			console.log(`Subscribe: ${topic}`);
-			if ( typeof topic !== "string" ) {
-				throw new Error( 'You must provide a valid topic to create a subscription.' );
-			}
+				console.log(`Subscribe: ${topic}`);
+				if (typeof topic !== 'string') {
 
-			if ( arguments.length === 3 && typeof callback === 'number' ) {
-				priority = callback;
-				callback = context;
-				context = null;
-			}
-			if ( arguments.length === 2 ) {
-				callback = context;
-				context = null;
-			}
-			priority = priority || 10;
+					throw new Error('You must provide a valid topic to create a subscription.');
 
-			var topicIndex = 0,
-				topics = topic.split( /\s/ ),
-				topicLength = topics.length,
-				added;
-			for ( ; topicIndex < topicLength; topicIndex++ ) {
-				topic = topics[ topicIndex ];
-				added = false;
-				if ( !subscriptions[ topic ] ) {
-					subscriptions[ topic ] = [];
 				}
 
-				var i = subscriptions[ topic ].length - 1,
-					subscriptionInfo = {
-						callback: callback,
-						context: context,
-						priority: priority
-					};
+				if (arguments.length === 3 && typeof callback === 'number') {
 
-				for ( ; i >= 0; i-- ) {
-					if ( subscriptions[ topic ][ i ].priority <= priority ) {
-						subscriptions[ topic ].splice( i + 1, 0, subscriptionInfo );
-						added = true;
-						break;
+					priority = callback;
+					callback = context;
+					context = null;
+
+				}
+				if (arguments.length === 2) {
+
+					callback = context;
+					context = null;
+
+				}
+				priority = priority || 10;
+
+				let topicIndex = 0,
+					topics = topic.split(/\s/),
+					topicLength = topics.length,
+					added;
+				for (; topicIndex < topicLength; topicIndex++) {
+
+					topic = topics[topicIndex];
+					added = false;
+					if (!subscriptions[topic]) {
+
+						subscriptions[topic] = [];
+
 					}
+
+					let i = subscriptions[topic].length - 1,
+						subscriptionInfo = {
+							callback,
+							context,
+							priority
+						};
+
+					for (; i >= 0; i--) {
+
+						if (subscriptions[topic][i].priority <= priority) {
+
+							subscriptions[topic].splice(i + 1, 0, subscriptionInfo);
+							added = true;
+							break;
+
+						}
+
+					}
+
+					if (!added) {
+
+						subscriptions[topic].unshift(subscriptionInfo);
+
+					}
+
 				}
 
-				if ( !added ) {
-					subscriptions[ topic ].unshift( subscriptionInfo );
+				return callback;
+
+			},
+
+			unsubscribe(topic, context, callback) {
+
+				console.log(`Unsubscribe: ${topic}`);
+				if (typeof topic !== 'string') {
+
+					throw new Error('You must provide a valid topic to remove a subscription.');
+
 				}
-			}
 
-			return callback;
-		},
+				if (arguments.length === 2) {
 
-		unsubscribe: function( topic, context, callback ) {
-			console.log("Unsubscribe: " + topic);
-			if ( typeof topic !== "string" ) {
-				throw new Error( "You must provide a valid topic to remove a subscription." );
-			}
+					callback = context;
+					context = null;
 
-			if ( arguments.length === 2 ) {
-				callback = context;
-				context = null;
-			}
+				}
 
-			if ( !subscriptions[ topic ] ) {
-				return;
-			}
+				if (!subscriptions[topic]) {
 
-			var length = subscriptions[ topic ].length,
-				i = 0;
+					return;
 
-			for ( ; i < length; i++ ) {
-				if ( subscriptions[ topic ][ i ].callback === callback ) {
-					if ( !context || subscriptions[ topic ][ i ].context === context ) {
-						subscriptions[ topic ].splice( i, 1 );
+				}
+
+				let length = subscriptions[topic].length,
+					i = 0;
+
+				for (; i < length; i++) {
+
+					if (subscriptions[topic][i].callback === callback) {
+
+						if (!context || subscriptions[topic][i].context === context) {
+
+							subscriptions[topic].splice(i, 1);
 
 						// Adjust counter and length for removed item
-						i--;
-						length--;
-					}
-				}
-			}
-		}
-	};
+							i--;
+							length--;
 
-	module.exports = global.amplify;
+						}
+
+					}
+
+				}
+
+			}
+		};
+
+		module.exports = global.amplify;
 	// console.log("amplify.js - amplify: ",amplify);
 	// console.log("module.exports: ",module.exports);
 
-	}( this ) );
+	}(this));
+
 });

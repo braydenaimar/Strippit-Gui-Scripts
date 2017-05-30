@@ -1,23 +1,28 @@
 
-define(['jquery'], function($) {
-	console.log("running gui.js");
+define([ 'jquery' ], function ($) {
+
+	console.log('running gui.js');
 
 	this.gui = {
 
 		escGroup() {
 
 			for (let i = 0; i < 10; i++) {
+
 				console.groupEnd();
+
 			}
 
 		},
 
-		resizeWidgetDom: function() {
-			console.log("Resizing widget DOM.");
+		resizeWidgetDom() {
+
+			console.log('Resizing widget DOM.');
 
 		},
 
-		parseObject: function(data, indentLevel, parseFilter) {
+		parseObject(data, indentLevel, parseFilter) {
+
 			// console.group("parseObject");
 
 			// parseObject( [data] )
@@ -33,48 +38,72 @@ define(['jquery'], function($) {
 			// TODO:270 Pass a 'showType' argument.
 
 			// TODO:330 Sort objects based on the sortOrder array before parsing.
-			var sortOrder = [["Cmd", "Port", "Baud", "Buffer"], ["Desc"]];
+			const sortOrder = [ [ 'Cmd', 'Port', 'Baud', 'Buffer' ], [ 'Desc' ] ];
 
 			// If the parseFilter argument was omitted, and the indentLevel argument is [object], assume the indentLevel argument has been passed as the parseFilter argument.
-			if (parseFilter === undefined && typeof indentLevel == "object" && Array.isArray(indentLevel)) {
+			if (parseFilter === undefined && typeof indentLevel == 'object' && Array.isArray(indentLevel)) {
+
 				parseFilter = indentLevel;
 			// If the parseFilter argument is given and the indentLevel argument is [array/object], throw an error.
-			} else if (typeof indentLevel == "object") {
-				throw new Error("The indentLevel argument needs to be a string or number.");
+
+			} else if (typeof indentLevel == 'object') {
+
+				throw new Error('The indentLevel argument needs to be a string or number.');
+
 			}
 
-			if (typeof data == "object" && Array.isArray(data)) {
-				var dataType = "array";
+			if (typeof data == 'object' && Array.isArray(data)) {
+
+				var dataType = 'array';
+
 			} else {
+
 				var dataType = typeof data;
+
 			}
 
-			var parseFilterKeep = [];
-			var parseFilterDiscard = [];
+			let parseFilterKeep = [];
+			let parseFilterDiscard = [];
 			// If the parseFilter argument was passed and it is not an [array], throw an error.
-			if (parseFilter !== undefined && typeof parseFilter !== "object") {
+			if (parseFilter !== undefined && typeof parseFilter !== 'object') {
+
 				throw new Error('The parseFilter argument needs to be an object. ex.["AvailableBufferAlgorithms"] or ex.{ keep: ["AvailableBufferAlgorithms"] }');
 
 			// If the parseFilter argument is [object].
+
 			} else if (parseFilter !== undefined && !Array.isArray(parseFilter)) {
-				$.each(parseFilter, function(parseFilterIndex, parseFilterItem) {
-					var subParseFilter = [];
-					for(var i = 0; i < parseFilterItem.length; i++) {
+
+				$.each(parseFilter, (parseFilterIndex, parseFilterItem) => {
+
+					const subParseFilter = [];
+					for (let i = 0; i < parseFilterItem.length; i++) {
+
 						subParseFilter.push(parseFilterItem[i]);
+
 					}
-					if (parseFilterIndex == "keep") {
+					if (parseFilterIndex == 'keep') {
+
 						parseFilterKeep = subParseFilter;
-					} else if (parseFilterIndex == "discard") {
+
+					} else if (parseFilterIndex == 'discard') {
+
 						parseFilterDiscard = subParseFilter;
+
 					} else {
+
 						throw new Error("The parseFilter object property names must be either:\n  a) 'keep'\n  b) 'discard'");
+
 					}
+
 				});
 
 
 			// If the parseFilter argument is [array].
+
 			} else if (parseFilter !== undefined && Array.isArray(parseFilter)) {
+
 				parseFilterDiscard = parseFilter;
+
 			}
 			// console.log("keep:", parseFilterKeep);
 			// console.log("discard:", parseFilterDiscard);
@@ -82,72 +111,97 @@ define(['jquery'], function($) {
 
 			// console.log("data:", data, "[" + dataType + "]\nindent: " + indentLevel + " [" + typeof indentLevel + " ]parseFilter:", parseFilter, "[" + typeof parseFilter + "]");
 
-			var parsedData = "";
+			let parsedData = '';
 
-			if (typeof indentLevel == "number") {
-				var indent = "\n" + " ".repeat(indentLevel);
-			} else if (typeof indentLevel == "string") {
+			if (typeof indentLevel == 'number') {
+
+				var indent = `\n${' '.repeat(indentLevel)}`;
+
+			} else if (typeof indentLevel == 'string') {
+
 				var indent = indentLevel;
+
 			} else {
-				var indent = "\n";
+
+				var indent = '\n';
+
 			}
 
 			// If the data argument is [array], parse it as [array[...]].
-			if (typeof data == "object" && Array.isArray(data)) {
+			if (typeof data == 'object' && Array.isArray(data)) {
 
-				$.each(data, function(dataIndex, dataItem) {
+				$.each(data, (dataIndex, dataItem) => {
+
 					// console.log("  dataIndex:", dataIndex, " typeof:", typeof(dataIndex), "\n  dataItem:", dataItem, " typeof:", typeof(dataItem));
-					if (parseFilterKeep.length && typeof dataIndex === "string" && parseFilterKeep.indexOf(dataIndex) == -1) return true;
+					if (parseFilterKeep.length && typeof dataIndex === 'string' && parseFilterKeep.indexOf(dataIndex) == -1) return true;
 					if (parseFilterDiscard.indexOf(dataIndex) != -1) return true;
 
 					// If dataItem is [object], parse the data object as [array[objects[string/number/array[string/number/objects[string/number]]]]].
-					if (typeof dataItem == "object") {
-						parsedData += indent + "[" + dataIndex + "]";
-						$.each(dataItem, function(index, item) {
+					if (typeof dataItem == 'object') {
+
+						parsedData += `${indent}[${dataIndex}]`;
+						$.each(dataItem, (index, item) => {
+
 							// If the name of this object matches one of the parseFilter, do not parse it.
-							if (parseFilterKeep.length && typeof index === "string" && parseFilterKeep.indexOf(index) == -1) return true;
+							if (parseFilterKeep.length && typeof index === 'string' && parseFilterKeep.indexOf(index) == -1) return true;
 							if (parseFilterDiscard.indexOf(index) != -1) return true;
 
-							var parsedItem = "";
+							let parsedItem = '';
 
 							if (Array.isArray(item)) {
+
 								// I would explain whats going on here but dat nestin' tho.
-								$.each(item, function(subIndex, subItem) {
-									if (parseFilterKeep.length && typeof subIndex === "string" && parseFilterKeep.indexOf(subIndex) == -1) return true;
+								$.each(item, (subIndex, subItem) => {
+
+									if (parseFilterKeep.length && typeof subIndex === 'string' && parseFilterKeep.indexOf(subIndex) == -1) return true;
 									if (parseFilterDiscard.indexOf(subIndex) != -1) return true;
 
-									if (typeof subItem == "object") {
-										var parsedSubItem = "{";
-										$.each(subItem, function(subSubIndex, subSubItem) {
+									if (typeof subItem == 'object') {
+
+										let parsedSubItem = '{';
+										$.each(subItem, (subSubIndex, subSubItem) => {
+
 											// Welcome to the fourth level of nested loop hell.
-											if (parseFilterKeep.length && typeof subSubIndex === "string" && parseFilterKeep.indexOf(subSubIndex) == -1) return true;
+											if (parseFilterKeep.length && typeof subSubIndex === 'string' && parseFilterKeep.indexOf(subSubIndex) == -1) return true;
 											if (parseFilterDiscard.indexOf(subSubIndex) != -1) return true;
-											parsedSubItem += (parsedSubItem == "{") ? " ":", ";
-											parsedSubItem += subSubIndex + ": " + subSubItem;
+											parsedSubItem += (parsedSubItem == '{') ? ' ' : ', ';
+											parsedSubItem += `${subSubIndex}: ${subSubItem}`;
 											// TODO:80 Create the fith level of nested loop hell.
+
 										});
-										parsedSubItem += " }";
-										parsedItem += (parsedItem) ? ", " + parsedSubItem:"[ " + parsedSubItem;
+										parsedSubItem += ' }';
+										parsedItem += (parsedItem) ? `, ${parsedSubItem}` : `[ ${parsedSubItem}`;
+
 									} else {
-										parsedItem += (parsedItem) ? ", " + subItem:"[ " + subItem;
+
+										parsedItem += (parsedItem) ? `, ${subItem}` : `[ ${subItem}`;
+
 									}
+
 								});
-								parsedItem += " ]";
+								parsedItem += ' ]';
 
 							} else {
+
 								parsedItem = item;
+
 							}
-							parsedData += indent + "  " + index + ": " + parsedItem;
+							parsedData += `${indent}  ${index}: ${parsedItem}`;
+
 						});
 
 
 					// If the data argument is [array[string/number]] and the indentLevel argument is omitted, list elements on a single line with comma-space seperations between each element.
+
 					} else if (indentLevel === undefined) {
-						parsedData += (parsedData) ? ", " + dataItem:"[ " + dataItem;
+
+						parsedData += (parsedData) ? `, ${dataItem}` : `[ ${dataItem}`;
 
 					// If the data argument is [array[string/number]] and the indentLevel argument is given, list elements on seperate lines.
+
 					} else {
-						parsedData += indent + "[" + dataIndex + "]: " + dataItem;
+
+						parsedData += `${indent}[${dataIndex}]: ${dataItem}`;
 
 					}
 
@@ -156,61 +210,83 @@ define(['jquery'], function($) {
 
 				// If the data argument is an empty [object], return empty '[]' without a newline character.
 				if (!data.length) {
-					parsedData = " [ ]";
+
+					parsedData = ' [ ]';
 
 				// If the data argument is [array[string/number]], add an ']' to close the array line.
-				} else if (parsedData.slice(0,1) == "[") {
-					parsedData += " ]";
+
+				} else if (parsedData.slice(0, 1) == '[') {
+
+					parsedData += ' ]';
+
 				}
 
 			// If the data argument is [object], parse it as such.
-			} else if (typeof data == "object") {
 
-				$.each(data, function(dataIndex, dataItem) {
+			} else if (typeof data == 'object') {
+
+				$.each(data, (dataIndex, dataItem) => {
+
 					// console.log(" dataIndex: " + dataIndex + " [" + typeof dataIndex + "]\n  dataItem:", dataItem, " [" + typeof dataItem + "]");
-					if (parseFilterKeep.length && typeof dataIndex === "string" && parseFilterKeep.indexOf(dataIndex) == -1) return true;
+					if (parseFilterKeep.length && typeof dataIndex === 'string' && parseFilterKeep.indexOf(dataIndex) == -1) return true;
 					if (parseFilterDiscard.indexOf(dataIndex) != -1) return true;
 
-					var parsedSubData = "";
+					let parsedSubData = '';
 
 					// If the data argument is [object[objects]], parse as such.
-					if (typeof dataItem == "object") {
-						$.each(dataItem, function(subDataIndex, subDataItem) {
-							if (parseFilterKeep.length && typeof subDataIndex === "string" && parseFilterKeep.indexOf(subDataIndex) == -1) return true;
+					if (typeof dataItem == 'object') {
+
+						$.each(dataItem, (subDataIndex, subDataItem) => {
+
+							if (parseFilterKeep.length && typeof subDataIndex === 'string' && parseFilterKeep.indexOf(subDataIndex) == -1) return true;
 							if (parseFilterDiscard.indexOf(subDataIndex) != -1) return true;
 
 							// If the data argument is [object[objects[array]]], parse as such.
-							if (typeof subDataItem == "object" && Array.isArray(subDataItem)) {
-								var parsedSub1Data = "";
-								$.each(subDataItem, function(sub1DataIndex, sub1DataItem) {
-									if (parseFilterKeep.length && typeof sub1DataIndex === "string" && parseFilterKeep.indexOf(sub1DataIndex) == -1) return true;
+							if (typeof subDataItem == 'object' && Array.isArray(subDataItem)) {
+
+								var parsedSub1Data = '';
+								$.each(subDataItem, (sub1DataIndex, sub1DataItem) => {
+
+									if (parseFilterKeep.length && typeof sub1DataIndex === 'string' && parseFilterKeep.indexOf(sub1DataIndex) == -1) return true;
 									if (parseFilterDiscard.indexOf(sub1DataIndex) != -1) return true;
 
-									parsedSub1Data += (parsedSub1Data) ? ", " + sub1DataItem:"[ " + sub1DataItem;
+									parsedSub1Data += (parsedSub1Data) ? `, ${sub1DataItem}` : `[ ${sub1DataItem}`;
+
 								});
-								parsedSub1Data = (parsedSub1Data) ? parsedSub1Data + " ]":"[ ]";
+								parsedSub1Data = (parsedSub1Data) ? `${parsedSub1Data} ]` : '[ ]';
+
 							} else {
+
 								var parsedSub1Data = subDataItem;
+
 							}
-							parsedSubData += indent + "  " + subDataIndex + ": " + parsedSub1Data;
+							parsedSubData += `${indent}  ${subDataIndex}: ${parsedSub1Data}`;
+
 						});
-						parsedData += indent + "{" + dataIndex + "}";
+						parsedData += `${indent}{${dataIndex}}`;
 						parsedData += parsedSubData;
 
 					// If the data argument is [object[string/number]], parse as such.
+
 					} else {
-						parsedData += indent + dataIndex + ": " + dataItem;
+
+						parsedData += `${indent + dataIndex}: ${dataItem}`;
+
 					}
 
 				});
 
 			// If the data argument is not [array/object] (aka. data is [string/number]), return the indent combined with the data.
+
 			} else {
+
 				parsedData = indent + data;
+
 			}
 
 			// console.groupEnd();
 			return parsedData;
+
 		}
 	};
 

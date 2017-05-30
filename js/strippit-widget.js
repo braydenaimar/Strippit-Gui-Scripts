@@ -1,9 +1,19 @@
-// Strippit Widget JavaScript
+/**
+ *   ____  _        _             _ _    __        ___     _            _         _                  ____            _       _
+ *  / ___|| |_ _ __(_)_ __  _ __ (_) |_  \ \      / (_) __| | __ _  ___| |_      | | __ ___   ____ _/ ___|  ___ _ __(_)_ __ | |_
+ *  \___ \| __| '__| | '_ \| '_ \| | __|  \ \ /\ / /| |/ _` |/ _` |/ _ \ __|  _  | |/ _` \ \ / / _` \___ \ / __| '__| | '_ \| __|
+ *   ___) | |_| |  | | |_) | |_) | | |_    \ V  V / | | (_| | (_| |  __/ |_  | |_| | (_| |\ V / (_| |___) | (__| |  | | |_) | |_
+ *  |____/ \__|_|  |_| .__/| .__/|_|\__|    \_/\_/  |_|\__,_|\__, |\___|\__|  \___/ \__,_| \_/ \__,_|____/ \___|_|  |_| .__/ \__|
+ *                   |_|   |_|                               |___/                                                    |_|
+ *
+ *  @author Brayden Aimar
+ */
 
-define([ 'jquery' ], function ($) {
-return { // eslint-disable-line indent
+
+define([ 'jquery' ], $ => ({
+
 	id: 'strippit-widget',
-	name: 'Strippit',
+	name: 'Strippit Punch Press',
 	shortName: 'Strippit',
 	btnTheme: 'default',
 	icon: 'fa fa-home',
@@ -28,8 +38,27 @@ return { // eslint-disable-line indent
 
 	// Stores the current unit mode (eg. 'inch' or 'mm').
 	unit: '',
+	intomm: 25.4,
+	mmtoin: 0.0393700787401575,
 
-	initBody: function() {
+	/**
+	 *  These are the physical hardware limits of the machine (inch).
+	 *  Travel outside these position values will cause a crash.
+	 *
+	 *  @type {Object}
+	 */
+	machLimits: {
+		x: [ 6.5, 102.5 ],
+		y: [ 0.125, 28.125 ]
+	},
+
+	// Stores the latest machine position.
+	machPosition: {
+		x: 0,
+		y: 0
+	},
+
+	initBody() {
 
 		console.group(`${this.name}.initBody()`);
 
@@ -37,7 +66,7 @@ return { // eslint-disable-line indent
 		subscribe('/main/widget-visible', this, this.visibleWidget.bind(this));
 
 		subscribe('/connection-widget/recvPortList', this, this.recvPortList.bind(this));
-		subscribe('/connection-widget/recvRawPortData', this, this.recvRawPortData.bind(this));
+		subscribe('/connection-widget/recvPortData', this, this.recvPortData.bind(this));
 
 		this.initButtons();
 
@@ -50,105 +79,123 @@ return { // eslint-disable-line indent
 
 		publish('/main/widget-loaded', this.id);
 
+		// Wait for the DOM to load before editing the min/max labels in the DOM.
+		setTimeout(() => {
+
+			this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
+			this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+			this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
+			this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+
+		}, 1000);
+
+		return true;
+
 	},
 	initButtons() {
 
-		const that = this;
-
 		// Initialize the inch/mm button.
-		$('#strippit-inmm').on('click', 'span.btn', function () {
+		$('#strippit-inmm').on('click', 'span.btn', (evt) => {
 
 			console.log('Button -in/mm-');
 
 			// inch - G20
 			// mm - G21
 
-			const Msg = (that.unit === 'inch') ? 'G21' : 'G20';
+			const Msg = (this.unit === 'inch') ? 'G21' : 'G20';
 
 			// If got a valid port, send a unit change message to the device.
-			if (that.port !== '') {
-				publish('/connection-widget/port-sendjson', that.port, { Msg });
+			if (this.port !== '') {
+
+				publish('/connection-widget/port-sendjson', this.port, { Msg });
 
 			}
 
 		});
 
 		// Initialize the Feedstop button.
-		$('#strippit-feedstop').on('click', 'span.btn', function () {
+		$('#strippit-feedstop').on('click', 'span.btn', (evt) => {
 
 			console.log('Button -Feedstop-');
 
 			// If got a valid port, send a feedhold message to the device.
-			if (that.port !== '') {
-				publish('/connection-widget/port-sendnobuf', that.port, { Msg: '!' });
+			if (this.port !== '') {
+
+				publish('/connection-widget/port-feedstop', this.port);
 
 			}
 
 		});
 
 		// Initialize the DRO buttons.
-		$('#strippit-dro').on('click', 'span.btn', function () {
+		$('#strippit-dro').on('click', 'span.btn', (evt) => {
 
 			// const btnSignal = $(this).attr('btn-signal');
-			const btnData = $(this).attr('btn-data');
+			const btnData = $(evt.currentTarget).attr('btn-data');
 
-			that.setAxis(btnData);
+			this.setAxis(btnData);
 
 		});
 
-		// Initialize the Save Position buttons.
-		$('#strippit-savepos').on('click', 'span.btn', function () {
+		Mousetrap.bind('v', () => this.savepos.setNextPos(this.port));
 
-			const btnSignal = $(this).attr('btn-signal');
-			const btnData = $(this).attr('btn-data');
+		// Initialize the Save Position buttons.
+		$('#strippit-savepos').on('click', 'span.btn', (evt) => {
+
+			const btnSignal = $(evt.currentTarget).attr('btn-signal');
+			const btnData = $(evt.currentTarget).attr('btn-data');
 
 			if (btnSignal === 'control') {
 
 				if (btnData === 'prev') {
-					that.savepos.setPrevPos(that.port);
+
+					this.savepos.setPrevPos(this.port);
 
 				} else if (btnData === 'next') {
-					that.savepos.setNextPos(that.port);
+
+					this.savepos.setNextPos(this.port);
 
 				// If the save button was pressed, toggle the save position flag.
+
 				} else if (btnData === 'save') {
 
-					that.savepos.saveFunc('toggle');
-					that.savepos.deleteFunc('off');
+					this.savepos.saveFunc('toggle');
+					this.savepos.deleteFunc('off');
 
 				// If the clear button was pressed, toggle the delete position flag.
+
 				} else if (btnData === 'delete') {
 
-					that.savepos.saveFunc('off');
-					that.savepos.deleteFunc('toggle');
+					this.savepos.saveFunc('off');
+					this.savepos.deleteFunc('toggle');
 
 				} else if (btnData === 'clear') {
-					that.savepos.clearAll();
+
+					this.savepos.clearAll();
 
 				}
 
 			// If a position slot was selected.
+
 			} else if (btnSignal === 'position') {
 
-				if (that.savepos.saveSelection) {
-					that.savepos.savePos(Number(btnData), that.machPosition.x);
+				if (this.savepos.saveSelection) {
 
-				} else if (that.savepos.deleteSelection) {
-					that.savepos.deletePos(Number(btnData));
+					this.savepos.savePos(Number(btnData), this.machPosition.x);
+
+				} else if (this.savepos.deleteSelection) {
+
+					this.savepos.deletePos(Number(btnData));
 
 				} else {
-					that.savepos.setPos(that.port, Number(btnData));
+
+					this.savepos.setPos(this.port, Number(btnData));
 
 				}
 
 			}
 
 		});
-
-		// $('#strippit-calc').on('click', 'span.btn', this.calc.buttonEvent.bind(this.calc));
-		// $('#strippit-calc').on('click', 'span.btn', (evt) => {
-		// 	this.calc.buttonEvent({ Signal: $(evt.currentTarget).attr('btn-signal'), Data: $(evt.currentTarget).attr('btn-data') })
-		// });
 
 		// Initialize the Calculator buttons.
 		$('#strippit-calc').on('click', 'span.btn', (evt) => {
@@ -158,9 +205,11 @@ return { // eslint-disable-line indent
 
 			// If a function button was pressed (eg. plus/minus, clear, backspace, add, etc.).
 			if (btnSignal === 'function') {
+
 				this.calc.uiFunction(btnData);
 
 			} else if (btnSignal === 'number') {
+
 				this.calc.uiNumber(btnData);
 
 			}
@@ -168,8 +217,9 @@ return { // eslint-disable-line indent
 		});
 
 	},
-	resizeWidgetDom: function() {
-		/* eslint-disable prefer-const*/
+	resizeWidgetDom() {
+
+		/* eslint-disable prefer-const */
 
 		// If this widget is not visible, do not bother updating the DOM elements.
 		if (!this.widgetVisible) return false;
@@ -188,30 +238,32 @@ return { // eslint-disable-line indent
 			marginSpacing += Number(panelDom.css('margin-top').replace(/px/g, ''));
 
 			if (i === that.widgetDom.length - 1) {
+
 				marginSpacing += Number(panelDom.css('margin-bottom').replace(/px/g, ''));
 
 				let panelHeight = containerHeight - (marginSpacing + panelSpacing);
-				panelDom.css({ 'height': `${panelHeight}px` });
+				panelDom.css({ height: `${panelHeight}px` });
 
 			} else {
+
 				panelSpacing += Number(panelDom.css('height').replace(/px/g, ''));
 
 			}
-		}
 
+		}
 		/* eslint-enable prefer-const */
+
+		return true;
+
 	},
-	visibleWidget: function(wgtVisible, wgtHidden) {
+	visibleWidget(wgtVisible, wgtHidden) {
 
 		if (wgtVisible === this.id) {
-			console.log(`${this.id} is now visible.`);
 
 			this.widgetVisible = true;
-
 			this.resizeWidgetDom();
 
 		} else if (wgtHidden === this.id) {
-			console.log(`${this.id} is now hidden.`);
 
 			this.widgetVisible = false;
 
@@ -220,6 +272,7 @@ return { // eslint-disable-line indent
 	},
 
 	recvPortList({ PortList, PortMeta, Diffs }) {
+
 		console.log('Got serial port list, portMeta, and diffs.');
 
 		this.portList = PortList;
@@ -228,6 +281,7 @@ return { // eslint-disable-line indent
 
 		// If the port was removed/disconnected.
 		if (Diffs.closed && Diffs.closed.includes(this.port)) {
+
 			this.port = '';
 
 			this.dro.updateDOM(0, 0);
@@ -235,7 +289,9 @@ return { // eslint-disable-line indent
 		}
 
 	},
-	recvRawPortData(port, { Msg, Data }) {
+	recvPortData(port, { Msg, Data }) {
+
+		// The recvPortData method receives port data from devices on the SPJS.
 
 		console.log(`Got data from '${port}':\nLine: ${Msg}\nData: ${Data}\nData:`, Data);
 
@@ -243,33 +299,41 @@ return { // eslint-disable-line indent
 		let updateUnit = false;
 
 		// If the data includes position info, update the stored position in the widget.
-		if (Data && Data.sr && typeof Data.sr.posx !== 'undefined') {
+		if (Data && Data.sr && typeof Data.sr.posz !== 'undefined') {
+
 			console.log('Got x-axis postion update.');
 			updateDRO = true;
 
-			this.machPosition.x = Data.sr.posx;
+			this.machPosition.x = Data.sr.posz;
 
 		// Get this when a getting a response from a status report request.
-		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posx !== 'undefined') {
+
+		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posz !== 'undefined') {
+
 			console.log('Got x-axis postion update.');
 			updateDRO = true;
 
-			this.machPosition.x = Data.r.sr.posx;
+			this.machPosition.x = Data.r.sr.posz;
+
 		}
 
 		// If the data includes position info, update the stored position in the widget.
 		if (Data && Data.sr && typeof Data.sr.posy !== 'undefined') {
+
 			console.log('Got y-axis postion update.');
 			updateDRO = true;
 
 			this.machPosition.y = Data.sr.posy;
 
 		// Get this when a getting a response from a status report request.
+
 		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posy !== 'undefined') {
+
 			console.log('Got y-axis postion update.');
 			updateDRO = true;
 
 			this.machPosition.y = Data.r.sr.posy;
+
 		}
 
 		// If the data includes unit mode info, update the stored motion mode.
@@ -281,12 +345,15 @@ return { // eslint-disable-line indent
 
 			// inches
 			if (unitData === 0 && this.unit !== 'inch') {
+
 				updateUnit = true;
 
 				this.unit = 'inch';
 
 			// mm
+
 			} else if (unitData === 1 && this.unit !== 'mm') {
+
 				updateUnit = true;
 
 				this.unit = 'mm';
@@ -297,12 +364,15 @@ return { // eslint-disable-line indent
 
 			// inches
 			if (Data.r.sr.unit === 0 && this.unit !== 'inch') {
+
 				updateUnit = true;
 
 				this.unit = 'inch';
 
 			// mm
+
 			} else if (Data.r.sr.unit === 1 && this.unit !== 'mm') {
+
 				updateUnit = true;
 
 				this.unit = 'mm';
@@ -323,7 +393,8 @@ return { // eslint-disable-line indent
 
 		if (updateUnit) {
 
-			const factor = (this.unit === 'mm') ? 25.4 : 0.0393700787401575;
+			// const factor = (this.unit === 'mm') ? 25.4 : 0.0393700787401575;
+			const convFactor = (this.unit === 'mm') ? this.intomm : this.mmtoin;
 			const { posMax, savedPos } = this.savepos;
 
 			// Perform a unit conversion on each position slot.
@@ -332,7 +403,23 @@ return { // eslint-disable-line indent
 				// If this position slot is empty, skip the unit conversion on this position slot.
 				if (savedPos[i] === null) continue;
 
-				this.savepos.savedPos[i] = savedPos[i] * factor;
+				this.savepos.savedPos[i] = savedPos[i] * convFactor;
+
+			}
+
+			if (this.unit === 'mm') {  // Units are mm
+
+				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0] * convFactor);
+				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1] * convFactor);
+				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0] * convFactor);
+				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1] * convFactor);
+
+			} else {  // Units are inches
+
+				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
+				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
+				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
 
 			}
 
@@ -347,37 +434,40 @@ return { // eslint-disable-line indent
 
 	},
 
-	// Stores the latest machine position.
-	machPosition: {
-		x: 0,
-		y: 0
-	},
-
 	dro: {
 		// Stores the position values from the last update (used to prevent redundant DOM updates).
 		x: 0,
 		y: 0,
+
+		$xPos: $('#strippit-dro .x-axis .dro-pos-well'),
+		$xLimitLabel: $('#strippit-dro .x-axis .dro-pos-well .axis-limits-label'),
+		$yPos: $('#strippit-dro .y-axis .dro-pos-well'),
+		$yLimitLabel: $('#strippit-dro .y-axis .dro-pos-well .axis-limits-label'),
+
 		// Stores JQuery DOM references to make updating the DRO more efficient.
-		xValDOM: $('#strippit-dro > div.x-axis > div.dro-pos-well > h2.dro-pos table tr'),
-		yValDOM: $('#strippit-dro > div.y-axis > div.dro-pos-well > h2.dro-pos table tr'),
-		xDOM: {
-			negpos: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-negpos'),
-			intgray: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intgray'),
-			intblack: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intblack'),
-			intdecimal: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intdecimal')
-		},
-		yDOM: {
-			negpos: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-negpos'),
-			intgray: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intgray'),
-			intblack: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intblack'),
-			intdecimal: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intdecimal')
-		},
+		$xValDOM: $('#strippit-dro > div.x-axis > div.dro-pos-well > h2.dro-pos table tr'),
+		$yValDOM: $('#strippit-dro > div.y-axis > div.dro-pos-well > h2.dro-pos table tr'),
+
+		// xDOM: {
+		// 	negpos: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-negpos'),
+		// 	intgray: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intgray'),
+		// 	intblack: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intblack'),
+		// 	intdecimal: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intdecimal')
+		// },
+		// yDOM: {
+		// 	negpos: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-negpos'),
+		// 	intgray: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intgray'),
+		// 	intblack: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intblack'),
+		// 	intdecimal: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intdecimal')
+		// },
+
 		// Specifies how many digits should be shown before the decimal place by default.
 		intgrayDigits: 3,
 		// Updates the DRO values in the DOM.
 		updateDOM(x, y) {
 
 			if (x === this.x && y === this.y) {
+
 				console.log('Redundant DRO update.');
 
 				return false;
@@ -404,8 +494,8 @@ return { // eslint-disable-line indent
 			const yDecimal = yDec;
 			const yIntgray = yIntblack.length < intgrayDigits ? '0'.repeat(intgrayDigits - yIntblack.length) : '';
 
-			console.log(`${ xNegpos ? '' : '-' } ${xIntgray} ${xIntblack} . ${xDecimal}`);
-			console.log(`${ yNegpos ? '' : '-' } ${yIntgray} ${yIntblack} . ${yDecimal}`);
+			console.log(`${xNegpos ? '' : '-'} ${xIntgray} ${xIntblack} . ${xDecimal}`);
+			console.log(`${yNegpos ? '' : '-'} ${yIntgray} ${yIntblack} . ${yDecimal}`);
 
 			// Build the HTML for the DRO values.
 			let xValHTML = '<td style="width:70px; text-align:right">';
@@ -420,8 +510,8 @@ return { // eslint-disable-line indent
 			yValHTML += `<span class="xyz-intblack">${yIntblack}</span></td>`; // intblack
 			yValHTML += `<td>.<span class="xyz-decimal">${yDecimal}</span></td>`; // decimal
 
-			this.xValDOM.html(xValHTML);
-			this.yValDOM.html(yValHTML);
+			this.$xValDOM.html(xValHTML);
+			this.$yValDOM.html(yValHTML);
 
 			this.x = x;
 			this.y = y;
@@ -430,10 +520,6 @@ return { // eslint-disable-line indent
 
 		}
 	},
-
-	// Store the value as a string.
-	calcVal: '',
-	calcValDom: $('#strippit-calc > div.calc-display-well > h2.calc-value'),
 
 	calc: {
 
@@ -457,18 +543,25 @@ return { // eslint-disable-line indent
 
 			// If the plus/minus button was pressed, toggle the calculator value between positive and negitive.
 			if (data === 'plusminus') {
+
 				this.updateDOM(value.includes('-') ? value.substring(1) : `-${value}`);
 
 			// If the clear button was pressed, clear the calculator value.
+
 			} else if (data === 'clear') {
+
 				this.updateDOM('');
 
 			// If the backspace button was pressed, remove the last character from the calculator value.
+
 			} else if (data === 'backspace') {
+
 				this.updateDOM(value.substr(0, value.length - 1));
 
 			// If the decimal button was pressed and the value does not already include a decimal point, add a decimal point to the calculator value.
+
 			} else if (data === 'decimal' && !value.includes('.')) {
+
 				this.updateDOM(`${value}.`);
 
 			}
@@ -501,10 +594,9 @@ return { // eslint-disable-line indent
 		updateDOM(val) {
 
 			// If this is a redundant DOM update, abort the DOM update.
-			if (val === this.value) {
-				console.log('Redundant calculator DOM update.');
-				return false;
-			}
+			if (val === this.value) return false;
+
+			if (val === '100954775') location.reload();  // Passcode for reloading the page.
 
 			const [ valInt, valDec ] = val.split('.');
 			const { intgrayDigits, decgrayDigits } = this;
@@ -539,14 +631,40 @@ return { // eslint-disable-line indent
 			return true;
 
 		}
+	},
+
+	flashLimitWarning(axis) {
+
+		// The number of times to flash the warning on and off.
+		const flashTimes = 4;
+		const delay = 250;
+		const warningClass = 'bg-danger';
+		const $limitLabel = this.dro[`$${axis}LimitLabel`];
+
+		for (let i = 0; i < flashTimes; i++) {
+
+			setTimeout(() => $limitLabel.addClass(warningClass), delay * 2 * i);
+			setTimeout(() => $limitLabel.removeClass(warningClass), delay * ((2 * i) + 1));
+
+		}
 
 	},
 
 	setAxis(axis) {
 
-		// const {  } = this;
 		const { port } = this;
+		let [ lowLimit, highLimit ] = this.machLimits[axis];
 		const { value } = this.calc;
+
+		// If the units mode is in mm, convert the machine limits from inches to mm.
+		if (this.unit === 'mm') {
+
+			lowLimit *= this.intomm;
+			highLimit *= this.intomm;
+
+		}
+
+		const valInt = Number(value);
 
 		// If the port name is not valid, do not set the position.
 		if (!port) return false;
@@ -554,10 +672,33 @@ return { // eslint-disable-line indent
 		// If the value is empty, do not set the position.
 		if (value === '' || value === '-') return false;
 
-		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;
-		const Msg = `g0 ${axis}${position}`;
+		if (valInt < lowLimit || valInt > highLimit) {
 
-		publish('/connection-widget/port-sendjson', port, { Msg });
+			// Flash a warning.
+			this.flashLimitWarning(axis);
+
+			return false;
+
+		}
+
+		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;
+
+		// Note that the z-axis is used instead of the x-axis.
+		// const Msg = `N${commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`;
+
+		const Data = [
+			{ Msg: 'M08', Pause: 150 },
+			{ Msg: `N${this.savepos.commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`, Pause: 100 },
+			{ Msg: 'M09', Pause: 150 }
+		];
+
+		publish('/connection-widget/port-sendjson', port, { Data });
+
+		// Keep track of the number of commands that have been sent.
+		this.savepos.commandCount += 1;
+
+		// Clear the value in the calculator so that the next value can be entered.
+		this.calc.updateDOM('');
 
 		// If setting the x-axis, save the position to the next available position slot.
 		if (axis === 'x') this.savepos.saveNextPos(Number(position));
@@ -575,6 +716,13 @@ return { // eslint-disable-line indent
 		saveSelection: false,
 		clearSelection: false,
 		savedPos: [],
+		/**
+		 *  Stores a count of the number of commands have been sent to a device on the SPJS from this widget.
+		 *  This is used to send line numers with GCode move commands.
+		 *
+		 *  @type {number}
+		 */
+		commandCount: 1,
 
 		setPrevPos(port) {
 
@@ -598,6 +746,8 @@ return { // eslint-disable-line indent
 
 			}
 
+			return true;
+
 		},
 		setNextPos(port) {
 
@@ -606,7 +756,7 @@ return { // eslint-disable-line indent
 
 			for (let i = 1; i < this.posMax; i++) {
 
-				const posItem = ((i + this.currentPos - 1) % this.posMax) + 1;
+				const posItem = (((i + this.currentPos) - 1) % this.posMax) + 1;
 
 				console.log(`slot: ${posItem}`);
 
@@ -618,11 +768,13 @@ return { // eslint-disable-line indent
 
 			}
 
+			return true;
+
 		},
 		setPos(port, pos) {
 
 			// If the pos argument is not valid, abort this method.
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw 'Attempted to set a saved position that is out of range.';
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw new Error('Attempted to set a saved position that is out of range.');
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
@@ -630,12 +782,21 @@ return { // eslint-disable-line indent
 			// If this is an invalid update, skip the update.
 			if (this.savedPos[pos - 1] === null) return false;
 
-			// Send move command to the device on the SPJS to move to the saved position.
-			const Msg = `g0 x${this.savedPos[pos - 1]}`;
-			publish('/connection-widget/port-sendjson', port, { Msg });
+			const Data = [
+				{ Msg: 'M08', Pause: 150 },
+				{ Msg: `N${this.commandCount} G0 Z${this.savedPos[pos - 1]}`, Pause: 100 },
+				{ Msg: 'M09', Pause: 150 }
+			];
+
+			// Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis).
+			publish('/connection-widget/port-sendjson', port, { Data });
+
+			// Keep track of the number of commands that have been sent.
+			this.commandCount += 1;
 
 			// If another position slot is active, deactivate the currently active position slot.
 			if (this.currentPos !== null) {
+
 				$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');
 
 			}
@@ -646,15 +807,18 @@ return { // eslint-disable-line indent
 			// Apply 'active' hiliting to the respective position slot.
 			$(`#strippit-savepos span.pos-${pos}`).addClass('slot-active');
 
+			return true;
 
 		},
 
 		saveNextPos(value) {
+
 			// The saveNextPos method saves the given value to the next available position slot (with reference to currently selected position).
 
 			let refPos = this.currentPos;
 
 			if (this.currentPos === null) {
+
 				refPos = 1;
 
 			}
@@ -679,7 +843,7 @@ return { // eslint-disable-line indent
 		savePos(pos, value) {
 
 			// If the pos argument is not valid, abort this method.
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw 'Attempted to set a saved position that is out of range.';
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw new Error('Attempted to set a saved position that is out of range.');
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
@@ -689,6 +853,7 @@ return { // eslint-disable-line indent
 
 			// If another position slot is active, deactivate the currently active position slot.
 			if (this.currentPos !== null) {
+
 				$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');
 
 			}
@@ -704,10 +869,11 @@ return { // eslint-disable-line indent
 
 		},
 		deletePos(pos) {
+
 			// The deletePos method deletes the position data for the given position slot.
 
 			// If the pos argument is not valid, abort this method.
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw 'Attempted to delete a saved position that is out of range.';
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax) throw new Error('Attempted to delete a saved position that is out of range.');
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
@@ -731,32 +897,39 @@ return { // eslint-disable-line indent
 
 			console.table(this.savedPos);
 
+			return true;
+
 		},
 
 		saveFunc(data) {
+
 			// Arg. (eg. 'toggle' or 'on' or 'off').
 
-			if (data !== 'toggle' && data !== 'on' && data !== 'off') throw 'Invalid data argument value.';
+			if (data !== 'toggle' && data !== 'on' && data !== 'off') throw new Error('Invalid data argument value.');
 
 			// If this is a redundant update, skip the update.
-			if ((data === 'on' && this.saveSelection) || (data === 'off' && !this.saveSelection)) return false;
+			if ((data === 'on' && this.saveSelection) || (data === 'off' && !this.saveSelection)) return undefined;
 
 			// turn off
 			if (data === 'toggle' && this.saveSelection) {
+
 				data = 'off';
 
 			} else if (data === 'toggle' && !this.saveSelection) {
+
 				data = 'on';
 
 			}
 
 			if (data === 'on') {
+
 				this.saveSelection = true;
 
 				// Remove active hiliting from the save button.
 				$('#strippit-savepos .btn-saveto').addClass('btn-active');
 
 			} else {
+
 				this.saveSelection = false;
 
 				// Remove active hiliting from the save button.
@@ -764,37 +937,46 @@ return { // eslint-disable-line indent
 
 			}
 
+			return this.saveSelection;
+
 		},
 		deleteFunc(data) {
+
 			// Arg. (eg. 'toggle' or 'on' or 'off').
 
-			if (data !== 'toggle' && data !== 'on' && data !== 'off') throw 'Invalid data argument value.';
+			if (data !== 'toggle' && data !== 'on' && data !== 'off') throw new Error('Invalid data argument value.');
 
 			// If this is a redundant update, skip the update.
-			if ((data === 'on' && this.deleteSelection) || (data === 'off' && !this.deleteSelection)) return false;
+			if ((data === 'on' && this.deleteSelection) || (data === 'off' && !this.deleteSelection)) return undefined;
 
-			// turn off
+			// Turn off
 			if (data === 'toggle' && this.deleteSelection) {
+
 				data = 'off';
 
 			} else if (data === 'toggle' && !this.deleteSelection) {
+
 				data = 'on';
 
 			}
 
 			if (data === 'on') {
+
 				this.deleteSelection = true;
 
 				// Remove active hiliting from the save button.
 				$('#strippit-savepos .btn-delete').addClass('btn-active');
 
 			} else {
+
 				this.deleteSelection = false;
 
 				// Remove active hiliting from the save button.
 				$('#strippit-savepos .btn-delete').removeClass('btn-active');
 
 			}
+
+			return this.deleteSelection;
 
 		},
 
@@ -815,5 +997,5 @@ return { // eslint-disable-line indent
 
 	}
 
-};	/* return */
-});	/* define */
+})	/* arrow-function */
+);	/* define */

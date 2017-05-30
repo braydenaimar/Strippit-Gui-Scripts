@@ -1,6 +1,6 @@
 # Connection Widget Settings
 
-SPJS:
+SPJS: {
     # Sets the time (msec) that the program will wait between attempting to connect to the WebSocket.
     # If wsPollReconnect has a value of "null", no auto reconnection attempts will be made.
     wsReconnectDelay: 2000
@@ -10,8 +10,9 @@ SPJS:
     requestListDelay: null
     # requestListDelay: 10000
     exitUntrustedSpjs: true
+}
 
-consoleLog:
+consoleLog: {
     maxLineLimit: 500
     minLineLimit: 250
     staleCmdLimit: 10000
@@ -117,6 +118,7 @@ consoleLog:
     	SpjsCommand: true # A command sent to the SPJS that is placed in the respective port"s log.
     	Command: true
     	MdiCommand: true
+}
 
 #     Friendly: "Tinyg v9"
 #     Baud: 115200
