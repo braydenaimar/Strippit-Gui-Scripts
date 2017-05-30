@@ -3741,7 +3741,8 @@ define([ 'jquery' ], $ => ({
 		let meta = this.tinygStatusMeta.statusCodes[code];
 
 		// If no meta found for the provided status code, the code is reserved.
-		if (!meta) return { Code: code, Label: 'Reserved', Desc: '' };
+		if (!meta)
+			return { Code: code, Label: 'Reserved', Desc: '' };
 
 		let colonIndex = meta.indexOf(':');
 
@@ -3906,49 +3907,52 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			// Queue Report.
-			if (lineObj.qr) {
+			if (lineObj.qr) {  // Queue Report.
 
 				// qr
 
 			}
 
-			// Queue In.
-			if (lineObj.qi) {
+			if (lineObj.qi) {  // Queue In.
 
 				// qi
 
 			}
 
-			// Queue Out.
-			if (lineObj.qo) {
+			if (lineObj.qo) {  // Queue Out.
 
 				// qo
 
 			}
 
-			// {"er":{"fb":78.02,"st":89,"msg":"State management assertion failure",gcs2}}
-			if (lineObj.er) {
+			if (lineObj.er) {  // If an error message was received (eg. '{"er":{"fb":78.02,"st":89,"msg":"State management assertion failure",gcs2}}')
 
-				console.error('error message found');
+				debug.warn('error message found');
 
+				const { fb, st, msg } = lineObj.er;
 				const { logBotOnStatusCode } = this.consoleLog;
-				const { fb, st, msg } = lineobj.er;
 
-				let Label = typeof msg == 'undefined' ? '' : msg;
+				let Code;
+				let Label;
+				let Desc;
+
+				if (typeof st != 'undefined')  // If a status code was received
+					({ Code, Label, Desc } = this.lookupStatusCode(st));  // Look up the status code in the status code definitions.
+
+				if (msg)  // If a message was received
+					Label = msg;
 
 				const logBotMsg = `${Label} [${this.makePortUnSafe(port)}${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
 
-				// If log bot status code messages is enabled in settings, add a log bot status code message to the port's console log.
-				if (logBotOnStatusCode === 'port' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
+				if (logBotOnStatusCode === 'port' || logBotOnStatusCode === 'both')  // If log bot status code messages is enabled in settings
+					this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });  // Add a log bot status code message to the port's console log
 
-				// If log bot status code messages is enabled in settings, add a log bot status code message to the SPJS console log.
-				if (logBotOnStatusCode === 'spjs' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
+				if (logBotOnStatusCode === 'spjs' || logBotOnStatusCode === 'both')  // If log bot status code messages is enabled in settings
+					this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });  // Add a log bot status code message to the SPJS console log
 
 			}
 
-			// If there is a footer in the data.
-			if (lineObj.f) {
+			if (lineObj.f) {  // If footer data was received
 
 				const [ pv, sc, rx ] = lineObj.f;
 
@@ -3982,7 +3986,8 @@ define([ 'jquery' ], $ => ({
 
 						({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment, UpdateRelated: true }));
 
-						if (!matchFound) console.log('Found no match. idk wtf to do.');
+						if (!matchFound)
+							console.log('Found no match. idk wtf to do.');
 
 					} else if (typeof lineObj.r === 'string') {
 
@@ -4019,10 +4024,12 @@ define([ 'jquery' ], $ => ({
 						let refMsg = rStr.substring(0, rStr.indexOf(':')).replace(/\W/g, '');
 						// let refMsg = new RegExp(rStr.substring(0, rStr.indexOf(':')).replace(/\W/, ''), 'gi');
 
-						// If the parsed string is longer than the string that the port received, replace 'null' with 'n'.
-						if (rStr.length > rx) rStr = rStr.replace(/null/g, 'n');
-						// If the parsed string is longer than the string that the port received, remove the quotes from the parsed string.
-						if (rStr.length > rx) rStr = rStr.replace(/"/g, '');
+						if (rStr.length > rx) {  // If the parsed string is longer than the string that the port received, replace 'null' with 'n'.
+
+							rStr = rStr.replace(/null/g, 'n');  // Replace 'null' with 'n'
+							rStr = rStr.replace(/"/g, '');      // Remove the quotes from the parsed string
+
+						}
 
 						console.log(`refMsg: ${refMsg}`);
 
@@ -4032,23 +4039,26 @@ define([ 'jquery' ], $ => ({
 
 						matchFound || ({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { PartMsg: refMsg, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
-						if (!matchFound) console.log('No match was found for the partMsg and msg length given.');
+						if (!matchFound)
+							console.log('No match was found for the partMsg and msg length given.');
 
 					} else {
 
 						console.log('lineObj.r is unrecognized.');
 
-						throw new Error('Make lineObj.r recognized and do something with it.');
+						debug.error('Make lineObj.r recognized and do something with it.');
 
 					}
 
 					const logBotMsg = `${Label} [${this.makePortUnSafe(port)}${typeof matchLine == 'undefined' ? '' : `:${matchLine}`}]`;
 
-					// If log bot status code messages is enabled in settings, add a log bot status code message to the port's console log.
-					if (logBotOnStatusCode === 'port' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
 
-					// If log bot status code messages is enabled in settings, add a log bot status code message to the SPJS console log.
-					if (logBotOnStatusCode === 'spjs' || logBotOnStatusCode === 'both') this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });
+					if (logBotOnStatusCode === 'port' || logBotOnStatusCode === 'both')  // If log bot status code messages is enabled in settings
+						this.consoleLog.appendMsg(port, { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });  // Add a log bot status code message to the port's console log
+
+					if (logBotOnStatusCode === 'spjs' || logBotOnStatusCode === 'both')  // If log bot status code messages is enabled in settings
+						this.consoleLog.appendMsg('SPJS', { Msg: logBotMsg, IdPrefix: 'bot', Type: 'LogBot' });  // Add a log bot status code message to the SPJS console log
+
 
 				}
 
@@ -4472,8 +4482,10 @@ define([ 'jquery' ], $ => ({
 
 		// If the Meta argument is not an array, split it into an array.
 		if (!Array.isArray(Meta)) {
-			console.error(`The Meta argument is not an array. But i will fix it for you... because i am nice like that. Next time i may not be so nice, so you may wanna get that fixed.\n  Meta: ${Meta}\n  typeof: ${typeof Meta}`);
+
+			debug.error(`The Meta argument is not an array. But i will fix it for you... because i am nice like that. Next time i may not be so nice, so you may wanna get that fixed.\n  Meta: ${Meta}\n  typeof: ${typeof Meta}`);
 			Meta = Meta.split(' ');
+
 		}
 
 		const { portMeta } = this.SPJS;
@@ -4482,13 +4494,12 @@ define([ 'jquery' ], $ => ({
 		let idBase;
 		let idSuffix;
 
-		if (typeof port == 'undefined') throw new Error('The port argument was not passed properly.');
+		if (typeof port == 'undefined')
+			debug.error('The port argument was not passed properly.');
 
 		// Msg argument can be used instead of Data argument to pass a single command.
-		if (typeof Data == 'undefined' && typeof Msg != 'undefined') {
+		if (typeof Data == 'undefined' && typeof Msg != 'undefined')
 			Data = Msg;
-
-		}
 
 		// The data argument is [array[]], parse the data from it.
 		if (Array.isArray(Data)) {
@@ -4498,11 +4509,15 @@ define([ 'jquery' ], $ => ({
 				idBase = Id.substring(0, Id.search(/\d+\b/));
 				idSuffix = /\d+\b/.exec();
 
-				if (!idSuffix) {
+				if (!idSuffix)
 					idSuffix = '0';
-				}
 
 				console.log(`idBase: ${idBase}\nidSuffix: ${idSuffix}`);
+
+			} else {
+
+				idBase = ''
+				idSuffix = '';
 
 			}
 

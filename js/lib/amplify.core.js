@@ -47,7 +47,8 @@ define([ 'jquery', 'gui' ], function ($) {
 
 				if (!subscriptions[topic]) {
 
-					console.error(`There are no subscriptions for ${topic}`);
+					// console.log(`There are no subscriptions for ${topic}`);
+
 					return true;
 
 				}

@@ -69,13 +69,11 @@ define([ 'jquery' ], $ => ({
 		subscribe('/connection-widget/recvPortData', this, this.recvPortData.bind(this));
 
 		this.initButtons();
+		this.initKeyboardShortcuts();
 
 		// Initialize the array for saving positions.
-		for (let i = 0; i < this.savepos.posMax; i++) {
-
+		for (let i = 0; i < this.savepos.posMax; i++)
 			this.savepos.savedPos.push(null);
-
-		}
 
 		publish('/main/widget-loaded', this.id);
 
@@ -101,13 +99,12 @@ define([ 'jquery' ], $ => ({
 
 			// inch - G20
 			// mm - G21
-
+			const { port } = this;
 			const Msg = (this.unit === 'inch') ? 'G21' : 'G20';
 
-			// If got a valid port, send a unit change message to the device.
-			if (this.port !== '') {
+			if (port) {  // If got a valid port, send a unit change message to the device.
 
-				publish('/connection-widget/port-sendjson', this.port, { Msg });
+				publish('/connection-widget/port-sendjson', port, { Msg });
 
 			}
 
@@ -118,10 +115,17 @@ define([ 'jquery' ], $ => ({
 
 			console.log('Button -Feedstop-');
 
-			// If got a valid port, send a feedhold message to the device.
-			if (this.port !== '') {
+			const { port } = this;
 
-				publish('/connection-widget/port-feedstop', this.port);
+			if (port) {  // If got a valid port, send a feedhold message to the device.
+
+				publish('/connection-widget/port-feedstop', port);
+
+				setTimeout(() => {
+
+					publish('/connection-widget/port-sendjson', port, { Msg: [ 'M09', 'M09' ], IdPrefix: 'fstop', Pause: 200 });  // Drop solenoid finger
+
+				}, 2500);
 
 			}
 
@@ -136,8 +140,6 @@ define([ 'jquery' ], $ => ({
 			this.setAxis(btnData);
 
 		});
-
-		Mousetrap.bind('v', () => this.savepos.setNextPos(this.port));
 
 		// Initialize the Save Position buttons.
 		$('#strippit-savepos').on('click', 'span.btn', (evt) => {
@@ -204,17 +206,37 @@ define([ 'jquery' ], $ => ({
 			const btnData = $(evt.currentTarget).attr('btn-data');
 
 			// If a function button was pressed (eg. plus/minus, clear, backspace, add, etc.).
-			if (btnSignal === 'function') {
-
+			if (btnSignal === 'function')
 				this.calc.uiFunction(btnData);
 
-			} else if (btnSignal === 'number') {
-
+			else if (btnSignal === 'number')
 				this.calc.uiNumber(btnData);
 
-			}
 
 		});
+
+	},
+	initKeyboardShortcuts() {
+
+		Mousetrap.bind('v', () => this.savepos.setNextPos(this.port));  // Advance to next saved on punch
+
+		Mousetrap.bind('0', this.calc.uiNumber.bind(this.calc, '0'));   // Calculator digits
+		Mousetrap.bind('1', this.calc.uiNumber.bind(this.calc, '1'));
+		Mousetrap.bind('2', this.calc.uiNumber.bind(this.calc, '2'));
+		Mousetrap.bind('3', this.calc.uiNumber.bind(this.calc, '3'));
+		Mousetrap.bind('4', this.calc.uiNumber.bind(this.calc, '4'));
+		Mousetrap.bind('5', this.calc.uiNumber.bind(this.calc, '5'));
+		Mousetrap.bind('6', this.calc.uiNumber.bind(this.calc, '6'));
+		Mousetrap.bind('7', this.calc.uiNumber.bind(this.calc, '7'));
+		Mousetrap.bind('8', this.calc.uiNumber.bind(this.calc, '8'));
+		Mousetrap.bind('9', this.calc.uiNumber.bind(this.calc, '9'));
+
+		Mousetrap.bind('backspace', this.calc.uiFunction.bind(this.calc, 'backspace'));  // Calculator value backspace
+		Mousetrap.bind('del', this.calc.uiFunction.bind(this.calc, 'clear'));            // Calculator value clear
+		Mousetrap.bind('.', this.calc.uiFunction.bind(this.calc, 'decimal'));            // Calculator value clear
+
+		Mousetrap.bind('ctrl+alt+x', this.setAxis.bind(this, 'x'));
+		Mousetrap.bind('ctrl+alt+y', this.setAxis.bind(this, 'y'));
 
 	},
 	resizeWidgetDom() {
