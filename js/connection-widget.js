@@ -1789,10 +1789,8 @@ define([ 'jquery' ], $ => ({
 
 				that.newspjsSend({ Msg: 'restart', Type: 'Command' });
 
-			} else if (evtData === 'reload') {
-				location.reload();
-
 			} else if (evtSignal) {
+				
 				publish(evtSignal, evtData);
 
 			}
@@ -1967,17 +1965,16 @@ define([ 'jquery' ], $ => ({
 	},
 	keyboardShortcuts(data) {
 
-		// If this widget is not visible, do not apply any keyboard shortcuts and abort this method.
-		if (!this.widgetVisible) return false;
+		if (!this.widgetVisible)  // If the widget is not visible
+			return false;
 
-		if (data === 'ctrl+pageup') this.consoleLogChangeView('left');
+		if (data === 'ctrl+pageup')
+			this.consoleLogChangeView('left');
 
-		if (data === 'ctrl+pagedown') this.consoleLogChangeView('right');
-
-		return true;
+		if (data === 'ctrl+pagedown')
+			this.consoleLogChangeView('right');
 
 	},
-	// FIXME: If the console log was scrolled to the bottom when widget resized, scroll to bottom of log after resize.
 	resizeWidgetDom() {
 
 		// If widget is not visible, do not update the size of DOM elements.
@@ -2074,17 +2071,16 @@ define([ 'jquery' ], $ => ({
 		const { platform, architecture, os } = hostMeta;
 		const { launchGpioServerOnLinux } = this.SPJS;
 
-		// If on a Raspberry Pi.
-		if (platform === 'linux' && architecture === 'arm') {
+		if (platform === 'linux' && architecture === 'arm') {  // If on a Raspberry Pi.
 
 			// Launch the SPJS in max garbage collection mode.
-			this.SPJS.go = spawn('lxterminal --command "sudo json_server/linux_arm/serial-port-json-server -gc max -allowexec"', [], { shell: false });
+			this.SPJS.go = spawn('lxterminal --command "sudo json_server/linux_arm/serial-port-json-server -gc max -allowexec"');
 			// this.SPJS.go = spawn(`lxterminal --command "sudo serial-port-json-server-1.92_linux_arm/serial-port-json-server -gc max -allowexec"`, [], { shell: true });
 
 			if (launchGpioServerOnLinux) {
 
 				// Launch the GPIO JSON server.
-				this.SPJS.gpio = spawn('lxterminal --command "sudo json_server/linux_arm/gpio-json-server"', [], { shell: false });
+				this.SPJS.gpio = spawn('lxterminal --command "sudo json_server/linux_arm/gpio-json-server"');
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 

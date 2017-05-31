@@ -103,17 +103,19 @@
 #strippit-dro .dro-label-well h2 {
     text-align: center;
     width: 44px;
-	font-size: 24px;
+	font-size: 28px;
 }
 /* -- Axis Position Value -- */
 #strippit-dro .dro-pos-well {
 	position: absolute;
 	top: 0;
 	right: 0;
+	width: 445px;
+	height: 44px;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-	width: 445px;
-	border-radius: 3px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
 	border: 1px solid black;
 	padding: 3px 16px 0px 16px;
 }
