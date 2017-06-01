@@ -12,6 +12,7 @@
 /* global ws:true, wgtMap:true, wgtLoaded:true, wgtVisible:true, widget:true, initBody:true, widgetLoadCheck:true, createWidgetContainer:true, loadHtmlWidget:true, loadJsWidget:true, createSidebarBtns:true, initWidgetVisible:true, makeWidgetVisible:true, updateGitRepo:true */  // eslint-disable-line no-unused-vars
 
 define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
+
 	/* eslint-disable no-console*/
 
 	console.log('running main.js');
@@ -27,9 +28,6 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	({ ipcRenderer: ipc } = electron);
 
 	({ publish, subscribe, unsubscribe } = amplify);
-	// publish = amplify.publish;
-	// subscribe = amplify.subscribe;
-	// unsubscribe = amplify.unsubscribe;
 
 	const developerHosts = [ 'BRAYDENS-LENOVO' ];  // List of developer host devices
 	inDebugMode = developerHosts.includes(os.hostname());
@@ -41,6 +39,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		const keys = Object.keys(console);
 
 		for (let i = 0; i < keys.length; i++) {
+
 			const key = keys[i];
 
 			if (key === 'memory')
@@ -51,13 +50,16 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			else
 				debug[key] = console[key].bind(console);
+
 		}
-	}
-	else {
+
+	} else {
+
 		const keys = Object.keys(console);
 		const banned = [ 'log', 'info', 'table' ];  // Console log methods that will be ignored
 
 		for (let i = 0; i < keys.length; i++) {
+
 			const key = keys[i];
 
 			if (banned.includes(key))  // If not allowed
@@ -68,7 +70,9 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			else
 				debug[key] = console[key].bind(console);
+
 		}
+
 	}
 
 	/* eslint-enable no-console*/
