@@ -29,8 +29,8 @@ app.on('ready', () => {
 
 		win = new BrowserWindow({
 			// show: false,
-			width: 980,
-			height: 620,
+			width: 1285,
+			height: 755,
 			// fullscreen: true,
 			// kiosk: true,
 			// frame: false,
@@ -78,14 +78,22 @@ app.on('ready', () => {
 	ipcMain.on('all-widgets-loaded', () => {
 
 		win.show();
+		win.focus();
 
 		console.log('Got ipcMain event: \'all-widgets-loaded\'.\n  ...showing window.');
+
+	});
+
+	ipcMain.on('focus-window', () => {
+
+		win.focus();
 
 	});
 
 	ipcMain.on('open-dev-tools', () => {
 
 		win.webContents.openDevTools();
+		win.focus();
 
 		console.log('Got ipcMain event: \'open-dev-tools\'.');
 
