@@ -66,4 +66,3 @@ config/connection-widget_defaultDeviceMeta.cson
 config/connection-widget_spjs.cson
 config/connection-widget_connectScripts.cson
 config/connection-widget_deviceMeta.cson
-.eslintrc1.json
