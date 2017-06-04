@@ -59,6 +59,24 @@ If you are having issues, you may need to add the program to the list of exclusi
 
 To clone a different branch run `git clone -b <branch> https://github.com/braydenaimar/Strippit-Gui-Scripts.git`.
 
+To switch between branches run `git checkout <branch>`.
+
+### Linux
+
+1. Install nodejs by running `sudo apt-get install nodejs`.
+2. Run `sudo apt-get install npm`.
+3. Run `sudo apt-get install git`.
+4. Run `git clone https://github.com/braydenaimar/Strippit-Gui-Scripts.git` to download the program into your home directory.
+5. Run `cd Strippit-Gui-Scripts` to open the directory.
+6. Run `npm install`.
+7. Navigate to '/json_server/linux_arm' right click on 'serial-port-json-server' and select 'Permissions', enable everyone to execute the file.
+8. Run `npm start` to launch the app.
+
+#### Ubuntu Mate
+You will also need to run `sudo apt-get install lxterminal`.
+
+Go to 'serial-port-json-server', right click and select 'Permissions', select 'Allow executing file as program'.
+
 File Tree
 -----
 Below a snapshot of the structure of files and folders of the application after installation on Windows.
