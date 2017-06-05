@@ -9,7 +9,7 @@
  *  @author Brayden Aimar
  */
 
-/* global ws:true, wgtMap:true, wgtLoaded:true, wgtVisible:true, widget:true, initBody:true, widgetLoadCheck:true, createWidgetContainer:true, loadHtmlWidget:true, loadJsWidget:true, createSidebarBtns:true, initWidgetVisible:true, makeWidgetVisible:true, updateGitRepo:true */  // eslint-disable-line no-unused-vars
+/* global ws: true, wgtLen: true , wgtMap: true, wgtLoaded: true, wgtVisible: true, widget: true, initBody: true, widgetLoadCheck: true, createWidgetContainer: true, loadHtmlWidget: true, loadJsWidget: true, createSidebarBtns: true, initWidgetVisible: true, makeWidgetVisible: true, updateGitRepo: true */  // eslint-disable-line no-unused-vars
 
 define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
@@ -104,31 +104,25 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		userInfo: os.userInfo()
 	};
 
-	if (navigator.appVersion.includes('Win')) {
+	if (navigator.appVersion.includes('Win'))
 		hostMeta.os = 'Windows';
 
-	} else if (navigator.appVersion.includes('Mac')) {
+	else if (navigator.appVersion.includes('Mac'))
 		hostMeta.os = 'Mac';
 
-	} else if (navigator.appVersion.includes('X11')) {
+	else if (navigator.appVersion.includes('X11'))
 		hostMeta.os = 'Unix';
 
-	} else if (navigator.appVersion.includes('Linux')) {
+	else if (navigator.appVersion.includes('Linux'))
 		hostMeta.os = 'Linux';
 
-	} else if (navigator.appVersion.includes('SunOs')) {
+	else if (navigator.appVersion.includes('SunOs'))
 		hostMeta.os = 'Solaris';
 
-	}
+	if (navigator.onLine)
+		debug.log('Connected to the internet.');
 
-	if (navigator.onLine) {
-
-		console.log('Connected to the internet.');
-
-	}
-
-	console.log(hostMeta);
-
+	debug.log(hostMeta);
 
 	// IDEA: Declare all of these as const and take them out of the 'ws' object.
 	ws = {
@@ -181,15 +175,15 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	}
 
-	console.groupCollapsed(`${ws.name} Setup`);
+	debug.groupCollapsed(`${ws.name} Setup`);
 
 	initBody = function () {
 
-		console.group(`${ws.id}.initBody()`);
+		debug.group(`${ws.id}.initBody()`);
 
 		$(window).resize(() => {
 
-			// console.log("Resize window");
+			// debug.log("Resize window");
 			// publish('/' + this.ws.id + '/window-resize');
 			// TODO: Fix resize. Widgets do not resize with the window. only the first subscriber to the '/main/window-resize' line gets their callback called.
 			publish('/main/window-resize');
@@ -198,7 +192,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		widgetLoadCheck = setTimeout(function () {
 
-			console.log('widgetLoadCheck timeout function running');
+			debug.log('widgetLoadCheck timeout function running');
 
 			if (wgtLoaded.includes(false)) {
 
@@ -211,7 +205,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 				});
 
-				console.error(errorLog);
+				debug.error(errorLog);
 
 				alert(errorLog);
 
@@ -219,7 +213,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			} else {
 
-				console.log('  check non-resultant');
+				debug.log('  check non-resultant');
 
 			}
 
@@ -228,7 +222,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// This gets published at the end of each widget's initBody() function.
 		subscribe(`/${this.ws.id}/widget-loaded`, this, function (wgt) {
 
-			console.groupEnd();
+			debug.groupEnd();
 			// If this is the first time being called, set timer to check that all widgets are loaded within a given timeframe. If any widgets have not loaded after that time has elapsed, create an alert and log event listing the widget(s) that did not load.
 			// if (wgtLoaded.indexOf(true) == -1) {
 			// }
@@ -241,7 +235,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 				// initSidebarBtnEvts();
 				initWidgetVisible();
 
-				console.groupEnd();
+				debug.groupEnd();
 				// Publish before making dom visible so that the widgets can start communicating with eachother and getting their shit together.
 				publish(`/${this.ws.id}/all-widgets-loaded`);
 				ipc.send('all-widgets-loaded');
@@ -260,7 +254,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// Load each widget in the order they appear in the widget object
 		$.each(widget, (wgt, wgtItem) => {
 
-			console.log(`Loading ${wgt}`);
+			debug.log(`Loading ${wgt}`);
 
 			if (wgtItem.loadHtml) {
 
@@ -275,7 +269,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		});
 
-		console.log('Initializing sidebar button click events.');
+		debug.log('Initializing sidebar button click events.');
 
 		$('#sidebar').on('click', 'span.btn', function (evt) {
 
@@ -283,13 +277,13 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		});
 
-		console.groupEnd(); // Main Setup
+		debug.groupEnd(); // Main Setup
 
 	};
 
 	createWidgetContainer = function createWidgetContainer(wgt) {
 		// append a div container to dom body
-		console.log('  Creating widget DOM container');
+		debug.log('  Creating widget DOM container');
 
 		const containerHtml = `<div id="${wgt}" class="widget-container hidden"></div>`;
 		$('body').append(containerHtml);
@@ -298,7 +292,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	loadHtmlWidget = function (wgt) {
 
-		console.log('  Loading HTML & JS');
+		debug.log('  Loading HTML & JS');
 
 		$(`#${wgt}`).load(`html/${wgt}.html`, '', () => {
 
@@ -320,7 +314,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	loadJsWidget = function (wgt) {
 
-		console.log('  Loading JS');
+		debug.log('  Loading JS');
 
 		requirejs([ wgt ], (ref) => {
 
@@ -337,7 +331,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	createSidebarBtns = function (wgt) {
 
-		console.log('Creating Sidebar Buttons');
+		debug.log('Creating Sidebar Buttons');
 		$.each(widget, (widgetIndex, widgetItem) => {
 			// Check if the respective widget wants a sidebar button made
 			debug.log(`  ${widgetIndex}`);
@@ -384,10 +378,10 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	makeWidgetVisible = function (wgt) {
 
-		console.log(`Widget visible: ${wgt}`);
+		debug.log(`Widget visible: ${wgt}`);
 		// If wgt is already visible, do nothing.
 		if (wgt === wgtVisible) return;
-		// console.log("  wgt: " + wgt + "\n  wgtVisible: " + wgtVisible);
+		// debug.log("  wgt: " + wgt + "\n  wgtVisible: " + wgtVisible);
 
 		$(`#btn-${wgt}`).removeClass('btn-default');
 		$(`#btn-${wgt}`).addClass('btn-primary');
@@ -418,7 +412,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 		// Skip the update if host is my laptop or if there is no internet connection.
 		if (hostMeta.hostName === 'BRAYDENS-LENOVO' || !navigator.onLine) return false;
 
-		console.log('Pulling latest repo from GitHub.');
+		debug.log('Pulling latest repo from GitHub.');
 
 		terminal = spawn('git pull', [], { shell: true });
 
@@ -429,12 +423,12 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 
-				if (msgBuffer[i]) console.log(`Git pull stdout: ${msgBuffer[i]}`);
+				if (msgBuffer[i]) debug.log(`Git pull stdout: ${msgBuffer[i]}`);
 
 				// If a newer repository was found, reload the GUI so the new scripts are used.
 				if (msgBuffer[i].includes('Updating')) {
 
-					console.log('Repository was updated.');
+					debug.log('Repository was updated.');
 
 					// Reload the program to make use of any new updates.
 					location.reload(true);
@@ -452,7 +446,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 
-				if (msgBuffer[i]) console.log(`Git pull stderr: ${msgBuffer[i]}`);
+				if (msgBuffer[i]) debug.log(`Git pull stderr: ${msgBuffer[i]}`);
 
 			}
 
@@ -460,7 +454,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 		terminal.on('close', (code) => {
 
-			console.log(`Git pull.\nChild precess exited with the code: ${code}.`);
+			debug.log(`Git pull.\nChild precess exited with the code: ${code}.`);
 
 		});
 
