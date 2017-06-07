@@ -72,6 +72,7 @@ define([ 'jquery' ], $ => ({
 		this.initButtons();
 		this.initKeyboardShortcuts();
 
+		const { id, dro } = this;
 		const { posMax } = this.savepos;
 
 		for (let i = 0; i < posMax; i++)  // Initialize the array for saving positions
@@ -79,12 +80,19 @@ define([ 'jquery' ], $ => ({
 
 		publish('/main/widget-loaded', this.id);
 
-		setTimeout(() => {  // Wait for the DOM to load before editing the min/max labels in the DOM
+		setTimeout(() => {  // Wait for the DOM to load before changing DOM elements
 
-			this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
-			this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
-			this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
-			this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+			if (inDebugMode) {
+
+				$(`#${id}`).css('zoom', '1');
+				$(`#${id}`).css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
+
+			}
+
+			dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);  // X Axis DRO limits
+			dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+			dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);  // Y Axis DRO limits
+			dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
 
 		}, 1000);
 

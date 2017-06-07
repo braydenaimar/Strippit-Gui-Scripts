@@ -30,12 +30,13 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	({ publish, subscribe, unsubscribe } = amplify);
 
 	const developerHosts = [ 'BRAYDENS-LENOVO' ];  // List of developer host devices
-	inDebugMode = developerHosts.includes(os.hostname());
-
+	
 	DEBUG_ENABLED = true;  // Enable debugging mode
+	inDebugMode = DEBUG_ENABLED && developerHosts.includes(os.hostname());
+
 	debug = {};
 
-	if (DEBUG_ENABLED && inDebugMode && (typeof console != 'undefined')) { // If debug mode is enabled
+	if (inDebugMode && (typeof console != 'undefined')) { // If debug mode is enabled
 		const keys = Object.keys(console);
 
 		for (let i = 0; i < keys.length; i++) {
