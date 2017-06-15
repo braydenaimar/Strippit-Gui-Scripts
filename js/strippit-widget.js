@@ -72,6 +72,7 @@ define([ 'jquery' ], $ => ({
 		this.initButtons();
 		this.initKeyboardShortcuts();
 
+		const { id, dro } = this;
 		const { posMax } = this.savepos;
 
 		for (let i = 0; i < posMax; i++)  // Initialize the array for saving positions
@@ -79,12 +80,20 @@ define([ 'jquery' ], $ => ({
 
 		publish('/main/widget-loaded', this.id);
 
-		setTimeout(() => {  // Wait for the DOM to load before editing the min/max labels in the DOM
+		setTimeout(() => {  // Wait for the DOM to load before changing DOM elements
 
-			this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
-			this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
-			this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
-			this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+			if (inDebugMode) {
+
+				$(`#${id}`).css('zoom', '1');
+				$(`#${id}`).css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
+				// $('body').css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
+
+			}
+
+			dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);  // X Axis DRO limits
+			dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
+			dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);  // Y Axis DRO limits
+			dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
 
 		}, 1000);
 
@@ -93,14 +102,14 @@ define([ 'jquery' ], $ => ({
 	},
 	initButtons() {
 
-		$('#strippit-inmm').on('click', 'span.btn', () => {  // Initialize the inch/mm button
+		const { port, unit } = this;
 
-			debug.log('Button -in/mm-');
+		$('#strippit-inmm').on('click', 'span.btn', () => {  // Initialize the inch/mm button
 
 			// inch - G20
 			// mm - G21
-			const { port } = this;
-			const Msg = (this.unit === 'inch') ? 'G21' : 'G20';
+			debug.log('Button -in/mm-');
+			const Msg = (unit === 'inch') ? 'G21' : 'G20';
 
 			if (port)  // If got a valid port
 				publish('/connection-widget/port-sendjson', port, { Msg });  // Send a unit change message to the device
@@ -110,8 +119,6 @@ define([ 'jquery' ], $ => ({
 		$('#strippit-feedstop').on('click', 'span.btn', () => {  // Initialize the Feedstop button
 
 			debug.log('Button -Feedstop-');
-
-			const { port } = this;
 
 			if (port) {  // If got a valid port
 
@@ -130,7 +137,6 @@ define([ 'jquery' ], $ => ({
 		$('#strippit-dro').on('click', 'span.btn', (evt) => {  // Initialize the DRO buttons
 
 			const btnData = $(evt.currentTarget).attr('btn-data');
-
 			this.setAxis(btnData);
 
 		});
@@ -144,11 +150,11 @@ define([ 'jquery' ], $ => ({
 
 				if (btnData === 'prev') {
 
-					this.savepos.setPrevPos(this.port);
+					this.savepos.setPrevPos(port);
 
 				} else if (btnData === 'next') {
 
-					this.savepos.setNextPos(this.port);
+					this.savepos.setNextPos(port);
 
 				} else if (btnData === 'save') {
 
@@ -185,14 +191,12 @@ define([ 'jquery' ], $ => ({
 
 		});
 
-		// Initialize the Calculator buttons.
-		$('#strippit-calc').on('click', 'span.btn', (evt) => {
+		$('#strippit-calc').on('click', 'span.btn', (evt) => {  // Initialize the Calculator buttons
 
 			const btnSignal = $(evt.currentTarget).attr('btn-signal');
 			const btnData = $(evt.currentTarget).attr('btn-data');
 
-			// If a function button was pressed (eg. plus/minus, clear, backspace, add, etc.).
-			if (btnSignal === 'function')
+			if (btnSignal === 'function')  // If a function button was pressed (eg. plus/minus, clear, backspace, add, etc.)
 				this.calc.uiFunction(btnData);
 
 			else if (btnSignal === 'number')
@@ -312,9 +316,7 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-	recvPortData(port, { Msg, Data }) {
-
-		// The recvPortData method receives port data from devices on the SPJS.
+	recvPortData(port, { Msg, Data }) {  // The recvPortData method receives port data from devices on the SPJS
 
 		debug.log(`Got data from '${port}':\nLine: ${Msg}\nData: ${Data}\nData:`, Data);
 
@@ -694,10 +696,10 @@ define([ 'jquery' ], $ => ({
 		 */
 		currentPos: null,
 		/**
-		 *  Number of available save positions.
+		 *  Maximum save position slot number.
 		 *  @type {Number}
 		 */
-		posMax: 12,
+		posMax: 24,
 		/**
 		 *  This flag is set when the save position button is pressed.
 		 *  @type {Boolean}
@@ -722,19 +724,23 @@ define([ 'jquery' ], $ => ({
 
 		setPrevPos(port) {
 
-			if (this.currentPos === null)  // If no position slot is active
+			const { currentPos, posMax, savedPos } = this;
+
+			if (!port)  // If the port argument is invalid
+				return debug.error('The port argument is invalid.');
+
+			if (currentPos === null)  // If no position slot is active
 				return false;
 
-			for (let i = 0; i < this.posMax; i++) {
+			for (let i = 0; i < posMax; i++) {
 
-				const posItem = this.currentPos - ((i % this.posMax) + 1);
-
+				const posItem = currentPos - ((i % posMax) + 1);
 				debug.log(`slot: ${posItem}`);
 
 				if (posItem <= 0)  // If the position is invalid
 					return false;
 
-				if (this.savedPos[posItem - 1] !== null)  // If this slot has no saved position
+				if (savedPos[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
 
 			}
@@ -744,16 +750,20 @@ define([ 'jquery' ], $ => ({
 		},
 		setNextPos(port) {
 
-			if (this.currentPos === null)  // If no position slot is active
+			const { currentPos, posMax, savedPos } = this;
+
+			if (!port)  // If the port argument is invalid
+				return debug.error('The port argument is invalid.');
+
+			if (currentPos === null)  // If no position slot is active
 				return false;
 
-			for (let i = 1; i < this.posMax; i++) {
+			for (let i = 1; i < posMax; i++) {
 
-				const posItem = (((i + this.currentPos) - 1) % this.posMax) + 1;
-
+				const posItem = (((i + currentPos) - 1) % posMax) + 1;
 				debug.log(`slot: ${posItem}`);
 
-				if (this.savedPos[posItem - 1] !== null)  // If this slot has no saved position
+				if (savedPos[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
 
 			}
@@ -762,6 +772,9 @@ define([ 'jquery' ], $ => ({
 
 		},
 		setPos(port, pos) {
+
+			if (!port)  // If the port argument is invalid
+				return debug.error('The port argument is invalid.');
 
 			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax)  // If the pos argument is invalid
 				return debug.error('Attempted to set a saved position that is out of range.');
@@ -795,18 +808,19 @@ define([ 'jquery' ], $ => ({
 
 		saveNextPos(value) {  // Save the given value to the next available position slot (with reference to currently selected position)
 
-			let refPos = this.currentPos;
+			const { currentPos, posMax, savedPos } = this;
+			let refPos = currentPos;
 
-			if (this.currentPos === null)
+			if (currentPos === null)
 				refPos = 1;
 
-			for (let i = 0; i < this.posMax; i++) {
+			for (let i = 0; i < posMax; i++) {
 
-				const posItem = (i + refPos) % this.posMax;
+				const posItem = (i + refPos) % posMax;
 
 				debug.log(`slot: ${posItem}`);
 
-				if (this.savedPos[posItem - 1] === null)
+				if (savedPos[posItem - 1] === null)
 					return this.savePos(posItem, value);
 
 			}
@@ -821,7 +835,9 @@ define([ 'jquery' ], $ => ({
 		 */
 		savePos(pos, value) {
 
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax)  // If the pos argument is invalid
+			const { posMax, currentPos } = this;
+
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > posMax)  // If the pos argument is invalid
 				return debug.error('Attempted to set a saved position that is out of range.');
 
 			this.saveFunc('off');
@@ -829,8 +845,8 @@ define([ 'jquery' ], $ => ({
 
 			this.savedPos[pos - 1] = value;  // Save the value to the selected position
 
-			if (this.currentPos !== null)  // If another position slot is active
-				$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
+			if (currentPos !== null)  // If another position slot is active
+				$(`#strippit-savepos span.pos-${currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
 
 			this.currentPos = pos;  // Make this position slot active
 
@@ -842,20 +858,22 @@ define([ 'jquery' ], $ => ({
 		},
 		deletePos(pos) {  // Delete the position data for the given position slot
 
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax)  // If the pos argument is invalid
+			const { posMax, savedPos, currentPos } = this;
+
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > posMax)  // If the pos argument is invalid
 				debug.error('Attempted to delete a saved position that is out of range.');
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
 
-			if (this.savedPos[pos - 1] === null)  // If this is a redundant update
+			if (savedPos[pos - 1] === null)  // If this is a redundant update
 				return false;
 
 			this.savedPos[pos - 1] = null;
 
 			$(`#strippit-savepos span.pos-${pos}`).removeClass('slot-filled'); // Remove filled hiliting from the respective position slot
 
-			if (pos === this.currentPos) {  // If removing the currently selected position slot
+			if (pos === currentPos) {  // If removing the currently selected position slot
 
 				this.currentPos = null;
 				$(`#strippit-savepos span.pos-${pos}`).removeClass('slot-active');
@@ -863,7 +881,6 @@ define([ 'jquery' ], $ => ({
 			}
 
 			debug.table(this.savedPos);
-
 			return true;
 
 		},
@@ -939,13 +956,24 @@ define([ 'jquery' ], $ => ({
 
 		clearAll() {  // Clear all the saved position data
 
-			for (let i = 0; i < this.posMax; i++)  // Delete the position data in each position slot
+			const { posMax } = this;
+
+			for (let i = 0; i < posMax; i++)  // Delete the position data in each position slot
 				this.deletePos(i + 1);
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
 
-		}
+		},
+
+		// hiliteSlotFilled(slot) {},
+		// hiliteSlotEmpty(slot) {},
+		// hiliteSlotActive(slot) {
+		//
+		// 	if (this.currentPos !== null)  // If another position slot is active
+		// 		$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
+		//
+		// }
 
 	}
 
