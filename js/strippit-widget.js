@@ -43,7 +43,28 @@ define([ 'jquery' ], $ => ({
 	mmtoin: 0.0393700787401575,
 
 	/**
-	 *  These are the physical hardware limits of the machine (inch).
+	 *  Stores information about the current die size.
+	 *  @type {String}
+	 */
+	dieSize: '',
+
+	/**
+	 *  Stores data about the machine limits for each die.
+	 *  @type {Object}
+	 */
+	dieMetaData: {
+		small: {
+			x: [ 6.5, 102.5 ],
+			y: [ 0.125, 28.125 ]
+		},
+		large: {
+			x: [ 6.5, 102.5 ],
+			y: [ 3, 28.125 ]
+		}
+	},
+
+	/**
+	 *  These are the physical hardware limits of the machine in inches [in].
 	 *  Travel outside these position values will cause a crash.
 	 *
 	 *  @type {Object}
@@ -72,7 +93,7 @@ define([ 'jquery' ], $ => ({
 		this.initButtons();
 		this.initKeyboardShortcuts();
 
-		const { id, dro } = this;
+		const { id } = this;
 		const { posMax } = this.savepos;
 
 		for (let i = 0; i < posMax; i++)  // Initialize the array for saving positions
@@ -90,10 +111,7 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);  // X Axis DRO limits
-			dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
-			dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);  // Y Axis DRO limits
-			dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
+			this.updateDroLimits();
 
 		}, 1000);
 
@@ -188,6 +206,40 @@ define([ 'jquery' ], $ => ({
 					this.savepos.setPos(this.port, Number(btnData));
 
 			}
+
+		});
+
+		$('.strippit-die-size').on('click', 'span.btn', (evt) => {  // Initialize the Calculator buttons
+
+			const { dieSize, dieMetaData } = this;
+			const btnSignal = $(evt.currentTarget).attr('btn-signal');
+			const btnData = $(evt.currentTarget).attr('btn-data');
+
+			if (dieSize === '') {  // If selecting the die size for the first time
+
+				$('.overlay').hide();
+
+			}
+
+			if (typeof dieMetaData[btnData] == 'undefined')  // If the die size is not valid
+				return false;
+
+			this.machLimits = dieMetaData[btnData];
+			this.updateDroLimits();
+
+			if (btnData === 'small') {
+
+				$('.strippit-die-size .small-die').removeClass('btn-default').addClass('btn-active');
+				$('.strippit-die-size .large-die').removeClass('btn-active').addClass('btn-default');
+
+			} else if (btnData === 'large') {
+
+				$('.strippit-die-size .small-die').removeClass('btn-active').addClass('btn-default');
+				$('.strippit-die-size .large-die').removeClass('btn-default').addClass('btn-active');
+
+			}
+
+			this.dieSize = btnData;
 
 		});
 
@@ -437,6 +489,7 @@ define([ 'jquery' ], $ => ({
 	},
 
 	dro: {
+
 		// Stores the position values from the last update (used to prevent redundant DOM updates).
 		x: 0,
 		y: 0,
@@ -521,6 +574,24 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		}
+	},
+
+	updateDroLimits() {
+
+		const { dro, machLimits } = this;
+
+		if (machLimits.x[0].toString())
+
+		dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0].toString().includes('.') ? machLimits.x[0] : `${machLimits.x[0]}.0`);  // X Axis DRO limits
+		dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1].toString().includes('.') ? machLimits.x[1] : `${machLimits.x[1]}.0`);
+		dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0].toString().includes('.') ? machLimits.y[0] : `${machLimits.y[0]}.0`);  // Y Axis DRO limits
+		dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1].toString().includes('.') ? machLimits.y[1] : `${machLimits.y[1]}.0`);
+
+		// dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0]);  // X Axis DRO limits
+		// dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1]);
+		// dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0]);  // Y Axis DRO limits
+		// dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1]);
+
 	},
 
 	calc: {

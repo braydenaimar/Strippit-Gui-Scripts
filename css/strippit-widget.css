@@ -286,6 +286,38 @@
 	/*height: 34px;*/
 }
 
+/* -- Die Size Selector -- */
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #000;
+    opacity: 0.8;
+    z-index: 1001;
+}
+.strippit-die-size {
+	position: fixed;
+	top: 230px;
+	left: 277px;
+	/*width: 400px;*/
+	/*height: 250px;*/
+	background-color: #fff;
+	opacity: 1;
+	z-index: 1002;
+	padding: 4px;
+	border-radius: 3px;
+}
+.strippit-die-size .die-size-label {
+	display: block;
+	text-align: center;
+	margin-bottom: 3px;
+}
+.strippit-die-size .die-size {
+	width: 70px;
+}
+
 /* -- Calculator -- */
 #strippit-calc {
 	position: absolute;
