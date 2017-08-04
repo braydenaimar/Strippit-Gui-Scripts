@@ -1,5 +1,12 @@
 /* Strippit Widget CSS */
 
+.bg-success {
+	background-color: #a5f5a5;
+}
+.bg-danger {
+	background-color: #ff8b87;
+}
+
 #strippit-widget {
 	zoom: 1.4;
     transform-origin: 0 0;
@@ -502,7 +509,8 @@
     border: none;
 }
 .btn-active {
-	background-color: #dff0d8;
+	background-color: #a5f5a5;
+	/*background-color: #dff0d8;*/
 }
 
 #strippit-dro .btnIconWarning {

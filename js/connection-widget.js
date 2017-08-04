@@ -381,11 +381,13 @@ define([ 'jquery' ], $ => ({
 				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
 				{ Msg: '{2:{ma:2,sa:1.8,tr:0.5233,mi:8,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
-				{ Msg: '{g54z:0}', Pause: 300 },
-				{ Msg: '{g54y:0}', Pause: 300 },
+				{ Msg: '{g54z:0}', Pause: 300 },  // Set work offset to zero
+				{ Msg: '{g54y:0}', Pause: 300 },  // Set work offset to zero
 				{ Msg: 'G91', Pause: 500 },
+				{ Msg: 'M08', Pause: 300 },
 				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
 				{ Msg: 'Y-1 Z-1', Pause: 500 },
+				{ Msg: 'M09', Pause: 300 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: 'M08', Pause: 300 }, 					   // Lift the Finger Solenoid
