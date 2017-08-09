@@ -43,6 +43,17 @@ define([ 'jquery' ], $ => ({
 	mmtoin: 0.0393700787401575,
 
 	/**
+	 *  The minimum number of digits to be displayed after the decimal place of the dro limits.
+	 *  @type {Number}
+	 */
+	droLimitMinDecDigits: 1,
+	/**
+	 *  The maximum number of digits to be displayed after the decimal place of the dro limits.
+	 *  @type {Number}
+	 */
+	droLimitMaxDecDigits: 3,
+
+	/**
 	 *  Stores information about the current die size.
 	 *  @type {String}
 	 */
@@ -120,9 +131,9 @@ define([ 'jquery' ], $ => ({
 	},
 	initButtons() {
 
-		const { port, unit } = this;
-
 		$('#strippit-inmm').on('click', 'span.btn', () => {  // Initialize the inch/mm button
+
+			const { port, unit } = this;
 
 			// inch - G20
 			// mm - G21
@@ -135,6 +146,8 @@ define([ 'jquery' ], $ => ({
 		});
 
 		$('#strippit-feedstop').on('click', 'span.btn', () => {  // Initialize the Feedstop button
+
+			const { port } = this;
 
 			debug.log('Button -Feedstop-');
 
@@ -161,6 +174,7 @@ define([ 'jquery' ], $ => ({
 
 		$('#strippit-savepos').on('click', 'span.btn', (evt) => {  // Initialize the Save Position buttons
 
+			const { port } = this;
 			const btnSignal = $(evt.currentTarget).attr('btn-signal');
 			const btnData = $(evt.currentTarget).attr('btn-data');
 
@@ -193,7 +207,7 @@ define([ 'jquery' ], $ => ({
 
 			} else if (btnSignal === 'position') {  // If a position slot was selected
 
-				const { machPosition } = this;
+				const { machPosition, port } = this;
 				const { saveSelection, deleteSelection } = this.savepos;
 
 				if (saveSelection)
@@ -203,7 +217,7 @@ define([ 'jquery' ], $ => ({
 					this.savepos.deletePos(Number(btnData));
 
 				else
-					this.savepos.setPos(this.port, Number(btnData));
+					this.savepos.setPos(port, Number(btnData));
 
 			}
 
@@ -224,7 +238,7 @@ define([ 'jquery' ], $ => ({
 			if (typeof dieMetaData[btnData] == 'undefined')  // If the die size is not valid
 				return false;
 
-			this.machLimits = dieMetaData[btnData];
+			[ this.machLimits.x, this.machLimits.y ] = [ dieMetaData[btnData].x, dieMetaData[btnData].y ];
 			this.updateDroLimits();
 
 			if (btnData === 'small') {
@@ -450,7 +464,7 @@ define([ 'jquery' ], $ => ({
 
 		if (updateUnit) {  // If a unit update was received
 
-			const { unit, intomm, mmtoin } = this;
+			const { unit, intomm, mmtoin, dro, machLimits } = this;
 			const { posMax, savedPos } = this.savepos;
 			const convFactor = (unit === 'mm') ? intomm : mmtoin;
 
@@ -463,26 +477,28 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			if (this.unit === 'mm') {  // Units are millimeters [mm]
+			// if (unit === 'mm') {  // Units are millimeters [mm]
+			//
+			// 	dro.$xLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.x[0] * convFactor, 3));
+			// 	dro.$xLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.x[1] * convFactor, 3));
+			// 	dro.$yLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.y[0] * convFactor, 3));
+			// 	dro.$yLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.y[1] * convFactor, 3));
+			//
+			// } else {  // Units are inches [in]
+			//
+			// 	dro.$xLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.x[0], 3));
+			// 	dro.$xLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.x[1], 3));
+			// 	dro.$yLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.y[0], 3));
+			// 	dro.$yLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.y[1], 3));
+			//
+			// }
 
-				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0] * convFactor);
-				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1] * convFactor);
-				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0] * convFactor);
-				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1] * convFactor);
+			this.updateDroLimits();
 
-			} else {  // Units are inches [in]
+			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(unit);  // Update the unit in the DRO
+			$('#strippit-dro .y-axis .dro-pos-well .dro-dim').text(unit);
 
-				this.dro.$xLimitLabel.find('.min-limit-label').text(this.machLimits.x[0]);
-				this.dro.$xLimitLabel.find('.max-limit-label').text(this.machLimits.x[1]);
-				this.dro.$yLimitLabel.find('.min-limit-label').text(this.machLimits.y[0]);
-				this.dro.$yLimitLabel.find('.max-limit-label').text(this.machLimits.y[1]);
-
-			}
-
-			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(this.unit);  // Update the unit in the DRO
-			$('#strippit-dro .y-axis .dro-pos-well .dro-dim').text(this.unit);
-
-			$('#strippit-calc .calc-display-well .dro-dim').text(this.unit);  // Update the unit in the calculator readout
+			$('#strippit-calc .calc-display-well .dro-dim').text(unit);  // Update the unit in the calculator readout
 
 		}
 
@@ -578,14 +594,39 @@ define([ 'jquery' ], $ => ({
 
 	updateDroLimits() {
 
-		const { dro, machLimits } = this;
+		const { dro, machLimits, unit, intomm, droLimitMinDecDigits: minDigits, droLimitMaxDecDigits: maxDigits } = this;
+		const keys = Object.keys(machLimits);
+		let limits = {};
 
-		if (machLimits.x[0].toString())
+		for (let i = 0; i < keys.length; i++) {
 
-		dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0].toString().includes('.') ? machLimits.x[0] : `${machLimits.x[0]}.0`);  // X Axis DRO limits
-		dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1].toString().includes('.') ? machLimits.x[1] : `${machLimits.x[1]}.0`);
-		dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0].toString().includes('.') ? machLimits.y[0] : `${machLimits.y[0]}.0`);  // Y Axis DRO limits
-		dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1].toString().includes('.') ? machLimits.y[1] : `${machLimits.y[1]}.0`);
+			const keyItem = keys[i];
+			const limitItem = machLimits[keyItem];
+			limits[keyItem] = [ ...limitItem ];
+
+			for (let j = 0; j < limitItem.length; j++) {
+
+				if (unit === 'mm')  // If units are in Millimeters [mm]
+					limits[keyItem][j] = limitItem[j] * intomm;
+
+				limits[keyItem][j] = Math.roundTo(limits[keyItem][j], maxDigits);
+
+				if (!limits[keyItem][j].toString().includes('.') && minDigits > 0)  // If the number has no decimal place
+					limits[keyItem][j] = `${limits[keyItem][j]}.${'0'.repeat(minDigits)}`;
+
+			}
+
+		}
+
+		dro.$xLimitLabel.find('.min-limit-label').text(limits.x[0]);  // X Axis DRO limits
+		dro.$xLimitLabel.find('.max-limit-label').text(limits.x[1]);
+		dro.$yLimitLabel.find('.min-limit-label').text(limits.y[0]);  // Y Axis DRO limits
+		dro.$yLimitLabel.find('.max-limit-label').text(limits.y[1]);
+
+		// dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0].toString().includes('.') ? machLimits.x[0] : `${machLimits.x[0]}.0`);  // X Axis DRO limits
+		// dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1].toString().includes('.') ? machLimits.x[1] : `${machLimits.x[1]}.0`);
+		// dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0].toString().includes('.') ? machLimits.y[0] : `${machLimits.y[0]}.0`);  // Y Axis DRO limits
+		// dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1].toString().includes('.') ? machLimits.y[1] : `${machLimits.y[1]}.0`);
 
 		// dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0]);  // X Axis DRO limits
 		// dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1]);

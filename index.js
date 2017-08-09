@@ -29,8 +29,8 @@ app.on('ready', () => {
 
 		win = new BrowserWindow({
 			// show: false,
-			width: 1285,
-			height: 755,
+			width: 940,
+			height: 555,
 			// fullscreen: true,
 			// kiosk: true,
 			// frame: false,
