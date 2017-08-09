@@ -30,7 +30,7 @@ app.on('ready', () => {
 		win = new BrowserWindow({
 			// show: false,
 			width: 940,
-			height: 555,
+			height: 550,
 			// fullscreen: true,
 			// kiosk: true,
 			// frame: false,

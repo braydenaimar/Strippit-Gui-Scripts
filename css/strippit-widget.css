@@ -57,15 +57,20 @@
 	position: absolute;
 	top: 18px;
 	left: 36px;
+	z-index: 1005;
 }
 #strippit-feedstop span.btn {
 	width: 160px;
 	height: 90px;
-	padding: 25px 15px;
-	font-size: 20px;
+	padding: 19px 15px;
+	font-size: 27px;
 	font-weight: bold;
 }
-
+#strippit-feedstop .material-icons {
+	position: relative;
+	top: 2px;
+	right: 2px;
+}
 /* -- DRO -- */
 #strippit-dro {
 	position: absolute;
@@ -364,15 +369,18 @@
 	height: 44px;
     overflow: hidden;
     margin-bottom: 0;
-    padding: 3px 16px;
+	/*padding: 3px 16px;*/
+    padding: 0px 16px;
 	border: 1px solid black;
 	border-radius: 3px;
 }
 #strippit-calc h2.calc-value {
 	position: absolute;
 	right: 70px;
-	font-size: 32px;
-	/*border: 1px solid blue;*/
+	/*font-size: 32px;*/
+	font-family: '24 Segment';
+	letter-spacing: 2px;
+	font-size: 34px;
 }
 #strippit-calc div.calc-buttons {
 	position: absolute;
