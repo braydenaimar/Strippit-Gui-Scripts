@@ -5,6 +5,12 @@ define([ 'jquery' ], function ($) {
 
 	this.gui = {
 
+		roundTo(value, decimals) {
+
+			return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+
+		},
+
 		escGroup() {
 
 			for (let i = 0; i < 10; i++) {

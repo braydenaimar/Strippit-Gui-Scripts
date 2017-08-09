@@ -22,6 +22,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	fs = require('fs');
 	os = require('os');
 	({ spawn } = require('child_process'));
+	Math.roundTo = gui.roundTo;
 
 	// The ipc module aLlows for communication between the main and render processes.
 	electron = require('electron');
@@ -30,7 +31,7 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 	({ publish, subscribe, unsubscribe } = amplify);
 
 	const developerHosts = [ 'BRAYDENS-LENOVO' ];  // List of developer host devices
-	
+
 	DEBUG_ENABLED = true;  // Enable debugging mode
 	inDebugMode = DEBUG_ENABLED && developerHosts.includes(os.hostname());
 
