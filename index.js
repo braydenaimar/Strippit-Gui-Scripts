@@ -20,19 +20,19 @@ app.on('browser-window-created', (e, window) => {
 app.on('ready', () => {
 
 	let win = null;
+	const [ platform, arch ] = [ os.platform(), os.arch() ];
 
-	// If running this on braydens laptop, open it in development mode.
-	if (os.hostname() === 'BRAYDENS-LENOVO') {
+	if (platform === 'linux' && arch === 'arm') {  // If running on a Raspberry Pi
 
-		console.log('Opening in development mode.');
-		console.log('electron', electron);
+		console.log('Opening in deployment mode.');
 
 		win = new BrowserWindow({
 			// show: false,
-			width: 940,
-			height: 550,
+			// width: 1650,
+			// height: 950,
 			// fullscreen: true,
-			// kiosk: true,
+			// frame: true,
+			kiosk: true,
 			// frame: false,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
@@ -44,15 +44,15 @@ app.on('ready', () => {
 
 	} else {
 
-		console.log('Opening in deployment mode.');
+		console.log('Opening in development mode.');
+		console.log('electron', electron);
 
 		win = new BrowserWindow({
 			// show: false,
-			// width: 1650,
-			// height: 950,
+			width: 940,
+			height: 550,
 			// fullscreen: true,
-			// frame: true,
-			kiosk: true,
+			// kiosk: true,
 			// frame: false,
 			// backgroundColor: '#eaedf4',
 			backgroundThrottling: false,
