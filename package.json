@@ -13,12 +13,12 @@
 		"eslint-config-airbnb": "^14.1.0",
 		"eslint-plugin-import": "^2.2.0",
 		"eslint-plugin-jsx-a11y": "^4.0.0",
-		"eslint-plugin-react": "^6.9.0",
-		"mousetrap": "^1.6.0"
+		"eslint-plugin-react": "^6.9.0"
 	},
 	"dependencies": {
 		"electron": "^1.4.2",
 		"cson": "^4.0.0",
-		"fs-cson": "^0.3.2"
+		"fs-cson": "^0.3.2",
+		"mousetrap": "^1.6.0"
 	}
 }
