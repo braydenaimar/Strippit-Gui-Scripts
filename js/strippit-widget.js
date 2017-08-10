@@ -116,9 +116,8 @@ define([ 'jquery' ], $ => ({
 
 			if (inDebugMode) {
 
-				$(`#${id}`).css('zoom', '1');
-				$(`#${id}`).css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
-				// $('body').css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
+				$('#strippit-widget').css('zoom', '1');
+				$('#strippit-widget').css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
 
 			}
 
@@ -699,6 +698,20 @@ define([ 'jquery' ], $ => ({
 
 			if (val === this.value)  // If this is a redundant DOM update
 				return false;
+
+			if (val === '100954771') {  // Passcode for opening dev tools
+
+				ipc.send('open-dev-tools');
+				val = '';
+
+			}
+
+			if (val === '100954774') {  // Passcode for restarting the SPJS
+
+				publish('/connection-widget/spjs-send', { Msg: 'restart', Comment: 'Back Door Command' });
+				val = '';
+
+			}
 
 			if (val === '100954775')  // Passcode for reloading the page
 				location.reload();
