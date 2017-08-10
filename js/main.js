@@ -406,13 +406,16 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 	};
 
+	/**
+	 *  Pull the latest repository from the master branch on GitHub.
+	 *  @return {[type]} [description]
+	 */
 	updateGitRepo = function () {
-		// Pulls the latest repository from the master branch on GitHub.
 
 		let terminal = null;
 
-		// Skip the update if host is my laptop or if there is no internet connection.
-		if (hostMeta.hostName === 'BRAYDENS-LENOVO' || !navigator.onLine) return false;
+		if (hostMeta.hostName === 'BRAYDENS-LENOVO' || !navigator.onLine)  // If hosted on my computer or there is no internet connection
+			return false;
 
 		debug.log('Pulling latest repo from GitHub.');
 
@@ -422,18 +425,18 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			const msg = `${data}`;
 			const msgBuffer = msg.split('\n');
+			let
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 
-				if (msgBuffer[i]) debug.log(`Git pull stdout: ${msgBuffer[i]}`);
+				if (msgBuffer[i])
+					debug.log(`Git pull stdout: ${msgBuffer[i]}`);
 
-				// If a newer repository was found, reload the GUI so the new scripts are used.
-				if (msgBuffer[i].includes('Updating')) {
+				if (msgBuffer[i].includes('Updating')) {  // If an update was found
 
 					debug.log('Repository was updated.');
 
-					// Reload the program to make use of any new updates.
-					location.reload(true);
+					location.reload(true);  // Reload the program to make use of any new updates
 
 				}
 
@@ -448,7 +451,8 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 
-				if (msgBuffer[i]) debug.log(`Git pull stderr: ${msgBuffer[i]}`);
+				if (msgBuffer[i])
+					debug.log(`Git pull stderr: ${msgBuffer[i]}`);
 
 			}
 

@@ -62,9 +62,10 @@
 #strippit-feedstop span.btn {
 	width: 160px;
 	height: 90px;
-	padding: 19px 15px;
-	font-size: 27px;
+	padding: 19px 34px;
+	font-size: 28px;
 	font-weight: bold;
+	font-family: serif;
 }
 #strippit-feedstop .material-icons {
 	position: relative;
@@ -377,10 +378,11 @@
 #strippit-calc h2.calc-value {
 	position: absolute;
 	right: 70px;
-	/*font-size: 32px;*/
-	font-family: '24 Segment';
-	letter-spacing: 2px;
-	font-size: 34px;
+	font-size: 32px;
+	top: 4px;
+	/*font-family: '7 Segment Monospace';
+	font-size: 38px;
+	top: 1px;*/
 }
 #strippit-calc div.calc-buttons {
 	position: absolute;
@@ -418,14 +420,14 @@
 	top: 0;
 	left: 75%;
 }
-#strippit-calc div.calc-buttons > div > span.btn { /* all calc btns except recall-x and recall-y */
+#strippit-calc .calc-buttons div .btn { /* all calc btns except recall-x and recall-y */
 	width: 88%;
 	height: 46px;
-	/*height: 44px;*/
 	margin-top: 10px;
+	padding: 0px 16px;
+	font-family: serif;
 	font-weight: bold;
 	font-size: 24px;
-	padding: 0px 16px;
 }
 #strippit-calc div.column-4 > div.recall-btns {
 	width: 88%;
@@ -435,7 +437,7 @@
 	height: 44px;
 	margin-top: 12px;
 }
-#strippit-calc .btn-number {
+#strippit-calc .calc-buttons span.btn-number {
 	background-color: #f5f5f5;
 }
 #strippit-calc span.btn-unavailable {
