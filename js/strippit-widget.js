@@ -93,6 +93,9 @@ define([ 'jquery' ], $ => ({
 
 	initBody() {
 
+		const { name, id } = this;
+		const { posMax } = this.savepos;
+
 		debug.group(`${this.name}.initBody()`);
 
 		subscribe('/main/window-resize', this, this.resizeWidgetDom.bind(this));
@@ -104,9 +107,6 @@ define([ 'jquery' ], $ => ({
 		this.initButtons();
 		this.initKeyboardShortcuts();
 
-		const { id } = this;
-		const { posMax } = this.savepos;
-
 		for (let i = 0; i < posMax; i++)  // Initialize the array for saving positions
 			this.savepos.savedPos.push(null);
 
@@ -114,7 +114,9 @@ define([ 'jquery' ], $ => ({
 
 		setTimeout(() => {  // Wait for the DOM to load before changing DOM elements
 
-			if (inDebugMode) {
+			const { platform, architecture, os } = hostMeta;
+
+			if (platform !== 'linux' || architecture !== 'arm') {
 
 				$('#strippit-widget').css('zoom', '1');
 				$('#strippit-widget').css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
