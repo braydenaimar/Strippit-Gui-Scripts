@@ -418,27 +418,28 @@ define([ 'jquery', 'gui', 'amplify', 'mousetrap' ], ($) => {
 			return false;
 
 		debug.log('Pulling latest repo from GitHub.');
-
 		terminal = spawn('git pull', [], { shell: true });
 
 		terminal.stdout.on('data', (data) => {
 
 			const msg = `${data}`;
 			const msgBuffer = msg.split('\n');
-			let
+			let updatedFlag = false;
 
 			for (let i = 0; i < msgBuffer.length; i++) {
 
 				if (msgBuffer[i])
 					debug.log(`Git pull stdout: ${msgBuffer[i]}`);
 
-				if (msgBuffer[i].includes('Updating')) {  // If an update was found
+				if (msgBuffer[i].includes('Updating'))  // If an update was found
+					updatedFlag = true;
 
-					debug.log('Repository was updated.');
+			}
 
-					location.reload(true);  // Reload the program to make use of any new updates
+			if (updatedFlag) {  // If an update was found
 
-				}
+				debug.log('Repository was updated.');
+				location.reload(true);  // Reload the program to make use of any new updates
 
 			}
 
