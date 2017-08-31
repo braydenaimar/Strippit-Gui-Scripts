@@ -759,10 +759,10 @@ define([ 'jquery' ], $ => ({
 
 			// Check that the message argument is valid.
 			if (Msg === '') {
-				console.log('The append message method got the Msg argument as an empty string.');
+				// console.log('The append message method got the Msg argument as an empty string.');
 
 			} else if (typeof Msg == 'undefined') {
-				// console.log('Aborted the append message method because the Msg argument was omitted.');
+				// // console.log('Aborted the append message method because the Msg argument was omitted.');
 				throw new Error('Aborted the append message method because the Msg argument was omitted.');
 
 			} else if (typeof Msg == 'object') {
@@ -784,7 +784,7 @@ define([ 'jquery' ], $ => ({
 			// Prevent any messages containing '<' or '>' because these can mess with the console log DOM structure.
 			if (/[<>]/.test(Msg)) {
 
-				if (Type === 'stdout' || Type === 'stderr') console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
+// 				if (Type === 'stdout' || Type === 'stderr') // console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
 
 				Msg = Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 
@@ -823,7 +823,7 @@ define([ 'jquery' ], $ => ({
 			// If the message is a command.
 			if (Type === 'Command' || Type === 'MdiCommand') {
 
-				console.groupCollapsed(`Append: ${Msg}`);
+				// console.groupCollapsed(`Append: ${Msg}`);
 
 				// Make the id.
 				if (IdPrefix) {
@@ -845,8 +845,8 @@ define([ 'jquery' ], $ => ({
 
 				this[port].cmdMap.push(logLength - 1);
 
-				console.log(`Pushed onto cmdMap: ${this[port].cmdMap}`);
-				console.table(this[port].logData);
+				// console.log(`Pushed onto cmdMap: ${this[port].cmdMap}`);
+				// console.table(this[port].logData);
 
 				// If the command is not already verified, add it to the verifyBuffer object.
 				// if (Status !== 'Executed' && Status !== 'Error' && !(Status === 'Completed' && Meta.includes('NumberedGCode')))
@@ -854,11 +854,11 @@ define([ 'jquery' ], $ => ({
 
 					this[port].verifyMap.push(logLength - 1);
 
-					console.log(`Pushed onto verifyMap: ${this[port].verifyMap}`);
+					// console.log(`Pushed onto verifyMap: ${this[port].verifyMap}`);
 
 				}
 
-				console.groupEnd();
+				// console.groupEnd();
 
 			// If the message is not a command, append the message data to this port's logData object.
 			} else {
@@ -934,7 +934,7 @@ define([ 'jquery' ], $ => ({
 			// If this is a command, build DOM elements for command.
 			if (Type === 'Command' || Type === 'MdiCommand') {
 
-				// console.log(`Port: ${port}\nMsg: ${Msg}\nType: ${Type}\nId: ${Id}\nStatus: ${Status}\nMeta: ${Meta}\nComment: ${Comment}\n${ Related ? (Related.Port ? `\nRelated Port: ${Related.Port}` : '') + (Related.Id ? `\nRelated Id: ${CSON.stringify(Related.Id)}` : '') : '' }`);
+				// // console.log(`Port: ${port}\nMsg: ${Msg}\nType: ${Type}\nId: ${Id}\nStatus: ${Status}\nMeta: ${Meta}\nComment: ${Comment}\n${ Related ? (Related.Port ? `\nRelated Port: ${Related.Port}` : '') + (Related.Id ? `\nRelated Id: ${CSON.stringify(Related.Id)}` : '') : '' }`);
 
 				const domCommentTag = (this.style.CmdComment.includes('samp')) ? 'samp' : 'code';
 				const domCommentClass = ((this.style.lineWrap) ? 'text-pre ' : 'text-prewrap ') + this.style.CmdComment.replace('samp ', '');
@@ -968,7 +968,7 @@ define([ 'jquery' ], $ => ({
 			// If the port is not exceeding the maximum length, abort this method.
 			if (logLength <= maxLineLimit) return false;
 
-			console.log(`Truncating the '${port}' log.`);
+			// console.log(`Truncating the '${port}' log.`);
 
 			const deleteCount = logLength - minLineLimit;
 
@@ -1008,7 +1008,7 @@ define([ 'jquery' ], $ => ({
 		},
 		rebuildLog(port) {
 
-			console.log(`Build the '${port}' log.`);
+			// console.log(`Build the '${port}' log.`);
 
 			const { logData, logPanelDOM } = this[port];
 
@@ -1027,7 +1027,7 @@ define([ 'jquery' ], $ => ({
 		},
 		makeRegExpSafe(str) {
 
-			console.log(`String: ${str}`);
+			// console.log(`String: ${str}`);
 
 			let safeString = '';
 
@@ -1042,7 +1042,7 @@ define([ 'jquery' ], $ => ({
 				}
 			}
 
-			console.log(`safeString: ${safeString}`);
+			// console.log(`safeString: ${safeString}`);
 
 			return safeString;
 
@@ -1050,7 +1050,7 @@ define([ 'jquery' ], $ => ({
 		checkMatchItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, LogItem, LogIndex }) {
 			// The checkMatchItem method checks for a match between an item in the log and given search criteria.
 
-			console.log('LogItem: %O', LogItem);
+			// console.log('LogItem: %O', LogItem);
 
 			if (typeof Msg != 'undefined' && LogItem.Msg !== Msg) return false;
 
@@ -1080,12 +1080,12 @@ define([ 'jquery' ], $ => ({
 
 			if (MaxAge && unixNow - LogItem.Time > MaxAge) {
 
-				console.log('Found old command.');
+				// console.log('Found old command.');
 
 				// If the command is stale, flag it in the log.
 				if (findStaleCommands && unixNow - LogItem.Time > this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
 
-					console.log('Found stale command.');
+					// console.log('Found stale command.');
 
 					this.updateCmd(port, { Index: LogIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
@@ -1098,7 +1098,7 @@ define([ 'jquery' ], $ => ({
 			// If the command is stale, flag it in the log and return as non-match.
 			if (findStaleCommands && unixNow - LogItem.Time > this.staleCmdLimit && this.verifyPrecidence.indexOf(LogItem.Status) < this.verifyPrecidence.indexOf('Completed')) {
 
-				console.log('Found stale command.');
+				// console.log('Found stale command.');
 
 				this.updateCmd(port, { Index: LogIndex, Status: 'Warning', Comment: 'Stale', UpdateRelated: true });
 
@@ -1141,7 +1141,7 @@ define([ 'jquery' ], $ => ({
 			const dataRef = typeof Msg != 'undefined' ? 'Msg' : (typeof PartMsg != 'undefined' ? 'PartMsg' : (typeof Length != 'undefined' ? 'Length' : (typeof Id != 'undefined' ? 'Id' : (typeof Line != 'undefined' ? 'Line' : 'Type'))));
 			const data = arguments[1][dataRef];
 
-			console.groupCollapsed(`Find - ${dataRef}: ${data}`);
+			// console.groupCollapsed(`Find - ${dataRef}: ${data}`);
 
 			let refMsg;
 
@@ -1173,14 +1173,14 @@ define([ 'jquery' ], $ => ({
 			// If the Index argument was given.
 			if (typeof Index != 'undefined') {
 
-				console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
+				// console.log('Index argument was given so not searching through the log for a match. Skiping to returning object data.');
 
 				matchFound = true;
 
 			// If the Index argument was omitted, search the port's console log for a match.
 			} else if (!SearchBackwards) {
 
-				console.log('Searching forwards through the log for a match (ie. old to recent).');
+				// console.log('Searching forwards through the log for a match (ie. old to recent).');
 
 				let init = 0;
 
@@ -1201,12 +1201,12 @@ define([ 'jquery' ], $ => ({
 					const logIndex = IndexMap[i];
 					const LogItem = logData[logIndex];
 
-					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
+					// console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
 					// Check to see if found a match.
 					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, LogItem, LogIndex: logIndex })) {
 
-						console.log('  ...got a match.');
+						// console.log('  ...got a match.');
 
 						matchFound = true;
 						matchIndex = logIndex;
@@ -1219,7 +1219,7 @@ define([ 'jquery' ], $ => ({
 			// Search backwards through the log for a match (ie. recent to old).
 			} else {
 
-				console.log('Searching backwards through the log for a match (ie. recent to old).');
+				// console.log('Searching backwards through the log for a match (ie. recent to old).');
 
 				let init = IndexMap.length - 1;
 				const refIndex = SearchFrom;
@@ -1241,12 +1241,12 @@ define([ 'jquery' ], $ => ({
 					const logIndex = IndexMap[i];
 					const LogItem = logData[logIndex];
 
-					console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
+					// console.log(`i: ${i}\nlogIndex: ${logIndex}\nIndexMap Length: ${IndexMap.length}\nLogItem: %O`, LogItem);
 
 					// Check to see if found a match.
 					if (this.checkMatchItem(port, { Msg, PartMsg: refMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, LogItem, LogIndex: logIndex })) {
 
-						console.log('  ...got a match.');
+						// console.log('  ...got a match.');
 
 						matchFound = true;
 						matchIndex = logIndex;
@@ -1262,8 +1262,8 @@ define([ 'jquery' ], $ => ({
 
 				const matchItem = this[port].logData[matchIndex];
 
-				console.log('Found match in log:', matchItem);
-				console.groupEnd();
+				// console.log('Found match in log:', matchItem);
+				// console.groupEnd();
 
 				return {
 					matchFound,
@@ -1282,8 +1282,8 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			console.log(`No match found in '${port}' log for ${Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))))}: ${data}`);
-			console.groupEnd();
+			// console.log(`No match found in '${port}' log for ${Msg !== undefined ? 'Msg' : (PartMsg !== undefined ? 'PartMsg' : (Length !== undefined ? 'Length' : (Id !== undefined ? 'Id' : (Line !== undefined ? 'Line' : 'Type'))))}: ${data}`);
+			// console.groupEnd();
 
 			return { matchFound };
 
@@ -1311,9 +1311,9 @@ define([ 'jquery' ], $ => ({
 
 			if (recursionDepth && recursionDepth >= this[port].logData.length) throw new Error('Infinite loop detected.');
 
-			console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`)))))}`);
-			// console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
-			console.log(CSON.stringify(arguments));
+			// console.groupCollapsed(`${port}${Comment ? ` - Comment: '${Comment}'` : ''}${Status ? ` - Status: ${Status}` : ''} - ${Msg !== undefined ? `Msg: ${Msg}` : (PartMsg !== undefined ? `PartMsg: ${PartMsg}` : (Length !== undefined ? `Length: ${Length}` : (Id !== undefined ? `Id: ${Id}` : (Line !== undefined ? `Line: ${Line}` : (Index !== undefined ? `Index: ${Index}` : `Type: ${Type}`)))))}`);
+			// // console.groupCollapsed(`Update ${ Status ? 'status' : 'comment' }: ${ Msg || PartMsg || Id || Line || Type }`);
+			// console.log(CSON.stringify(arguments));
 
 			const { cmdMap, verifyMap, logData } = this[port];
 
@@ -1348,12 +1348,12 @@ define([ 'jquery' ], $ => ({
 			// const matchItem = this.findItem(port, { Msg, PartMsg, Id, Index, IndexMap: this[port].verifyMap });
 			let { matchFound, matchIndex, matchMsg, matchId, matchLine, matchType, matchStatus, matchMeta, matchComment, matchRelated, matchTime, matchIndexMap } = this.findItem(port, { Msg, PartMsg, Length, Id, Line, Type, Meta, MinAge, MaxAge, StatusCondition, Index, IndexMap, SearchFrom, SearchBackwards });
 
-			console.log('matchFound:', matchFound, '\nmatchIndex:', matchIndex, '\nmatchMsg:', matchMsg, '\nmatchId:', matchId, '\nmatchLine:', matchLine, '\nmatchType:', matchType, '\nmatchStatus:', matchStatus, '\nmatchComment:', matchComment, '\nmatchRelated:', matchRelated, '\nmatchMeta:', matchMeta, '\nmatchTime:', matchTime);
+			// console.log('matchFound:', matchFound, '\nmatchIndex:', matchIndex, '\nmatchMsg:', matchMsg, '\nmatchId:', matchId, '\nmatchLine:', matchLine, '\nmatchType:', matchType, '\nmatchStatus:', matchStatus, '\nmatchComment:', matchComment, '\nmatchRelated:', matchRelated, '\nmatchMeta:', matchMeta, '\nmatchTime:', matchTime);
 
 			if (typeof matchIndex == 'undefined') {
 
-				console.log('No Match Found. Aborting update.');
-				console.groupEnd();
+				// console.log('No Match Found. Aborting update.');
+				// console.groupEnd();
 
 				return { matchFound };
 
@@ -1367,19 +1367,19 @@ define([ 'jquery' ], $ => ({
 
 				const bufferLength = this[port].verifyMap.length;
 
-				console.log('Status Update.');
-				console.log(`Remove item: ${removeItem}`);
+				// console.log('Status Update.');
+				// console.log(`Remove item: ${removeItem}`);
 				// console.log('Match item:', matchItem);
-				console.log('cmdMap:', this[port].cmdMap, '\nverifyMap:', this[port].verifyMap);
+				// console.log('cmdMap:', this[port].cmdMap, '\nverifyMap:', this[port].verifyMap);
 
 				// Update the style of the respective command's check-mark DOM element (ie. remove previous style and add new style).
 				$(`#connection-widget .console-log-panel .log-${port} span.verify-mark.${matchId}`).removeClass(this.verifyStyle[matchStatus]).addClass(this.verifyStyle[Status]);
-				// console.log(`#connection-widget .console-log-panel .log-${port} span.verify-mark.${matchId}`);
+				// // console.log(`#connection-widget .console-log-panel .log-${port} span.verify-mark.${matchId}`);
 
 				logData[matchIndex].Status = Status;
 
-				console.log('Updated status.');
-				console.log(`  Prev status: ${matchStatus}\n  New status: ${logData[matchIndex].Status}`);
+				// console.log('Updated status.');
+				// console.log(`  Prev status: ${matchStatus}\n  New status: ${logData[matchIndex].Status}`);
 
 				// If removeItem is true, remove the matched command from the verifyBuffer object.
 				if (removeItem && this[port].verifyMap.includes(matchIndex)) {
@@ -1387,7 +1387,7 @@ define([ 'jquery' ], $ => ({
 					if (this.commentTimeToVerify && (!matchMeta.includes('portSendJson') || (matchMeta.includes('portSendJson') && (port === 'SPJS' || matchMeta.includes('1of1'))))) {
 						const deltaTime = Date.now() - matchTime;
 
-						console.log(`Time to ${Status}: ${deltaTime}ms`);
+						// console.log(`Time to ${Status}: ${deltaTime}ms`);
 
 						const timeStr = `${deltaTime}`;
 						let timeComment = 'ms';
@@ -1420,13 +1420,13 @@ define([ 'jquery' ], $ => ({
 					// Remove the item from the verifyBuffer object.
 					this[port].verifyMap.splice(this[port].verifyMap.indexOf(matchIndex), 1);
 
-					console.log('  cmdMap:', this[port].cmdMap, '\n  verifyMap:', this[port].verifyMap);
+					// console.log('  cmdMap:', this[port].cmdMap, '\n  verifyMap:', this[port].verifyMap);
 
-					console.table(this[port].logData);
+					// console.table(this[port].logData);
 
 					// Double check that the item has been removed from the verifyBuffer object.
 					if (bufferLength && this[port].verifyMap.length + 1 === bufferLength) {
-						console.log('Item was removed from the verifyMap.');
+						// console.log('Item was removed from the verifyMap.');
 
 					} else {
 						throw new Error('Item was not successfully removed from the verifyMap.');
@@ -1434,21 +1434,21 @@ define([ 'jquery' ], $ => ({
 					}
 
 				} else if (removeItem) {
-					console.log('Item was already removed from the verifyMap.');
+					// console.log('Item was already removed from the verifyMap.');
 
 				}
 
 			} else if (this.enableRecursiveUpdate && Status && this.verifyPrecidence.indexOf(matchStatus) >= this.verifyPrecidence.indexOf(Status) && (!Comment || (Comment !== 'Stale'))) {  // If this a redundant status update, look for another match in the log incase this is the wrong command in the log.
 
-				console.log('Redundant Status Update.');
+				// console.log('Redundant Status Update.');
 
 				if ((Status === 'Warning' || Status === 'Error') && SearchFrom > 0 && SearchFrom !== IndexMap[0]) {  // Search backwards (ie. recent to oldest)
 
 					recursionDepth += 1;
 					const nextSearchIndex = SearchFrom - 1;
 
-					console.groupEnd();
-					console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${nextSearchIndex}`);
+					// console.groupEnd();
+					// console.log(`Redundant Status Update. Trying to find an older match in the log. SearchFrom: ${nextSearchIndex}`);
 
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: nextSearchIndex, SearchBackwards: true, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
 
@@ -1457,8 +1457,8 @@ define([ 'jquery' ], $ => ({
 					recursionDepth += 1;
 					const nextSearchIndex = SearchFrom + 1;
 
-					console.groupEnd();
-					console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${nextSearchIndex}`);
+					// console.groupEnd();
+					// console.log(`Redundant Status Update. Trying to find a newer match in the log. SearchFrom: ${nextSearchIndex}`);
 
 					return this.updateCmd(port, { Msg, PartMsg, Length, Id, Line, Type, Index, IndexMap, SearchFrom: nextSearchIndex, Status, Comment, PrevComment, UpdateRelated, recursionDepth });
 
@@ -1469,7 +1469,7 @@ define([ 'jquery' ], $ => ({
 			// If a Comment argument was passed and this is not a redundant update, add the comment to the respective port in the log.
 			if (typeof Comment != 'undefined' && !matchComment.includes(`[${Comment}]`)) {
 
-				console.log('Comment update.');
+				// console.log('Comment update.');
 
 				// Get the new value of the comment in case the comment was updated by the status update (ie. time to execute/error was added).
 				matchComment = logData[matchIndex].Comment;
@@ -1492,15 +1492,15 @@ define([ 'jquery' ], $ => ({
 
 				// Update the style of the respective command's comment DOM element (ie. remove previous style and add new style).
 				$(`#connection-widget .console-log-panel .log-${port} ${this.style.CmdComment.includes('samp') ? 'samp' : 'code'}.cmd-comment.${matchId}`).text(`${newComment}`);
-				// console.log(`#connection-widget.console-log-panel .log-${port} ${this.style.CmdComment.includes('samp') ? 'samp' : 'code'}.cmd-comment.${matchId}`);
+				// // console.log(`#connection-widget.console-log-panel .log-${port} ${this.style.CmdComment.includes('samp') ? 'samp' : 'code'}.cmd-comment.${matchId}`);
 
 				logData[matchIndex].Comment = newComment;
 
-				console.log(`New Comment: ${newComment}`);
+				// console.log(`New Comment: ${newComment}`);
 
 			// If this is a redundant comment update, skip the comment update.
 			} else if (Comment && matchComment.includes(`[${Comment}]`)) {
-				console.log('Redundant Comment Update.');
+				// console.log('Redundant Comment Update.');
 
 			}
 
@@ -1514,7 +1514,7 @@ define([ 'jquery' ], $ => ({
 			// If the command has a related command in a port's log, verify that command using the id from the command in the SPJS log.
 			if (UpdateRelated && matchRelated && matchRelated.Port && this[matchRelated.Port]) {
 
-				console.log(`Found related port:\n${CSON.stringify(matchRelated)}`);
+				// console.log(`Found related port:\n${CSON.stringify(matchRelated)}`);
 
 				// If there is a match Id, use that.
 				if (matchRelated.Id) {
@@ -1534,13 +1534,13 @@ define([ 'jquery' ], $ => ({
 				}
 
 			} else if (UpdateRelated && port !== 'SPJS') {
-				console.log('Finding related message in the SPJS log.');
+				// console.log('Finding related message in the SPJS log.');
 				this.updateCmd('SPJS', { Id: matchId, Status, Comment, PrevComment, UpdateRelated: false });
 
 			}
 
 			const matchItem = logData[matchIndex];
-			console.groupEnd();
+			// console.groupEnd();
 
 			return {
 				matchFound,
@@ -1563,7 +1563,7 @@ define([ 'jquery' ], $ => ({
 
 	initBody() {
 
-		console.group(`${this.name}.initBody()`);
+		// console.group(`${this.name}.initBody()`);
 
 		// Only connect to SPJS once all widgets have loaded so that we dont publish any important signals before other widgets have a chance to subscribe to them.
 		subscribe('/main/all-widgets-loaded', this, this.wsConnect.bind(this));
@@ -1644,8 +1644,8 @@ define([ 'jquery' ], $ => ({
 
 		const that = this;
 
-		console.log('Loading Settings from CSON file.');
-		// console.log('initScripts:', JSON.stringify(this.initScripts));
+		// console.log('Loading Settings from CSON file.');
+		// // console.log('initScripts:', JSON.stringify(this.initScripts));
 
 		// let SPJS = {};
 		// let consoleLog = {};
@@ -1660,11 +1660,11 @@ define([ 'jquery' ], $ => ({
 		//
 		// 	CSON.parseCSONFile(`config/connection-widget_${keys[i]}.cson`, (err, result) => {
 		//
-		// 		console.log('Error:', err, '\nResult:', result);
+		// 		// console.log('Error:', err, '\nResult:', result);
 		//
 		// 		if (err) return false;
 		//
-		// 		console.log(`Result -${keys[i]}-\n${CSON.stringify(result)}`);
+		// 		// console.log(`Result -${keys[i]}-\n${CSON.stringify(result)}`);
 		//
 		// 		return true;
 		//
@@ -1674,11 +1674,11 @@ define([ 'jquery' ], $ => ({
 
 		CSON.parseCSONFile('config/connection-widget_Settings.cson', (err, result) => {
 
-			console.log('Error:', err, '\nResult:', result);
+			// console.log('Error:', err, '\nResult:', result);
 
 			if (err) return false;
 
-			console.log('Result:', CSON.stringify(result));
+			// console.log('Result:', CSON.stringify(result));
 
 			const { SPJS, consoleLog, deviceMeta, defaultMetaIndex, initScripts, connectScripts } = result;
 
@@ -1706,44 +1706,44 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupCollapsed('CSON Format');
-		console.log(`SPJS:${CSON.stringify(this.SPJS)}`);
-		console.log(`consoleLog:${CSON.stringify(this.consoleLog)}`);
-		console.log(`deviceMeta:${CSON.stringify(this.deviceMeta)}`);
-		console.log(`defaultMetaIndex:${CSON.stringify(this.defaultMetaIndex)}`);
-		console.log(`initScripts:${CSON.stringify(this.initScripts)}`);
-		console.log(`connectScripts:${CSON.stringify(this.connectScripts)}`);
-		console.groupEnd();
+		// console.groupCollapsed('CSON Format');
+		// console.log(`SPJS:${CSON.stringify(this.SPJS)}`);
+		// console.log(`consoleLog:${CSON.stringify(this.consoleLog)}`);
+		// console.log(`deviceMeta:${CSON.stringify(this.deviceMeta)}`);
+		// console.log(`defaultMetaIndex:${CSON.stringify(this.defaultMetaIndex)}`);
+		// console.log(`initScripts:${CSON.stringify(this.initScripts)}`);
+		// console.log(`connectScripts:${CSON.stringify(this.connectScripts)}`);
+		// console.groupEnd();
 
-		console.groupCollapsed('JSON Format');
-		console.log(`SPJS:${JSON.stringify(this.SPJS)}`);
-		console.log(`consoleLog:${JSON.stringify(this.consoleLog)}`);
-		console.log(`deviceMeta:${JSON.stringify(this.deviceMeta)}`);
-		console.log(`defaultMetaIndex:${JSON.stringify(this.defaultMetaIndex)}`);
-		console.log(`initScripts:${JSON.stringify(this.initScripts)}`);
-		console.log(`connectScripts:${JSON.stringify(this.connectScripts)}`);
-		console.groupEnd();
+		// console.groupCollapsed('JSON Format');
+		// console.log(`SPJS:${JSON.stringify(this.SPJS)}`);
+		// console.log(`consoleLog:${JSON.stringify(this.consoleLog)}`);
+		// console.log(`deviceMeta:${JSON.stringify(this.deviceMeta)}`);
+		// console.log(`defaultMetaIndex:${JSON.stringify(this.defaultMetaIndex)}`);
+		// console.log(`initScripts:${JSON.stringify(this.initScripts)}`);
+		// console.log(`connectScripts:${JSON.stringify(this.connectScripts)}`);
+		// console.groupEnd();
 
-		// console.log('SPJS:', this.SPJS);
-		// console.log('consoleLog:', this.consoleLog);
-		// console.log('deviceMeta:', this.deviceMeta);
-		// console.log('defaultMetaIndex:', this.defaultMetaIndex);
-		// console.log('initScripts:', this.initScripts);
-		// console.log('connectScripts:', this.connectScripts);
+		// // console.log('SPJS:', this.SPJS);
+		// // console.log('consoleLog:', this.consoleLog);
+		// // console.log('deviceMeta:', this.deviceMeta);
+		// // console.log('defaultMetaIndex:', this.defaultMetaIndex);
+		// // console.log('initScripts:', this.initScripts);
+		// // console.log('connectScripts:', this.connectScripts);
 
 	},
 	initStatusCodes() {
 		// Synchronous file read.
 		const that = this;
-		console.log('Loading Status Codes from cson file.');
+		// console.log('Loading Status Codes from cson file.');
 
 		CSON.parseCSONFile('config/TinyG_Status_Codes.cson', (err, result) => {
-			// console.log('Error:', err, '\nResult:', result);
+			// // console.log('Error:', err, '\nResult:', result);
 			that.tinygStatusMeta = result;
 
 		});
 
-		// console.log('tinygStatusMeta:', this.tinygStatusMeta);
+		// // console.log('tinygStatusMeta:', this.tinygStatusMeta);
 
 	},
 	initClickEvents() {
@@ -1752,21 +1752,21 @@ define([ 'jquery' ], $ => ({
 
 		// Console log tab events.
 		$(`#${this.id} .console-log-panel .nav-tabs`).on('click', 'span', function (evt) {
-			// console.log("evt:", evt);
-			// console.log("View " + $(this).attr("evt-data") + " log.");
+			// // console.log("evt:", evt);
+			// // console.log("View " + $(this).attr("evt-data") + " log.");
 			that.consoleLogChangeView($(this).attr('evt-data'));
 		});
 
 		// Serial port list header button events.
 		$(`#${this.id} .splist-panel .panel-heading .btn-group`).on('click', 'span.btn', function (evt) {
-			// console.log("evt:", evt, "\nthis:", this);
-			// console.log("  evt-signal: " + $(evt.currentTarget).attr("evt-signal"));
-			// console.log("  evt-data: " + $(evt.currentTarget).attr("evt-data"));
+			// // console.log("evt:", evt, "\nthis:", this);
+			// // console.log("  evt-signal: " + $(evt.currentTarget).attr("evt-signal"));
+			// // console.log("  evt-data: " + $(evt.currentTarget).attr("evt-data"));
 			let evtSignal = $(this).attr('evt-signal');
 			let evtData = $(this).attr('evt-data');
 
 			if (evtSignal === 'hide-body') {
-				console.log('Hide body.', this);
+				// console.log('Hide body.', this);
 
 				$(`#connection-widget .${evtData} .panel-body`).addClass('hidden');
 				$(this).find('span').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
@@ -1775,7 +1775,7 @@ define([ 'jquery' ], $ => ({
 				that.resizeWidgetDom();
 
 			} else if (evtSignal === 'show-body') {
-				console.log('Show body.', this);
+				// console.log('Show body.', this);
 
 				$(`#connection-widget .${evtData} .panel-body`).removeClass('hidden');
 				$(this).find('span').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
@@ -1810,7 +1810,7 @@ define([ 'jquery' ], $ => ({
 			const unsafePort = that.makePortUnSafe(port);
 
 			if (that.consoleLog.openLogs.includes(port)) {
-				console.log(`Port ${unsafePort} selected.\n  ...closing port.`);
+				// console.log(`Port ${unsafePort} selected.\n  ...closing port.`);
 
 				// Prevent the port from autoconnecting again.
 				that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
@@ -1818,7 +1818,7 @@ define([ 'jquery' ], $ => ({
 				Msg = `close ${unsafePort}`;
 
 			} else {
-				console.log(`Port ${unsafePort} selected.\n  ...opening port.`);
+				// console.log(`Port ${unsafePort} selected.\n  ...opening port.`);
 
 				// Allow the port to autoconnecting again if it was dissabled by a manual port close.
 				// that.deviceMeta[portMeta[port].metaIndex].autoConnectPort = false;
@@ -1878,8 +1878,8 @@ define([ 'jquery' ], $ => ({
 		// single quote:	222
 
 		$(consoleInputDom).on('keydown', (evt) => {
-			// console.log("keyCode: " + evt.keyCode);
-			// console.log("key: " + evt.key);
+			// // console.log("keyCode: " + evt.keyCode);
+			// // console.log("key: " + evt.key);
 			// TODO: Set cursor to end of text in the input field after recalling a previous command from the history list.
 			let activeLog = that.consoleLog.activeLog;
 			let activeConsoleLog = that.consoleLog[activeLog];
@@ -1896,12 +1896,12 @@ define([ 'jquery' ], $ => ({
 
 			// If the 'backspace' key was pressed.
 			if (evt.keyCode == '8') {
-				// console.log("evt:", evt);
+				// // console.log("evt:", evt);
 				activeConsoleLog.value = inputData;
 
 			// If the 'enter' key was pressed.
 			} else if (evt.keyCode == 13) {
-				// console.log("evt:", evt);
+				// // console.log("evt:", evt);
 				// TODO: Write a more elegant solution.
 				that.consoleLogParseInput();
 				activeConsoleLog.value = '';
@@ -1924,7 +1924,7 @@ define([ 'jquery' ], $ => ({
 
 				}
 				// activeConsoleLog.historyRecallIndex = (historyRecallIndex === null) ? 0:++historyRecallIndex;
-				// console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
+				// // console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
 
 			// If the 'down-arrow' was pressed.
 			} else if (evt.keyCode == '40') {
@@ -1943,7 +1943,7 @@ define([ 'jquery' ], $ => ({
 					$(consoleInputDom).val(activeConsoleLog.history[activeConsoleLog.historyRecallIndex]);
 
 				}
-				// console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
+				// // console.log("historyRecallIndex: " + activeConsoleLog.historyRecallIndex);
 
 			// If a character key was pressed.
 			} else if (evt.key.length === 1) {
@@ -1957,8 +1957,8 @@ define([ 'jquery' ], $ => ({
 
 				activeConsoleLog.value = inputData;
 				activeConsoleLog.historyRecallIndex = null;
-				// console.log(activeLog + ":" + gui.parseObject(that.consoleLog, 2));
-				// console.log(activeLog + " Log:" + gui.parseObject(activeConsoleLog, 2));
+				// // console.log(activeLog + ":" + gui.parseObject(that.consoleLog, 2));
+				// // console.log(activeLog + " Log:" + gui.parseObject(activeConsoleLog, 2));
 
 			}
 
@@ -1990,7 +1990,7 @@ define([ 'jquery' ], $ => ({
 		// Put the .attr() function inside of a $.each() loop.
 
 		$.each(this.widgetDom, (setIndex, setItem) => {
-			// console.log("setIndex:", setIndex, "\nsetItem:", setItem);
+			// // console.log("setIndex:", setIndex, "\nsetItem:", setItem);
 			let that1 = that;
 			let containerElement = null;
 			let containerHeight = null;
@@ -1998,12 +1998,12 @@ define([ 'jquery' ], $ => ({
 			let panelSpacing = 0;
 
 			$.each(setItem, (panelIndex, panelItem) => {
-				// console.log("  panelIndex:", panelIndex, "\n  panelItem:", panelItem);
+				// // console.log("  panelIndex:", panelIndex, "\n  panelItem:", panelItem);
 				// If panelItem is the container element, skip it.
 				if (!panelIndex) {
 					containerElement = `#${that1.id}${panelItem}`;
 					containerHeight = $(containerElement).height();
-					// console.log("    Container: " + containerElement + "\n    Height: " + containerHeight);
+					// // console.log("    Container: " + containerElement + "\n    Height: " + containerHeight);
 					return true;
 				}
 
@@ -2018,7 +2018,7 @@ define([ 'jquery' ], $ => ({
 					let panelHeight = containerHeight - (marginSpacing + panelSpacing);
 
 					$(elementItem).css({ 'height': `${panelHeight}px` });
-					// console.log("    panelHeight: " + panelHeight);
+					// // console.log("    panelHeight: " + panelHeight);
 
 				// If this is not the last element in the array, read the element's height.
 				} else {
@@ -2052,8 +2052,8 @@ define([ 'jquery' ], $ => ({
 	wsConnect() {
 		// This method creates a new WebSocket connection to the SPJS and is called by the '/main/all-widgets-loaded' subscribe line.
 
-		// console.log("Attempting to connect to the SPJS now.");
-		// console.log("Web Socket (before calling 'new WebSocket()'):" + gui.parseObject(this.SPJS.ws, 2, { keep: ["CONNECTING", "OPEN", "CLOSING", "CLOSED", "url", "readyState", "bufferedAmount"] }));
+		// // console.log("Attempting to connect to the SPJS now.");
+		// // console.log("Web Socket (before calling 'new WebSocket()'):" + gui.parseObject(this.SPJS.ws, 2, { keep: ["CONNECTING", "OPEN", "CLOSING", "CLOSED", "url", "readyState", "bufferedAmount"] }));
 		const socketUrl = 'ws://localhost:8989/ws';
 		// const socketUrl = 'ws://192.168.1.68:8888/ws';
 		// const socketUrl = 'ws://192.168.1.68:8888/ws';
@@ -2068,7 +2068,7 @@ define([ 'jquery' ], $ => ({
 	},
 	launchSpjs() {
 
-		console.log('Launching a new SPJS.');
+		// console.log('Launching a new SPJS.');
 
 		const { platform, architecture, os } = hostMeta;
 		const { launchGpioServerOnLinux } = this.SPJS;
@@ -2092,7 +2092,7 @@ define([ 'jquery' ], $ => ({
 
 				this.SPJS.gpio.stdout.on('data', (data) => {
 
-					console.log(`GPIO Server. stdout: ${data}`);
+					// console.log(`GPIO Server. stdout: ${data}`);
 
 					let msg = `${data}`;
 					let msgBuffer = msg.split('\n');
@@ -2107,7 +2107,7 @@ define([ 'jquery' ], $ => ({
 
 				this.SPJS.gpio.stderr.on('data', (data) => {
 
-					console.log(`GPIO Server. stderr: ${data}`);
+					// console.log(`GPIO Server. stderr: ${data}`);
 
 					let msg = `${data}`;
 					let msgBuffer = msg.split('\n');
@@ -2121,7 +2121,7 @@ define([ 'jquery' ], $ => ({
 				});
 
 				this.SPJS.gpio.on('close', (code) => {
-					console.log(`GPIO Server. Child precess exited with the code: ${code}`);
+					// console.log(`GPIO Server. Child precess exited with the code: ${code}`);
 
 				});
 
@@ -2140,7 +2140,7 @@ define([ 'jquery' ], $ => ({
 
 		this.SPJS.go.stdout.on('data', (data) => {
 
-			console.log(`SPJS. stdout: ${data}`);
+			// console.log(`SPJS. stdout: ${data}`);
 
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
@@ -2155,7 +2155,7 @@ define([ 'jquery' ], $ => ({
 
 		this.SPJS.go.stderr.on('data', (data) => {
 
-			console.log(`SPJS. stderr: ${data}`);
+			// console.log(`SPJS. stderr: ${data}`);
 
 			let msg = `${data}`;
 			let msgBuffer = msg.split('\n');
@@ -2170,7 +2170,7 @@ define([ 'jquery' ], $ => ({
 
 		this.SPJS.go.on('close', (code) => {
 
-			console.log(`SPJS. Child precess exited with the code: ${code}`);
+			// console.log(`SPJS. Child precess exited with the code: ${code}`);
 
 		});
 
@@ -2180,9 +2180,9 @@ define([ 'jquery' ], $ => ({
 		// If the SPJS is already in an 'open' state, skip DOM updates.
 		if (this.SPJS.wsState === 'open') return false;
 
-		// console.log("WebSocket -onOpen-" + gui.parseObject(this.SPJS.ws, 2, { keep: ["url"] }));
-		console.groupCollapsed(`WebSocket -onOpen-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url' ] })}`);
-		console.log(`ws:${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] })}`);
+		// // console.log("WebSocket -onOpen-" + gui.parseObject(this.SPJS.ws, 2, { keep: ["url"] }));
+		// console.groupCollapsed(`WebSocket -onOpen-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url' ] })}`);
+		// console.log(`ws:${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] })}`);
 
 		this.SPJS.wsState = 'open';
 
@@ -2191,12 +2191,12 @@ define([ 'jquery' ], $ => ({
 
 		publish('/statusbar-widget/hilite', 'SPJS', 'success');
 
-		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
-		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+		// console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		this.resizeWidgetDom();
 
-		console.groupEnd();
+		// console.groupEnd();
 
 	},
 	onSpjsMessage(msg) {
@@ -2208,10 +2208,10 @@ define([ 'jquery' ], $ => ({
 			try {
 				data = JSON.parse(msg);
 
-				console.info(data);
+				// console.info(data);
 
 			} catch (error) {
-				console.log(`SPJS Recv (json error):\n  ${msg}`);
+				// console.log(`SPJS Recv (json error):\n  ${msg}`);
 
 				this.consoleLog.appendMsg('SPJS', { Msg: msg, Type: 'Error' });
 
@@ -2344,7 +2344,7 @@ define([ 'jquery' ], $ => ({
 		// If the SPJS is already in an 'error' or 'closed' state, skip DOM updates.
 		if (this.SPJS.wsState === 'error' || this.SPJS.wsState === 'closed') {
 
-			console.groupEnd();
+			// console.groupEnd();
 
 			return false;
 
@@ -2352,15 +2352,15 @@ define([ 'jquery' ], $ => ({
 
 		// console.error('WebSocket -onError-' + gui.parseObject(this.SPJS.ws, 2, { keep: ['url', 'bufferedAmount'] }));
 		// console.error('WebSocket -onError-');
-		console.groupCollapsed('WebSocket -onError-');
+		// console.groupCollapsed('WebSocket -onError-');
 
 		// Only update the state of the SPJS if it is not already closed.
 		this.SPJS.wsState = 'error';
-		// console.log('Web Socket -onSpjsError-' + gui.parseObject(this.SPJS.ws, 2, { keep: ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount'] }));
+		// // console.log('Web Socket -onSpjsError-' + gui.parseObject(this.SPJS.ws, 2, { keep: ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount'] }));
 
 		publish('/statusbar-widget/hilite', 'SPJS', 'danger');
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		return true;
 
@@ -2393,10 +2393,10 @@ define([ 'jquery' ], $ => ({
 		// If the SPJS was closed by an exit command and the wsReconnectOnExitCmd flag is set, launch a new SPJS.
 		if (matchFound) {
 
-			console.log('SPJS was shut down because of a \'exit\' command. ');
+			// console.log('SPJS was shut down because of a \'exit\' command. ');
 
 			if (this.SPJS.wsReconnectOnExitCmd) {
-				console.log('Got a close event. Launching a new SPJS.');
+				// console.log('Got a close event. Launching a new SPJS.');
 
 				this.launchSpjs();
 			}
@@ -2409,18 +2409,18 @@ define([ 'jquery' ], $ => ({
 
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Completed' }));
 
-			if (matchFound) console.log('SPJS was shut down because of a \'restart\' command.');
+// // 			if (matchFound) // console.log('SPJS was shut down because of a \'restart\' command.');
 
 		}
 
-		console.groupCollapsed(`WebSocket -onClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url', 'bufferedAmount' ] })}`);
+		// console.groupCollapsed(`WebSocket -onClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'url', 'bufferedAmount' ] })}`);
 
 		this.SPJS.wsState = 'closed';
 
-		console.log(`Web Socket -onSpjsClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] })}`);
+		// console.log(`Web Socket -onSpjsClose-${gui.parseObject(this.SPJS.ws, 2, { keep: [ 'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'url', 'readyState', 'bufferedAmount' ] })}`);
 
-		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
-		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+		// console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		// If there are any pending commands in the SPJS, mark them as error (recent to oldest).
 		if (verifyMap.length > 0) {
@@ -2476,10 +2476,10 @@ define([ 'jquery' ], $ => ({
 
 		this.portListDomUpdate();
 
-		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
-		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+		// console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		// Return true so that the caller knows that the SPJS was closed.
 		return true;
@@ -2491,7 +2491,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { "Version": "1.92" }
 
-		console.log(`SPJS -Version-\n  Version: ${Version}`);
+		// console.log(`SPJS -Version-\n  Version: ${Version}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Version' });
@@ -2504,7 +2504,7 @@ define([ 'jquery' ], $ => ({
 		const { Commands } = data;
 		// Ex. { "Commands" : [ "list", "open [portName] [baud]", ... ] }
 
-		console.log('SPJS -Commands-');
+		// console.log('SPJS -Commands-');
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Commands' });
@@ -2515,7 +2515,7 @@ define([ 'jquery' ], $ => ({
 	onBufferAlgorithm(data) {
 		const { BufferAlgorithm } = data;
 
-		console.log(`SPJS -BufferAlgorithm-\n BufferAlgorithm: ${BufferAlgorithm}`);
+		// console.log(`SPJS -BufferAlgorithm-\n BufferAlgorithm: ${BufferAlgorithm}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'BufferAlgorithm' });
@@ -2524,7 +2524,7 @@ define([ 'jquery' ], $ => ({
 	},
 	onBaudRate(data) {
 		const { BaudRate } = data;
-		console.log(`SPJS -BaudRate-\n BaudRate: ${BaudRate}`);
+		// console.log(`SPJS -BaudRate-\n BaudRate: ${BaudRate}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'BaudRate' });
@@ -2535,7 +2535,7 @@ define([ 'jquery' ], $ => ({
 		const { Hostname } = data;
 		// Ex. { "Hostname": "BRAYDENS-LENOVO" }
 
-		console.log(`SPJS -Hostname-\n  Hostname: ${Hostname}`);
+		// console.log(`SPJS -Hostname-\n  Hostname: ${Hostname}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Hostname' });
@@ -2591,7 +2591,7 @@ define([ 'jquery' ], $ => ({
 		// Linux os will show ports like '/dev/ttyAMA0' with no assocciated serial number.
 		if (hostMeta.platform !== 'linux' && !this.validifyPortList(dataObj)) {
 			// console.warn("Got corrupted port list data.");
-			console.log('Got corrupted port list data.');
+			// console.log('Got corrupted port list data.');
 
 			// Indicate that the 'list' command has errored in the SPJS console log.
 			// This also removes the 'list command from the verifyBuffer object allowing others 'list' commands to be sent.
@@ -2607,22 +2607,22 @@ define([ 'jquery' ], $ => ({
 		// This also removes the 'list command from the verifyMap object allowing others 'list' commands to be sent.
 		this.consoleLog.updateCmd('SPJS', { Msg: 'list', Status: 'Executed' });
 
-		console.groupCollapsed('onSerialPorts');
-		console.log(`SPJS -PortList-${gui.parseObject(dataObj, 2, [ 'DeviceClass', 'IsPrimary', 'AvailableBufferAlgorithms', 'Ver' ])}`);
-		console.table(dataObj);
+		// console.groupCollapsed('onSerialPorts');
+		// console.log(`SPJS -PortList-${gui.parseObject(dataObj, 2, [ 'DeviceClass', 'IsPrimary', 'AvailableBufferAlgorithms', 'Ver' ])}`);
+		// console.table(dataObj);
 
 		// Build the portListDiffs object.
 		// If the port list has not changed since the last time it was received, exit the function.
 		if (!this.buildPortListDiffs(dataObj)) {
 
-			console.groupEnd();
-			console.log('PortList not changed.');
+			// console.groupEnd();
+			// console.log('PortList not changed.');
 
 			return false;
 
 		}
 
-		console.log(`PortList changed.${gui.parseObject(this.SPJS.portListDiffs, 2)}`);
+		// console.log(`PortList changed.${gui.parseObject(this.SPJS.portListDiffs, 2)}`);
 
 		this.SPJS.portList = dataObj;
 
@@ -2634,7 +2634,7 @@ define([ 'jquery' ], $ => ({
 		// Normally when a port is opened/closed, portConnected()/portDisconnected() is called by onPortOpen()/onPortClose() in response to an 'open/close port' command from the SPJS.
 		if (diffs.opened) {
 
-			console.log(`diffs.opened: ${gui.parseObject(diffs.opened)}`);
+			// console.log(`diffs.opened: ${gui.parseObject(diffs.opened)}`);
 
 			// this.SPJS.openPorts = this.SPJS.openPorts.concat(diffs.opened);
 			this.SPJS.openPorts = [ ...this.SPJS.openPorts, ...diffs.opened ];  // Add the newly opened ports to the list of open ports
@@ -2680,17 +2680,17 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
-		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+		// console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		// If connected to an SPJS that was not launched by the launchSpjs method with no devices active, close the SPJS and launch a new one.
-		// console.log('go:', this.SPJS.go);
-		// console.log('openPorts:', this.SPJS.openPorts);
+		// // console.log('go:', this.SPJS.go);
+		// // console.log('openPorts:', this.SPJS.openPorts);
 		if (exitUntrustedSpjs && !this.SPJS.openPorts.length && this.SPJS.go === null) {
 
-			console.log('Exiting this SPJS and launching a new one.');
+			// console.log('Exiting this SPJS and launching a new one.');
 
 			this.newspjsSend({ Msg: 'exit', Comment: 'Untrusted SPJS' });
 
@@ -2736,15 +2736,15 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
-		console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+		// console.log(`openPorts: ${gui.parseObject(this.SPJS.openPorts)}`);
+		// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 		return true;
 
 	},
 	validifyPortList(data) {
 		// This method checks that port list data received from the SPJS is not corrupted.
-		console.log('Validating port list data.');
+		// console.log('Validating port list data.');
 
 		const that = this;
 		const requiredProp = [ 'SerialNumber', 'UsbPid', 'UsbVid' ];
@@ -2763,8 +2763,8 @@ define([ 'jquery' ], $ => ({
 		return true;
 	},
 	buildPortListDiffs(data) {
-		console.log('Finding diffs in list data.'); // ...since 1903
-		// console.log("this.SPJS.portList:", this.SPJS.portList);
+		// console.log('Finding diffs in list data.'); // ...since 1903
+		// // console.log("this.SPJS.portList:", this.SPJS.portList);
 
 		const { portList } = this.SPJS;
 		const diffs = this.SPJS.portListDiffs = {};
@@ -2816,8 +2816,8 @@ define([ 'jquery' ], $ => ({
 		return diffs;
 	},
 	buildPortMeta() {
-		// console.group("building portMeta");
-		console.groupCollapsed('Building portMeta');
+		// // console.group("building portMeta");
+		// console.groupCollapsed('Building portMeta');
 		// Builds the portMeta object based on the portList object and using information from the deviceMeta object.
 		// The portMeta object is used to determine which port to automatically connect to, and is used with portList to build the serial port list in the DOM.
 		const that = this;
@@ -2830,15 +2830,15 @@ define([ 'jquery' ], $ => ({
 
 		// Loop through each port object in the received serial ports object.
 		for (let port in portList) {
-			console.log(`Port ${port}`);
+			// console.log(`Port ${port}`);
 
 			// Loop through each meta in the deviceMeta object and check if it matches the current port in the serial ports list.
 			metaLoop: for (let i = 0; i < deviceMeta.length; i++) {
-				console.log(`  i: ${i}`);
+				// console.log(`  i: ${i}`);
 
 				// Loop through each Vid/Pid in the current deviceMeta and check for match against Vid/Pid in received port data.
 				for (let x = 0; x < deviceMeta[i].VidPids.length; x++) {
-					console.log(`    x: ${x}`);
+					// console.log(`    x: ${x}`);
 
 					// If the Vid/Pids from the deviceMeta match the received port's Vid/Pids.
 					if (deviceMeta[i].VidPids[x].Vid.toLowerCase() === portList[port].UsbVid.toLowerCase() && deviceMeta[i].VidPids[x].Pid.toLowerCase() == portList[port].UsbPid.toLowerCase()) {
@@ -2851,17 +2851,17 @@ define([ 'jquery' ], $ => ({
 							let a = Number(port.replace(/com|fs-dev-fs-tty\D{3}/i, ''));
 							let b = Number(portList[port].RelatedNames[0].replace(/com|fs-dev-fs-tty\D{3}/i, ''));
 
-							console.log(`a: ${a}\nb: ${b}`);
+							// console.log(`a: ${a}\nb: ${b}`);
 
 							// If this port is greater than it's related port, use the next meta object in the deviceMeta array.
 							if (a > b && matchIndex < deviceMeta.length - 1 && JSON.stringify(deviceMeta[i].VidPids) === JSON.stringify(deviceMeta[i + 1].VidPids)) {
 								matchIndex += 1;
-								console.log(`      ++i: ${matchIndex}`);
+								// console.log(`      ++i: ${matchIndex}`);
 							}
 						}
 
-						console.log(`      break. [${deviceMeta[matchIndex].Friendly}]`);
-						console.log(`index: ${matchIndex}\ndeviceMeta: `, deviceMeta[matchIndex]);
+						// console.log(`      break. [${deviceMeta[matchIndex].Friendly}]`);
+						// console.log(`index: ${matchIndex}\ndeviceMeta: `, deviceMeta[matchIndex]);
 
 						// Exit the search for meta data becuase a match was found.
 						break metaLoop;
@@ -2869,21 +2869,21 @@ define([ 'jquery' ], $ => ({
 					// If the Vid/Pid are empty strings, set the meta as the default meta data.
 					} else if (deviceMeta[i].VidPids[x].Vid === '' && deviceMeta[i].VidPids[x].Pid === '') {
 						matchIndex = i;
-						console.log(`      default. [${deviceMeta[matchIndex].Friendly}]`);
+						// console.log(`      default. [${deviceMeta[matchIndex].Friendly}]`);
 					}
 				}
 			}
 
 			const matchItem = deviceMeta[matchIndex];
 			const matchFriendly = matchItem.useReceivedFriendly ? portList[port].Friendly.split('(COM')[0] : matchItem.Friendly;
-			// console.log(`useReceivedFriendly: ${matchItem.useReceivedFriendly}\nmatchFriendly: ${matchFriendly}`);
+			// // console.log(`useReceivedFriendly: ${matchItem.useReceivedFriendly}\nmatchFriendly: ${matchFriendly}`);
 			const matchBaud = portList[port].Baud || matchItem.Baud;
 			const matchBuffer = portList[port].Buffer || matchItem.Buffer;
 
 			// If the info in the portMeta object has changed, perform a DOM update on the serial ports list.
 			if (portMeta[port] && (matchBaud !== portMeta[port].Baud || matchBuffer !== portMeta[port].Buffer)) {
 				portListUpdate = true;
-				console.log('Will update port list DOM.');
+				// console.log('Will update port list DOM.');
 			}
 
 			const lineEndings = this.consoleLog.lineEndings;
@@ -2905,13 +2905,13 @@ define([ 'jquery' ], $ => ({
 
 		portListUpdate && this.portListDomUpdate();
 
-		console.log(`Built -portMeta-${gui.parseObject(this.SPJS.portMeta, 2)}`);
-		console.groupEnd();
+		// console.log(`Built -portMeta-${gui.parseObject(this.SPJS.portMeta, 2)}`);
+		// console.groupEnd();
 
 	},
 	portListDomUpdate() {
 		// TODO: Make portListDomUpdate accept arguments to make updates more efficient. (aka. only update what is needing to be changed rather that rebuilding the entire DOM list everytime.)
-		console.groupCollapsed('Updating port list DOM');
+		// console.groupCollapsed('Updating port list DOM');
 
 		const that = this;
 		const portList = this.SPJS.portList;
@@ -2935,7 +2935,7 @@ define([ 'jquery' ], $ => ({
 
 			listHtml += portHtml;
 
-			console.log(`Port ${port}${(portMeta[port].portMuted ? ' [muted]' : '')}:`, portHtml);
+			// console.log(`Port ${port}${(portMeta[port].portMuted ? ' [muted]' : '')}:`, portHtml);
 
 		}
 
@@ -2945,37 +2945,37 @@ define([ 'jquery' ], $ => ({
 		$(`#${this.id} .serial-port-list`).html(listHtml);
 		this.resizeWidgetDom();
 
-		console.groupEnd();
+		// console.groupEnd();
 
 	},
 	autoConnectPorts() {
-		console.groupCollapsed('Auto-Connect Ports');
+		// console.groupCollapsed('Auto-Connect Ports');
 
 		const that = this;
 		const portList = this.SPJS.portList;
 		const portMeta = this.SPJS.portMeta;
 
 		for (let port in portMeta) {
-			// console.log("Port " + portMeta[port].Name + gui.parseObject(portMeta[port], 2));
+			// // console.log("Port " + portMeta[port].Name + gui.parseObject(portMeta[port], 2));
 			// If the port's autoConnectPort property is 'true', and the port is not already open, send an 'open' command to the SPJS.
 			const unsafePort = this.makePortUnSafe(port);
 
 			if (portMeta[port].autoConnectPort && !portList[port].IsOpen) {
-				console.log(`Port '${unsafePort}' ...connecting`);
+				// console.log(`Port '${unsafePort}' ...connecting`);
 
 				const Msg = `open ${unsafePort} ${portMeta[port].Baud} ${portMeta[port].Buffer}`;
 
 				this.newspjsSend({ Msg });
 
 			} else if (portList[port].IsOpen) {
-				console.log(`Port '${unsafePort}' ...already open`);
+				// console.log(`Port '${unsafePort}' ...already open`);
 
 			} else {
-				console.log(`Port '${unsafePort}' ...nope`);
+				// console.log(`Port '${unsafePort}' ...nope`);
 			}
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 	},
 	sendConnectScript(data) {
 		// The sendConnectScript method sends connect scripts to devices that were already opened on an SPJS that was just connected to.
@@ -3015,8 +3015,8 @@ define([ 'jquery' ], $ => ({
 		// If the port is the SPJS, abort the attempt to send connect scripts.
 		if (port === 'SPJS') return false;
 
-		console.groupCollapsed('Sending connect scripts to device.');
-		console.log(`Connect scripts for ${port}.`);
+		// console.groupCollapsed('Sending connect scripts to device.');
+		// console.log(`Connect scripts for ${port}.`);
 
 		// const { metaIndex, Friendly, Baud, Buffer, autoConnectPort, portMuted } = this.SPJS.portMeta[port];
 		const portMeta = this.SPJS.portMeta[port];
@@ -3024,7 +3024,7 @@ define([ 'jquery' ], $ => ({
 
 		// Scan through the initScripts array for a match with the port information.
 		for (let i = 0; i < this.connectScripts.length; i++) {
-			console.log(`i: ${i}`);
+			// console.log(`i: ${i}`);
 
 			let misMatch = 0;
 			let scriptItem = this.connectScripts[i];
@@ -3032,7 +3032,7 @@ define([ 'jquery' ], $ => ({
 			Object.keys(scriptItem).forEach((key, index) => {
 			    // key: the name of the object key
 			    // index: the ordinal position of the key within the object
-				console.log(`key: ${key}`);
+				// console.log(`key: ${key}`);
 
 				// Check for a match if this is device info.
 				if (key !== 'script' && key !== 'pause') {
@@ -3051,7 +3051,7 @@ define([ 'jquery' ], $ => ({
 
 			// If there is no mis-matching info (ie. if a match was found), send the script.
 			if (!misMatch) {
-				console.groupEnd();
+				// console.groupEnd();
 
 				// Return so that the caller knows that init scripts were sent successfully.
 				return this.newportSendJson(port, { Data: scriptItem.script, Id: 'connect0', Pause: scriptItem.pause });
@@ -3060,7 +3060,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		return false;
 
@@ -3071,7 +3071,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { Cmd: "Open", Desc: "Got register/open on port.", Port: "COM10", IsPrimary: true, Baud: 115200, BufferType: "tinygg2" }
 
-		console.log(`SPJS -PortOpen-${gui.parseObject(data, 2)}`);
+		// console.log(`SPJS -PortOpen-${gui.parseObject(data, 2)}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3117,12 +3117,12 @@ define([ 'jquery' ], $ => ({
 		// If the port argument is 'SPJS', exit the method.
 		if (port === 'SPJS') return false;
 
-		console.groupCollapsed(`Port Connected: ${port}`);
+		// console.groupCollapsed(`Port Connected: ${port}`);
 		const that = this;
 
 		// If this port is already initiated (ie. this method was called redundantly), skip all DOM and object updates.
 		if (typeof this.consoleLog[port] != 'undefined' && this.consoleLog.openLogs.indexOf(port) !== -1) {
-			console.log(`portConnected was already called for this port.${gui.parseObject(this.consoleLog, 2)}`);
+			// console.log(`portConnected was already called for this port.${gui.parseObject(this.consoleLog, 2)}`);
 
 		// If this method was not called redundantly, update objects and DOM elements.
 		} else {
@@ -3136,7 +3136,7 @@ define([ 'jquery' ], $ => ({
 
 			// If this port's console log is visible, make the spjs' console log visible.
 			if (port === this.consoleLog.activeLog) {
-				// console.log("This port's console log was visible.");
+				// // console.log("This port's console log was visible.");
 				this.consoleLogChangeView('SPJS');
 			}
 
@@ -3177,7 +3177,7 @@ define([ 'jquery' ], $ => ({
 
 			// Build the console log DOM based on the openLogs array.
 			for (let i = this.consoleLog.openLogs.indexOf(port) + 1; i < this.consoleLog.openLogs.length; i++) {
-				// console.log("openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
+				// // console.log("openLogs[" + i + "]: " + that.consoleLog.openLogs[i]);
 				publish('/statusbar-widget/add', port, this.makePortUnSafe(port.replace(/fs-dev-fs-tty/i, '')), 'success', that.consoleLog.openLogs[i]);
 
 				$(`#${that.id} .console-log-panel .nav-tabs .list-tab-${that.consoleLog.openLogs[i]}`).before(consoleLogTabHtml);
@@ -3208,7 +3208,7 @@ define([ 'jquery' ], $ => ({
 			// Call a  resize on the DOM elements so that 'style="height: ---px;"' is added to the console log's DOM element to ensure that scroll bars are created properly..
 			this.resizeWidgetDom();
 
-			console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
+			// console.log(`openLogs: ${gui.parseObject(this.consoleLog.openLogs)}`);
 
 			// If this port's raw data buffer is undefined, define it.
 			if (typeof this.dataRecvBuffer[port] == 'undefined') {
@@ -3228,7 +3228,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		// If the port argument was passed as [array], run the portConnected method for the next element in the port array.
 		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portConnected(nextPort);
@@ -3249,14 +3249,14 @@ define([ 'jquery' ], $ => ({
 		// If the port argument is 'SPJS', exit the method.
 		if (port === 'SPJS') return false;
 
-		console.groupCollapsed(`Port Disconnected: ${port}`);
+		// console.groupCollapsed(`Port Disconnected: ${port}`);
 
 		let that = this;
 		const { removeLogOnClose } = this.consoleLog;
 
 		// If this port is already un-initiated (aka. this function was called redundantly), skip all DOM and object updates.
 		if (typeof this.consoleLog[port] == 'undefined' && !this.consoleLog.openLogs.includes(port)) {
-			console.log(`portDisconnected has already been called for this port.${gui.parseObject(this.consoleLog, 2)}`);
+			// console.log(`portDisconnected has already been called for this port.${gui.parseObject(this.consoleLog, 2)}`);
 
 		// If this method was not redundantly called, update objects and DOM elements.
 		} else {
@@ -3308,13 +3308,13 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			// console.log("openLogs: " + gui.parseObject(this.consoleLog.openLogs));
-			// console.log("openLogs: ", this.consoleLog);
-			// console.log("consoleLog.length: ", this.consoleLog.length);
+			// // console.log("openLogs: " + gui.parseObject(this.consoleLog.openLogs));
+			// // console.log("openLogs: ", this.consoleLog);
+			// // console.log("consoleLog.length: ", this.consoleLog.length);
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portDisconnected(nextPort);
 
@@ -3327,7 +3327,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { Cmd: "OpenFail", Desc: "Error opening port. The system cannot find the file specified.", Port: "COM69", Baud: 115200 }
 
-		console.log(`SPJS -PortOpenFail-\n  Cmd: ${Cmd}\n  Port: ${Port}\n  Baud: ${Baud}\n  Desc: ${Desc}`);
+		// console.log(`SPJS -PortOpenFail-\n  Cmd: ${Cmd}\n  Port: ${Port}\n  Baud: ${Baud}\n  Desc: ${Desc}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3359,7 +3359,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. {Cmd: "Close", Desc: "Got unregister/close on port.", Port: "COM10", Baud: 115200}
 
-		console.log(`SPJS -PortClose-\n  Cmd: ${data.Cmd}\n  Port: ${data.Port}\n  Baud: ${data.Baud}\n  Desc: ${data.Desc}`);
+		// console.log(`SPJS -PortClose-\n  Cmd: ${data.Cmd}\n  Port: ${data.Port}\n  Baud: ${data.Baud}\n  Desc: ${data.Desc}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3376,7 +3376,7 @@ define([ 'jquery' ], $ => ({
 			// FIXME: This is weird, the port doesnt autoconnect even though there is no code here.
 			this.deviceMeta[this.SPJS.portMeta[safePort].metaIndex].autoConnectPort = false;
 
-			console.log(`Clearing auto-connect on: ${Port}`);
+			// console.log(`Clearing auto-connect on: ${Port}`);
 
 		// If the port closed because of a SPJS command.
 		} else if (this.consoleLog.updateCmd('SPJS', { PartMsg: refCmd, Status: 'Executed' })) {
@@ -3399,8 +3399,8 @@ define([ 'jquery' ], $ => ({
 	},
 	sendPortInits(port) {
 
-		console.groupCollapsed('Sending init scripts to device.');
-		console.log(`Init scripts for ${port}.`);
+		// console.groupCollapsed('Sending init scripts to device.');
+		// console.log(`Init scripts for ${port}.`);
 
 		// const { metaIndex, Friendly, Baud, Buffer, autoConnectPort, portMuted } = this.SPJS.portMeta[port];
 		const meta = this.SPJS.portMeta[port];
@@ -3409,7 +3409,7 @@ define([ 'jquery' ], $ => ({
 		// Scan through the initScripts array for a match with the port information.
 		for (let i = 0; i < this.initScripts.length; i++) {
 
-			console.log(`i: ${i}`);
+			// console.log(`i: ${i}`);
 
 			const scriptItem = this.initScripts[i];
 			const scriptItemKeys = Object.keys(scriptItem);
@@ -3422,7 +3422,7 @@ define([ 'jquery' ], $ => ({
 				const keyItem = scriptItemKeys[j];
 				const keyItemValue = scriptItem[keyItem];
 
-				console.log(`keyItem: ${keyItem}`);
+				// console.log(`keyItem: ${keyItem}`);
 
 				if (keyItem !== 'script' && keyItem !== 'pause') {
 
@@ -3444,7 +3444,7 @@ define([ 'jquery' ], $ => ({
 			// If all the conditions of this script match, send this script to this port.
 			if (matchFound) {
 
-				console.groupEnd();
+				// console.groupEnd();
 
 				// Return so that the caller knows that init scripts were sent.
 				return this.newportSendJson(port, { Data: scriptItem.script, Id: 'init0', Pause: scriptItem.pause });
@@ -3453,7 +3453,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		return false;
 
@@ -3464,7 +3464,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. {Cmd: "Broadcast", Msg: "helloworld↵"}
 
-		console.log(`SPJS -Broadcast-\n  Cmd: ${Cmd}\n  Msg: ${Msg}`);
+		// console.log(`SPJS -Broadcast-\n  Cmd: ${Cmd}\n  Msg: ${Msg}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3478,7 +3478,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { "Cmd": "WipedQueue", "QCnt": 0, "Port": "COM10" }
 
-		console.log(`SPJS -WipedQueue-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Port: ${Port}`);
+		// console.log(`SPJS -WipedQueue-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Port: ${Port}`);
 
 		// Add the mess age to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3493,7 +3493,7 @@ define([ 'jquery' ], $ => ({
 		// Ex. { "Cmd": "Queued", "QCnt": 1, "P": "COM10", "Data": [{ "D": "\n", "Id": "startup1", "Pause": 0 }] }
 		// Ex. { "Cmd": "Queued", "QCnt": 2, "P": "COM10", "Data": [{ "D": "$sys\n", "Id": "console18", "Pause": 0 }, { "D": "{"ej":""}\n", "Id": "console18-part-2-2", "Pause": 0 }] }
 
-		console.log(`SPJS -QueuedJson-${gui.parseObject(data, 2)}`);
+		// console.log(`SPJS -QueuedJson-${gui.parseObject(data, 2)}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3523,7 +3523,7 @@ define([ 'jquery' ], $ => ({
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true }));
 
-			if (!matchFound) console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
+// 			if (!matchFound) // console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
 
 		}
 
@@ -3535,7 +3535,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { "Cmd": "Queued", "QCnt": 2, "Ids": [ "" ], "D": [ "!" ], "Port": "COM5" }
 
-		console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
+		// console.log(`SPJS -QueuedText-\n  Cmd: ${Cmd}\n  QCnt: ${QCnt}\n  Ids: %O\n  D: %O\n  Port: ${Port}`, Ids, D);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3565,7 +3565,7 @@ define([ 'jquery' ], $ => ({
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: D[i], Status: 'Queued', UpdateRelated: true }));
 
-			if (!matchFound) console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
+// 			if (!matchFound) // console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
 
 		}
 
@@ -3580,8 +3580,8 @@ define([ 'jquery' ], $ => ({
 		// Ex. { "Cmd": "Write", "QCnt": 0, "Id": "", "P": "COM10" } <- from send text instead of json.
 		// Ex. { "Cmd": "Write", "QCnt": 1, "Id": "", "P": "COM5" }
 
-		console.log(`SPJS -WriteJson-${gui.parseObject(data, 2)}`);
-		// console.log("SPJS -WriteJson-\n  Cmd: " + data.Cmd + "\n  QCnt: " + data.QCnt + "\n  Id: " + data.Id + "\n  Port: " + data.P);
+		// console.log(`SPJS -WriteJson-${gui.parseObject(data, 2)}`);
+		// // console.log("SPJS -WriteJson-\n  Cmd: " + data.Cmd + "\n  QCnt: " + data.QCnt + "\n  Id: " + data.Id + "\n  Port: " + data.P);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3604,7 +3604,7 @@ define([ 'jquery' ], $ => ({
 			// This is what i had the first time i wrote this code and left it in here cuz why not.
 			({ matchFound } = this.consoleLog.updateCmd(P, { Meta: 'portSendNoBuf', Status: 'Written', UpdateRelated: true }));
 
-			if (!matchFound) console.log('No match found searching for portSendNoBuf commands.');
+			if (!matchFound) // console.log('No match found searching for portSendNoBuf commands.');
 
 			return;
 
@@ -3632,7 +3632,7 @@ define([ 'jquery' ], $ => ({
 		// Ex. { "Cmd": "Complete", "Id": "console18-part-2-2", "P": "COM10" }
 		// Ex. { "Cmd": "CompleteFake", "Id": "", "P": "COM5" } <- from send text instead of json.
 
-		console.log(`SPJS -CompleteJson-\n  Cmd: ${Cmd}\n  Id: ${Id}\n  Port: ${P}`);
+		// console.log(`SPJS -CompleteJson-\n  Cmd: ${Cmd}\n  Id: ${Id}\n  Port: ${P}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3662,7 +3662,7 @@ define([ 'jquery' ], $ => ({
 
 		if (matchFound) return true;
 
-		console.log(`No match was found for Id: '${Id}'`);
+		// console.log(`No match was found for Id: '${Id}'`);
 
 		return false;
 
@@ -3677,7 +3677,7 @@ define([ 'jquery' ], $ => ({
 		// Ex. { "Error": "Could not parse send command: sendNoBuf" }
 		// Ex. { "Error": "We could not find the serial port /dev/ttyAMA0 that you were trying to apply the feedrate override to. This error is ok actually because it just means you have not opened the serial port yet." }
 
-		console.log(`SPJS -ErrorText-\n  Error: ${Error}`);
+		// console.log(`SPJS -ErrorText-\n  Error: ${Error}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -3688,7 +3688,7 @@ define([ 'jquery' ], $ => ({
 		if (Error.includes(':')) {
 
 			refMsg = Error.substring(Error.indexOf(':') + 2);
-			console.log(`refMsg: '${refMsg}'`);
+			// console.log(`refMsg: '${refMsg}'`);
 
 			this.consoleLog.updateCmd('SPJS', { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
@@ -3699,7 +3699,7 @@ define([ 'jquery' ], $ => ({
 			let b = Error.indexOf('that you were trying') - 1;
 
 			refMsg = Error.substring(a, b);
-			console.log(`refMsg: '${refMsg}'`);
+			// console.log(`refMsg: '${refMsg}'`);
 
 			this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
@@ -3718,7 +3718,7 @@ define([ 'jquery' ], $ => ({
 
 		const { Cmd } = data;
 
-		console.log('SPJS -ErrorJson-\n ', data);
+		// console.log('SPJS -ErrorJson-\n ', data);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -3732,7 +3732,7 @@ define([ 'jquery' ], $ => ({
 
 		const { Label, Desc } = this.lookupStatusCode(er.st);
 
-		console.log('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${Desc ? `\n  Desc: ${Desc}` : ''}`);
+		// console.log('SPJS -SystemAlarm-\n ', data, `\n  #${er.st} - ${Label}${Desc ? `\n  Desc: ${Desc}` : ''}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Error' });
@@ -3762,7 +3762,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { "Cmd": "FeedRateOverride", "Desc": "Successfully set the feedrate override.", "Port": "COM10", "FeedRateOverride": 3, "IsOn": true }
 
-		console.log(`SPJS -FeedRateOverride-\n  Desc: ${Desc}\n  Port: ${Port}\n  FeedRateOverride: ${FeedRateOverride}\n  IsOn: ${IsOn}\n  Cmd: ${Cmd}`);
+		// console.log(`SPJS -FeedRateOverride-\n  Desc: ${Desc}\n  Port: ${Port}\n  FeedRateOverride: ${FeedRateOverride}\n  IsOn: ${IsOn}\n  Cmd: ${Cmd}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: Cmd });
@@ -3798,7 +3798,7 @@ define([ 'jquery' ], $ => ({
 
 		// If there is at least one full line of raw data in the data buffer and this port is open, parse the data in the raw data buffer.
 		if (this.dataRecvBuffer[safePort].match(/\n/) && this.consoleLog.openLogs.includes(safePort)) {
-			// console.log('  ...parsing raw data.');
+			// // console.log('  ...parsing raw data.');
 			this.parseRawPortData(safePort);
 
 		}
@@ -3807,7 +3807,7 @@ define([ 'jquery' ], $ => ({
 	parseRawPortData(port) {
 		// This is a seperate method from onRawPortData so that it can be called after this port has been opened if raw data was received before it was opened.
 
-		console.groupCollapsed(`Parsing raw port data.\n  Port: ${port}`);
+		// console.groupCollapsed(`Parsing raw port data.\n  Port: ${port}`);
 
 		// See if received newline.
 		while (/\n/.test(this.dataRecvBuffer[port])) {
@@ -3821,11 +3821,11 @@ define([ 'jquery' ], $ => ({
 
 			line = line.replace(/\t/g, '').replace(/\r/g, '').replace(/\v/g, '').replace(/\f/g, '');
 
-			console.log(`line character length: ${line.length}\ncharCode: ${line.charCodeAt(0)}`);
+			// console.log(`line character length: ${line.length}\ncharCode: ${line.charCodeAt(0)}`);
 
 			if (line === '') {
 
-				console.log('This line is an empty string.');
+				// console.log('This line is an empty string.');
 
 				continue;
 
@@ -3844,7 +3844,7 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			console.log(`line: ${line}`);
+			// console.log(`line: ${line}`);
 
 			// Add the raw data to the respective port's console log.
 			this.consoleLog.appendMsg(port, { Msg: line, Type: 'RawPortData' });
@@ -3863,13 +3863,13 @@ define([ 'jquery' ], $ => ({
 				// Ex. "tinyg [mm] err: Unrecognized command or config name: helloworld \n".
 				if (/tinyg \[\w{2}\] err:/g.test(line)) {
 
-					console.log('Got error message.');
+					// console.log('Got error message.');
 
 					const a = line.indexOf(':', 15) + 2;
 					const b = line.length - 1;
 					const refMsg = line.substring(a, b);
 
-					console.log(`RefMsg: '${refMsg}'`);
+					// console.log(`RefMsg: '${refMsg}'`);
 
 					const { matchId } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Error', Comment: 'Syntax Error' });
 
@@ -3892,7 +3892,7 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			console.log('lineObj:', lineObj);
+			// console.log('lineObj:', lineObj);
 
 			if (lineObj.sr || (lineObj.r && lineObj.r.sr)) {
 
@@ -3960,12 +3960,12 @@ define([ 'jquery' ], $ => ({
 
 				const [ pv, sc, rx ] = lineObj.f;
 
-				console.log(`Footer:\n  pv: ${pv}\n  sc: ${sc}\n  rx: ${rx}`);
+				// console.log(`Footer:\n  pv: ${pv}\n  sc: ${sc}\n  rx: ${rx}`);
 
 				// If there is a warning or error status code.
 				if (sc) {
 
-					console.log('sc !== 0');
+					// console.log('sc !== 0');
 
 					const { Code, Label, Desc } = this.lookupStatusCode(sc);
 					const { logBotOnStatusCode } = this.consoleLog;
@@ -3974,28 +3974,28 @@ define([ 'jquery' ], $ => ({
 					let matchIndex;
 					let matchLine;
 
-					console.log('lineObj.r:', lineObj.r);
-					console.log(`typeof lineObj.r: ${typeof lineObj.r}`);
-					console.log(`StatusMeta:\n  Code: ${Code}\n  Label: ${Label}\n  Desc: ${Desc}`);
+					// console.log('lineObj.r:', lineObj.r);
+					// console.log(`typeof lineObj.r: ${typeof lineObj.r}`);
+					// console.log(`StatusMeta:\n  Code: ${Code}\n  Label: ${Label}\n  Desc: ${Desc}`);
 
 					if (lineObj.r && lineObj.r.err) {  // If the lineObj data was an error message.
 
 						// Ex. { "r": {"err":"{sv}"}, "f": [1,108,4] }.
 						const { err: refMsg } = lineObj.r;
 
-						console.log('Got error data.');
-						console.log(`  RefMsg: '${refMsg}'`);
+						// console.log('Got error data.');
+						// console.log(`  RefMsg: '${refMsg}'`);
 
 						let Comment = Code ? Label : 'Syntax Error';
 
 						({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Msg: refMsg, Status: 'Warning', Comment, UpdateRelated: true }));
 
-						if (!matchFound)
-							console.log('Found no match. idk wtf to do.');
+						// if (!matchFound)
+							// console.log('Found no match. idk wtf to do.');
 
 					} else if (typeof lineObj.r === 'string') {
 
-						console.log(`lineObj.r is a string\n  r: ${lineObj.r}`);
+						// console.log(`lineObj.r is a string\n  r: ${lineObj.r}`);
 
 						const { r: refMsg } = lineObj;
 						// let Comment = statusMeta.Code ? statusMeta.Label : '';
@@ -4006,7 +4006,7 @@ define([ 'jquery' ], $ => ({
 						// If no matching message was found and there was a footer message, look for a message with a matching length to the rx received by the device.
 						if (!matchFound) {
 
-							console.log('  No matching message was found. Searching for matching message using rx received by the device.');
+							// console.log('  No matching message was found. Searching for matching message using rx received by the device.');
 
 							// NOTE: This is probably not a good idea cuz it may highlight the incorrect message as having an error since the search criteria is very vague.
 							({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: `${Label} length`, UpdateRelated: true }));
@@ -4015,14 +4015,14 @@ define([ 'jquery' ], $ => ({
 
 					} else if (typeof lineObj.r === 'object' && Object.keys(lineObj.r).length === 0) {
 
-						console.log('lineObj.r is an empty object.');
+						// console.log('lineObj.r is an empty object.');
 
 						// ({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 						({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Length: rx, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
 					} else if (typeof lineObj.r === 'object') {
 
-						console.log('lineObj.r is an object.');
+						// console.log('lineObj.r is an object.');
 
 						let rStr = JSON.stringify(lineObj.r);
 						let refMsg = rStr.substring(0, rStr.indexOf(':')).replace(/\W/g, '');
@@ -4035,7 +4035,7 @@ define([ 'jquery' ], $ => ({
 
 						}
 
-						console.log(`refMsg: ${refMsg}`);
+						// console.log(`refMsg: ${refMsg}`);
 
 						({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { Msg: rStr, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
@@ -4043,12 +4043,12 @@ define([ 'jquery' ], $ => ({
 
 						matchFound || ({ matchFound, matchIndex, matchLine } = this.consoleLog.updateCmd(port, { PartMsg: refMsg, Status: 'Warning', Comment: Label, UpdateRelated: true }));
 
-						if (!matchFound)
-							console.log('No match was found for the partMsg and msg length given.');
+						// if (!matchFound)
+							// console.log('No match was found for the partMsg and msg length given.');
 
 					} else {
 
-						console.log('lineObj.r is unrecognized.');
+						// console.log('lineObj.r is unrecognized.');
 
 						debug.error('Make lineObj.r recognized and do something with it.');
 
@@ -4072,7 +4072,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 	},
 	onQueueCnt(data) {
@@ -4081,7 +4081,7 @@ define([ 'jquery' ], $ => ({
 		const { dataSendBuffer } = this;
 		const { queueCount, pauseBufferedSend, userPauseBufferedSend, pauseOnQueueCount, resumeOnQueueCount } = this.SPJS;
 
-		console.log(`SPJS -QueueCnt-\n  QCnt: ${QCnt}`);
+		// console.log(`SPJS -QueueCnt-\n  QCnt: ${QCnt}`);
 
 		this.SPJS.queueCount = Number(QCnt);  // Update the queue count
 		publish('connection-widget/queue-count', this.SPJS.queueCount);  // Publish the queue count so that other widgets can use it
@@ -4114,7 +4114,7 @@ define([ 'jquery' ], $ => ({
 
 		const { Addr, Announce, Widget, JsonTag, DeviceId } = data;
 
-		console.log(`SPJS -Cayenn-\n  Addr: ${JSON.stringify(Addr)}\n  Announce: ${Announce}\n  Widget: ${Widget}\n  JsonTag: ${JsonTag}\n  DeviceId: ${DeviceId}`);
+		// console.log(`SPJS -Cayenn-\n  Addr: ${JSON.stringify(Addr)}\n  Announce: ${Announce}\n  Widget: ${Widget}\n  JsonTag: ${JsonTag}\n  DeviceId: ${DeviceId}`);
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'Cayenn' });
@@ -4126,7 +4126,7 @@ define([ 'jquery' ], $ => ({
 
 		const { gc } = data;
 
-		console.log(`SPJS -GarbageCollection-\n  Status: ${gc}`);
+		// console.log(`SPJS -GarbageCollection-\n  Status: ${gc}`);
 
 		const statusMeta = {
 			starting: 'Written',
@@ -4145,12 +4145,12 @@ define([ 'jquery' ], $ => ({
 
 		const { Alloc, TotalAlloc, Sys, Lookups, Mallocs, Frees, HeapAlloc, HeapSys, HeapIdle, HeapInuse, HeapReleased, HeapObjects, StackInuse, StackSys, MSpanInuse, MSpanSys, MCacheInuse, MCacheSys, BuckHashSys, GCSys, OtherSys, NextGC, LastGC, PauseTotalNS, PauseNS, PauseEnd, NumGC, GCCPUFraction, EnableGC, DebugGC, BySize } = data;
 
-		console.log('SPJS -GarbageCollectionHeap-');
+		// console.log('SPJS -GarbageCollectionHeap-');
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'GarbageHeap' });
 
-		console.log(`GCCPUFraction: ${(GCCPUFraction * 100).toFixed(10)}%`);
+		// console.log(`GCCPUFraction: ${(GCCPUFraction * 100).toFixed(10)}%`);
 
 	},
 	onExecRuntimeStatus(data) {
@@ -4164,7 +4164,7 @@ define([ 'jquery' ], $ => ({
 		// The ExecRuntimeStatus message is a result of calling the 'execruntime' command.
 		// Ex. { "ExecRuntimeStatus": "Done", "OS": "windows", "Arch": "amd64", "Goroot": "/usr/local/go", "NumCpu": 4 }
 
-		console.log('SPJS -ExecRuntimeStatus-');
+		// console.log('SPJS -ExecRuntimeStatus-');
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'ExecRuntimeStatus' });
@@ -4186,7 +4186,7 @@ define([ 'jquery' ], $ => ({
 		// Ex. { "ExecStatus": "Progress", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
 		// Ex. { "ExecStatus": "Done", "Id": "", "Cmd": "C:\\WINDOWS\\system32\\cmd.exe", "Args": [ "echo HelloWorld" ], "Output": "HelloWorld" }
 
-		console.log('SPJS -ExecStatus-');
+		// console.log('SPJS -ExecStatus-');
 
 		// Add the message to the SPJS log.
 		this.consoleLog.appendMsg('SPJS', { Msg: data, Type: 'ExecStatus' });
@@ -4215,7 +4215,7 @@ define([ 'jquery' ], $ => ({
 
 		// Ex. { "Error" : "Problem decoding json. giving up. json: {"P":"COM11","Data":[{"D":"Hi ","Id":"mdi-com11log0"}]}, err:invalid character '\n' in string literal" }
 
-		console.group(`SPJS -ParseError-\n  Error: ${Error}`);
+		// console.group(`SPJS -ParseError-\n  Error: ${Error}`);
 
 		if (data.includes('Problem decoding json. giving up. json: ') && data.includes(', err:')) {
 
@@ -4223,20 +4223,20 @@ define([ 'jquery' ], $ => ({
 			const b = data.indexOf(', err:');
 
 			const refMsg = data.substring(a, b);
-			console.log(`refMsg: ${refMsg}`);
+			// console.log(`refMsg: ${refMsg}`);
 
 			let { matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: refMsg, Status: 'Error', Comment: 'JSON Error' });
 
 			// If no match was found, try to parse the Id from the error message so that it can be used to try and find the responsible message in the log.
 			if (!matchFound && data.includes('"Id":"') && (/\"[\}\]]+,/).test(data)) {
 
-				console.log('Match not found.\nTrying to get Id from error report.');
+				// console.log('Match not found.\nTrying to get Id from error report.');
 
 				const c = data.indexOf('"Id":"') + 6;
 				const d = data.indexOf(data.match(/\"[\}\]]+,/)[0]);
 				const refId = data.substring(c, d);
 
-				console.log(`refId: ${refId}`);
+				// console.log(`refId: ${refId}`);
 
 				({ matchFound } = this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Error', Comment: 'JSON Error' }));
 
@@ -4265,7 +4265,7 @@ define([ 'jquery' ], $ => ({
 
 					const refId = data.substring(c, d);
 
-					console.log(`refId: ${refId}`);
+					// console.log(`refId: ${refId}`);
 
 					this.consoleLog.updateCmd('SPJS', { Id: refId, Status: 'Error', Comment: 'JSON Error' });
 
@@ -4275,7 +4275,7 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 	},
 	makePortSafe(unsafePortName) {
@@ -4287,7 +4287,7 @@ define([ 'jquery' ], $ => ({
 
 		// If the port is not in the portList object, try to find a match.
 		if (safePortName && !portList[safePortName]) {
-			// console.log(`The safePortName: '${safePortName}' not found in the serial ports list.`);
+			// // console.log(`The safePortName: '${safePortName}' not found in the serial ports list.`);
 
 			// Loop through each port in the portList object.
 			for (let port in portList) {
@@ -4296,7 +4296,7 @@ define([ 'jquery' ], $ => ({
 				if (port.toLowerCase() === safePortName.toLowerCase()) {
 
 					safePortName = port;
-					// console.log(`The safePortName: '${safePortName}' not found in the serial ports list.\nChanged safePortName to: '${safePortName}'.`);
+					// // console.log(`The safePortName: '${safePortName}' not found in the serial ports list.\nChanged safePortName to: '${safePortName}'.`);
 
 					break;
 
@@ -4337,7 +4337,7 @@ define([ 'jquery' ], $ => ({
 	 */
 	newspjsSend({ Msg, Id, IdPrefix, Type = 'Command', Status, Comment, Related, Meta = [], recursionDepth = 0 }) {
 
-		console.log(`SPJS Send\n  Msg: ${Msg}`);
+		// console.log(`SPJS Send\n  Msg: ${Msg}`);
 
 		// If the Meta argument is not an array, split it into an array.
 		if (!Array.isArray(Meta)) {
@@ -4348,7 +4348,7 @@ define([ 'jquery' ], $ => ({
 		// If the SPJS is not open, abort sending the command.
 		if (this.SPJS.wsState !== 'open') {
 
-			console.log('The SPJS is not open.');
+			// console.log('The SPJS is not open.');
 
 			Comment = Comment ? `${Comment}] [SPJS Closed` : 'SPJS Closed';
 
@@ -4366,12 +4366,12 @@ define([ 'jquery' ], $ => ({
 			const { matchFound, matchIndex, matchTime } = this.consoleLog.findItem('SPJS', { Msg: 'list', IndexMap: this.consoleLog.SPJS.verifyMap });
 			const deltaTime = matchFound && Date.now() - matchTime;
 
-			// console.log(`matchFound: ${matchFound}\nmatchTime: ${matchTime}\ndeltaTime: ${deltaTime}\nstaleListCmdLimit: ${this.consoleLog.staleListCmdLimit}`);
+			// // console.log(`matchFound: ${matchFound}\nmatchTime: ${matchTime}\ndeltaTime: ${deltaTime}\nstaleListCmdLimit: ${this.consoleLog.staleListCmdLimit}`);
 
 			// If a 'list' command was found in the log and it is older than staleListCmdLimit, flag that command as Error and try sending the list command again.
 			if (matchFound && Date.now() - matchTime > staleListCmdLimit) {
 
-				console.log('Found stale list command.');
+				// console.log('Found stale list command.');
 
 				this.consoleLog.updateCmd('SPJS', { Index: matchIndex, Status: 'Error', Comment: 'Stale' });
 
@@ -4385,7 +4385,7 @@ define([ 'jquery' ], $ => ({
 				return setTimeout(() => this.newspjsSend({ Msg: 'list', Comment, Related, Meta, recursionDepth }), 1000);
 
 			} else if (matchFound) {
-				console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
+				// console.log('The SPJS is already processing a request for the portList.\nRequest for list terminated.');
 
 				return false;
 
@@ -4402,7 +4402,7 @@ define([ 'jquery' ], $ => ({
 		// Since there was an error sending the command, show the error in the log and return false.
 		} catch (err) {
 
-			console.log(`Could not send command to the SPJS.\nError: ${err}`);
+			// console.log(`Could not send command to the SPJS.\nError: ${err}`);
 
 			this.consoleLog.updateCmd('SPJS', { Id: cmdId, Status: 'Error', Comment: 'SPJS Closed' });
 
@@ -4482,7 +4482,7 @@ define([ 'jquery' ], $ => ({
 		// Arg. Msg [string] - Can be used instead of Data for single line commands.
 		// Arg. Id [string] - If there are multiple msgs and the id ends with a number, the number will be incremented automatically for each msg. Otherwise, a suffix (ie. '-0', '-1', '-2', ... '-n') will be added to the end of each id.
 
-		console.groupCollapsed('newportSendJson');
+		// console.groupCollapsed('newportSendJson');
 
 		// If the Meta argument is not an array, split it into an array.
 		if (!Array.isArray(Meta)) {
@@ -4516,7 +4516,7 @@ define([ 'jquery' ], $ => ({
 				if (!idSuffix)
 					idSuffix = '0';
 
-				console.log(`idBase: ${idBase}\nidSuffix: ${idSuffix}`);
+				// console.log(`idBase: ${idBase}\nidSuffix: ${idSuffix}`);
 
 			} else {
 
@@ -4535,7 +4535,7 @@ define([ 'jquery' ], $ => ({
 				// Eg. Data: [ { Msg:msg0, Id:id0, Pause:pause0 }, { Msg:msg1, Id:id1, Pause:pause1 }, ..., { Msg:msgn, Id:idn, Pause:pausen } ]
 				if (typeof Data[i] == 'object') {
 
-					console.log('Data argument is [array[object[string/int]]]');
+					// console.log('Data argument is [array[object[string/int]]]');
 					// Parse item msg.
 					item.Msg = Data[i].Msg;
 
@@ -4550,7 +4550,7 @@ define([ 'jquery' ], $ => ({
 						const idItemZeros = idDeltaLen > 0 ? idDeltaLen : 0;
 
 						item.Id = `${idBase}${'0'.repeat(idItemZeros)}${idItemSuffix}`;
-						console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDeltaLen: ${idDeltaLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
+						// console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDeltaLen: ${idDeltaLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
 
 					}
 
@@ -4563,14 +4563,14 @@ define([ 'jquery' ], $ => ({
 				// The Data argument is [array[string]].
 				// Eg. Data: [ msg0, msg1, ..., msgn ], Id: id0, Pause: pause0
 				} else if (typeof Data[i] === 'string') {
-					console.log('Data argument is [array[string/int]]');
+					// console.log('Data argument is [array[string/int]]');
 
 					let idItemSuffix = (Number(idSuffix) + i).toString();
 					let idDeltaLen = idSuffix.length - idItemSuffix.length;
 					let idItemZeros = idDeltaLen > 0 ? idDeltaLen : 0;
 
 					item.Id = `${idBase}${'0'.repeat(idItemZeros)}${idItemSuffix}`;
-					console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDeltaLen: ${idDeltaLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
+					// console.log(`i: ${i}\n  idItemSuffix: ${idItemSuffix}\n  idDeltaLen: ${idDeltaLen}\n  idItemZeros: ${idItemZeros}\n  id: ${item.Id}`);
 
 				}
 				// cmdBuffer[i].Meta.push('portSendJson', `${ i + 1 }of${Data.length}`);
@@ -4581,12 +4581,12 @@ define([ 'jquery' ], $ => ({
 		// Eg. Data: msg, Id: id, ...etc.
 		} else if (typeof Data == 'string') {
 
-			console.log('Data argument is a string.');
+			// console.log('Data argument is a string.');
 			// console.error('Id argument was omitted.\n  Id:', Id);
 
 			cmdBuffer.push({ Msg: Data, Id, IdPrefix, Pause, Status, Comment, Meta: [ 'portSendJson', '1of1' ] });
 
-			console.log('cmdBuffer:', cmdBuffer);
+			// console.log('cmdBuffer:', cmdBuffer);
 
 		} else {
 			console.error('Did not receive a valid Data argument.\n  Data:', Data);
@@ -4630,11 +4630,11 @@ define([ 'jquery' ], $ => ({
 
 		// Send the message to the SPJS. If there is an error sending the command to the SPJS, the status of the message in the port's log will be automatically changed.
 		if (!this.newspjsSend({ Msg: cmd, Id: spjsId, Status, Comment, Related: { Port: port, Id: cmdIds }, Meta: [ 'portSendJson' ] })) {
-			console.groupEnd();
+			// console.groupEnd();
 			return false;
 		}
 
-		console.groupEnd();
+		// console.groupEnd();
 
 		// Return true to indicate that the command was sent successfully.
 		return spjsId;
@@ -4873,7 +4873,7 @@ define([ 'jquery' ], $ => ({
 				let unsafePortName = this.makePortUnSafe(portName);
 
 				let refStr = new RegExp(unsafePortName, 'gi');
-				// console.log('refStr:', refStr);
+				// // console.log('refStr:', refStr);
 
 				Msg = Msg.replace(refStr, unsafePortName);
 
@@ -4888,7 +4888,7 @@ define([ 'jquery' ], $ => ({
 				let [ msgOperation, msgPort, ...msg ] = Msg.split(' ');
 				msg = msg.join(' ');
 
-				console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
+				// console.log('msgOperation:', msgOperation, '\nmsgPort:', msgPort, '\nmsg:', msg, `\nmsg: '${msg}'`);
 
 				const safeMsgPort = msgPort ? this.makePortSafe(msgPort) : undefined;
 
@@ -4899,14 +4899,14 @@ define([ 'jquery' ], $ => ({
 				if (cmdId && msg && safeMsgPort && this.consoleLog.openLogs.includes(safeMsgPort)) {
 					this.consoleLog.appendMsg(safeMsgPort, { Msg: msg, Id: cmdId, Type: 'MdiCommand', Meta: [ 'portSendNoBuf' ], Status: 'Sent' });
 
-					console.log('Added message to related port.');
+					// console.log('Added message to related port.');
 
 				// NOTE: The following are intended for debugging purposes only.
 				} else {
-					cmdId || console.log('!cmdId', cmdId);
-					msg || console.log('!msg', msg);
-					safeMsgPort || console.log('!safeMsgPort', safeMsgPort);
-					this.consoleLog.openLogs.includes(safeMsgPort) || console.log('!this.consoleLog.openLogs.includes(safeMsgPort)', this.consoleLog.openLogs.includes(safeMsgPort));
+					// cmdId || // console.log('!cmdId', cmdId);
+					// msg || // console.log('!msg', msg);
+					// safeMsgPort || // console.log('!safeMsgPort', safeMsgPort);
+					// this.consoleLog.openLogs.includes(safeMsgPort) || console.log('!this.consoleLog.openLogs.includes(safeMsgPort)', this.consoleLog.openLogs.includes(safeMsgPort));
 
 				}
 
@@ -4984,7 +4984,7 @@ define([ 'jquery' ], $ => ({
 
 		let inputData = $(consoleInputDom).val();
 
-		console.log(`Parsing console log input: '${inputData}'`);
+		// console.log(`Parsing console log input: '${inputData}'`);
 
 		this.mdiSend(port, { Msg: inputData });
 
@@ -5024,10 +5024,10 @@ define([ 'jquery' ], $ => ({
 		if (portLog.inputStatus === status) return false;
 
 		if (status == 'error') {
-			console.log('Console log input error.');
+			// console.log('Console log input error.');
 
 			let errorData = portLog.history.shift();
-			console.log(`errorData: ${errorData}`);
+			// console.log(`errorData: ${errorData}`);
 
 			portLog.value = errorData;
 			portLog.historyRecallIndex = null;

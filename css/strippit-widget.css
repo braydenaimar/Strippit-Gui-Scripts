@@ -1,12 +1,5 @@
 /* Strippit Widget CSS */
 
-.bg-success {
-	background-color: #a5f5a5;
-}
-.bg-danger {
-	background-color: #ff8b87;
-}
-
 #strippit-widget {
 	zoom: 1.4;
     transform-origin: 0 0;
@@ -199,13 +192,11 @@
 	top: 115px;
 	left: 35px;
 	width: 210px;
-	/*border: 1px dashed blue;*/
 }
 #strippit-savepos div.btn-header {
 	position: absolute;
 	top: 0;
 	width: 100%;
-	/*border: 1px dashed red;*/
 }
 #strippit-savepos div.step-btns {
 	position: absolute;
@@ -220,52 +211,24 @@
 	left: 100%;
 	width: 150px;
 }
-#strippit-savepos div.left-btns,
-#strippit-savepos div.middle-left-btns,
-#strippit-savepos div.middle-right-btns,
-#strippit-savepos div.right-btns {
+#strippit-savepos .position-btns {
 	position: absolute;
 	top: 40px;
-	width: 33%;
 }
-#strippit-savepos .left-btns .btn,
-#strippit-savepos .middle-left-btns .btn,
-#strippit-savepos .middle-right-btns .btn,
-#strippit-savepos .right-btns .btn {
+#strippit-savepos .position-btns .btn {
 	border: dashed;
-	width: 64%;
-	margin-top: 10px;
-	margin-bottom: 0;
 	color: #444444;
-	/*color: #e9e9e9;*/
-	/* margin-right: 10px; */
 	text-align: center;
-	padding: 6px 0px;
+	width: 43px;
+	padding: 5px 0px;
+	margin: 10px 5px 0 0;
 }
-#strippit-savepos div.left-btns {
-	left: 0;
-}
-#strippit-savepos div.middle-left-btns {
-	left: 25%;
-}
-#strippit-savepos div.middle-right-btns {
-	left: 50%;
-}
-#strippit-savepos div.right-btns {
-	left: 75%;
-}
-#strippit-savepos div.left-btns span.btn.slot-active,
-#strippit-savepos div.middle-left-btns span.btn.slot-active,
-#strippit-savepos div.middle-right-btns span.btn.slot-active,
-#strippit-savepos div.right-btns span.btn.slot-active {
+#strippit-savepos .position-btns span.btn.slot-active {
 	border: solid;
 	background-color: #a5f5a5;
 	color: #444444;
 }
-#strippit-savepos div.left-btns .btn.slot-filled,
-#strippit-savepos div.middle-left-btns .btn.slot-filled,
-#strippit-savepos div.middle-right-btns .btn.slot-filled,
-#strippit-savepos div.right-btns .btn.slot-filled {
+#strippit-savepos .position-btns .btn.slot-filled {
 	background-color: #f5a5f5;
 	color: #444444;
 }

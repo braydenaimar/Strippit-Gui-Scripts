@@ -93,8 +93,7 @@ define([ 'jquery' ], $ => ({
 
 	initBody() {
 
-		const { name, id } = this;
-		const { posMax } = this.savepos;
+		const { name, id, savePosition } = this;
 
 		debug.group(`${this.name}.initBody()`);
 
@@ -106,10 +105,6 @@ define([ 'jquery' ], $ => ({
 
 		this.initButtons();
 		this.initKeyboardShortcuts();
-
-		for (let i = 0; i < posMax; i++)  // Initialize the array for saving positions
-			this.savepos.savedPos.push(null);
-
 		publish('/main/widget-loaded', this.id);
 
 		setTimeout(() => {  // Wait for the DOM to load before changing DOM elements
@@ -123,6 +118,7 @@ define([ 'jquery' ], $ => ({
 
 			}
 
+			savePosition.initialize();
 			this.updateDroLimits();
 
 		}, 1000);
@@ -138,7 +134,7 @@ define([ 'jquery' ], $ => ({
 
 			// inch - G20
 			// mm - G21
-			debug.log('Button -in/mm-');
+			// debug.log('Button -in/mm-');
 			const Msg = (unit === 'inch') ? 'G21' : 'G20';
 
 			if (port)  // If got a valid port
@@ -149,8 +145,7 @@ define([ 'jquery' ], $ => ({
 		$('#strippit-feedstop').on('click', 'span.btn', () => {  // Initialize the Feedstop button
 
 			const { port } = this;
-
-			debug.log('Button -Feedstop-');
+			// debug.log('Button -Feedstop-');
 
 			if (port) {  // If got a valid port
 
@@ -168,57 +163,56 @@ define([ 'jquery' ], $ => ({
 
 		$('#strippit-dro').on('click', 'span.btn', (evt) => {  // Initialize the DRO buttons
 
-			const btnData = $(evt.currentTarget).attr('btn-data');
+			const { btnSignal, btnData } = this.getButtonData(evt);
 			this.setAxis(btnData);
 
 		});
 
 		$('#strippit-savepos').on('click', 'span.btn', (evt) => {  // Initialize the Save Position buttons
 
-			const { port } = this;
-			const btnSignal = $(evt.currentTarget).attr('btn-signal');
-			const btnData = $(evt.currentTarget).attr('btn-data');
+			const { port, savePosition } = this;
+			const { btnSignal, btnData } = this.getButtonData(evt);
 
 			if (btnSignal === 'control') {
 
 				if (btnData === 'prev') {
 
-					this.savepos.setPrevPos(port);
+					savePosition.setPrevPos(port);
 
 				} else if (btnData === 'next') {
 
-					this.savepos.setNextPos(port);
+					savePosition.setNextPos(port);
 
 				} else if (btnData === 'save') {
 
-					this.savepos.saveFunc('toggle');
-					this.savepos.deleteFunc('off');
+					savePosition.saveFunc('toggle');
+					savePosition.deleteFunc('off');
 
 				} else if (btnData === 'delete') {
 
-					this.savepos.saveFunc('off');
-					this.savepos.deleteFunc('toggle');
+					savePosition.saveFunc('off');
+					savePosition.deleteFunc('toggle');
 
 				} else if (btnData === 'clear') {
 
-					this.savepos.clearAll();
+					savePosition.clearAll();
 
 				}
 
 
 			} else if (btnSignal === 'position') {  // If a position slot was selected
 
-				const { machPosition, port } = this;
-				const { saveSelection, deleteSelection } = this.savepos;
+				const { machPosition, port, savePosition } = this;
+				const { saveSelection, deleteSelection } = savePosition;
 
 				if (saveSelection)
-					this.savepos.savePos(Number(btnData), machPosition.x);
+					savePosition.savePosition(Number(btnData), machPosition.x);
 
 				else if (deleteSelection)
-					this.savepos.deletePos(Number(btnData));
+					savePosition.deletePos(Number(btnData));
 
 				else
-					this.savepos.setPos(port, Number(btnData));
+					savePosition.setPos(port, Number(btnData));
 
 			}
 
@@ -227,14 +221,10 @@ define([ 'jquery' ], $ => ({
 		$('.strippit-die-size').on('click', 'span.btn', (evt) => {  // Initialize the Calculator buttons
 
 			const { dieSize, dieMetaData } = this;
-			const btnSignal = $(evt.currentTarget).attr('btn-signal');
-			const btnData = $(evt.currentTarget).attr('btn-data');
+			const { btnSignal, btnData } = this.getButtonData(evt);
 
-			if (dieSize === '') {  // If selecting the die size for the first time
-
-				$('.overlay').hide();
-
-			}
+			if (dieSize === '')  // If selecting the die size for the first time
+				$('.overlay').hide();  // Hide the overlay to show the application
 
 			if (typeof dieMetaData[btnData] == 'undefined')  // If the die size is not valid
 				return false;
@@ -260,8 +250,7 @@ define([ 'jquery' ], $ => ({
 
 		$('#strippit-calc').on('click', 'span.btn', (evt) => {  // Initialize the Calculator buttons
 
-			const btnSignal = $(evt.currentTarget).attr('btn-signal');
-			const btnData = $(evt.currentTarget).attr('btn-data');
+			const { btnSignal, btnData } = this.getButtonData(evt);
 
 			if (btnSignal === 'function')  // If a function button was pressed (eg. plus/minus, clear, backspace, add, etc.)
 				this.calc.uiFunction(btnData);
@@ -269,13 +258,21 @@ define([ 'jquery' ], $ => ({
 			else if (btnSignal === 'number')
 				this.calc.uiNumber(btnData);
 
-
 		});
+
+	},
+	getButtonData(evt) {
+
+		const $target = $(evt.currentTarget);
+		const btnSignal = $target.attr('btn-signal');
+		const btnData = $target.attr('btn-data');
+
+		return { btnSignal, btnData };
 
 	},
 	initKeyboardShortcuts() {
 
-		Mousetrap.bind('v', () => this.savepos.setNextPos(this.port));  // Advance to next saved position on punch
+		Mousetrap.bind('v', () => this.savePosition.setNextPos(this.port));  // Advance to next saved position on punch
 
 		Mousetrap.bind([ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this.keyboardShortcuts.bind(this));
 		Mousetrap.bind([ 'backspace', 'del', '.' ], this.keyboardShortcuts.bind(this));
@@ -369,7 +366,7 @@ define([ 'jquery' ], $ => ({
 
 	recvPortList({ PortList, PortMeta, Diffs }) {
 
-		debug.log('Got serial port list, portMeta, and diffs.');
+		// debug.log('Got serial port list, portMeta, and diffs.');
 
 		this.portList = PortList;
 		this.portMeta = PortMeta;
@@ -385,21 +382,21 @@ define([ 'jquery' ], $ => ({
 	},
 	recvPortData(port, { Msg, Data }) {  // The recvPortData method receives port data from devices on the SPJS
 
-		debug.log(`Got data from '${port}':\nLine: ${Msg}\nData: ${Data}\nData:`, Data);
+		// // debug.log(`Got data from '${port}':\nLine: ${Msg}\nData: ${Data}\nData:`, Data);
 
 		let updateDRO = false;
 		let updateUnit = false;
 
 		if (Data && Data.sr && typeof Data.sr.posz !== 'undefined') {  // If the data includes position info
 
-			debug.log('Got x-axis postion update.');
+			// debug.log('Got x-axis postion update.');
 
 			updateDRO = true;
 			this.machPosition.x = Data.sr.posz;  // Update the stored position in the widget
 
 		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posz !== 'undefined') {  // Response from a status report request
 
-			debug.log('Got x-axis postion update.');
+			// debug.log('Got x-axis postion update.');
 
 			updateDRO = true;
 			this.machPosition.x = Data.r.sr.posz;  // Update the stored position in the widget
@@ -408,14 +405,14 @@ define([ 'jquery' ], $ => ({
 
 		if (Data && Data.sr && typeof Data.sr.posy !== 'undefined') {  // If the data includes position info
 
-			debug.log('Got y-axis postion update.');
+			// debug.log('Got y-axis postion update.');
 
 			updateDRO = true;
 			this.machPosition.y = Data.sr.posy;  // Update the stored position in the widget
 
 		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posy !== 'undefined') {  // Response from a status report request
 
-			debug.log('Got y-axis postion update.');
+			// debug.log('Got y-axis postion update.');
 
 			updateDRO = true;
 			this.machPosition.y = Data.r.sr.posy; // Update the stored position in the widget
@@ -426,7 +423,7 @@ define([ 'jquery' ], $ => ({
 
 			const { unit: unitData } = Data.sr;
 
-			debug.log('Got unit mode update.');
+			// debug.log('Got unit mode update.');
 
 			if (unitData === 0 && this.unit !== 'inch') {       // Inches [in]
 
@@ -465,41 +462,32 @@ define([ 'jquery' ], $ => ({
 
 		if (updateUnit) {  // If a unit update was received
 
-			const { unit, intomm, mmtoin, dro, machLimits } = this;
-			const { posMax, savedPos } = this.savepos;
+			const { unit, intomm, mmtoin, dro, machLimits, savePosition } = this;
+			const { maxPositions, posData, unit: savePosUnit } = savePosition;
 			const convFactor = (unit === 'mm') ? intomm : mmtoin;
 
-			for (let i = 0; i < posMax; i++) {  // Perform a unit conversion on each position slot
+			if (unit !== savePosUnit) {
 
-				if (savedPos[i] === null)  // If this position slot is empty
-					continue;
+				savePosition.unit = unit;
 
-				this.savepos.savedPos[i] = savedPos[i] * convFactor;
+				for (let i = 0; i < maxPositions; i++) {  // Perform a unit conversion on each position slot
+
+					if (posData[i] === null)  // If this position slot is empty
+						continue;
+
+					savePosition.posData[i] = posData[i] * convFactor;
+
+				}
 
 			}
 
-			// if (unit === 'mm') {  // Units are millimeters [mm]
-			//
-			// 	dro.$xLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.x[0] * convFactor, 3));
-			// 	dro.$xLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.x[1] * convFactor, 3));
-			// 	dro.$yLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.y[0] * convFactor, 3));
-			// 	dro.$yLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.y[1] * convFactor, 3));
-			//
-			// } else {  // Units are inches [in]
-			//
-			// 	dro.$xLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.x[0], 3));
-			// 	dro.$xLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.x[1], 3));
-			// 	dro.$yLimitLabel.find('.min-limit-label').text(Math.roundTo(machLimits.y[0], 3));
-			// 	dro.$yLimitLabel.find('.max-limit-label').text(Math.roundTo(machLimits.y[1], 3));
-			//
-			// }
-
+			savePosition.updatePositionsToFile();
 			this.updateDroLimits();
 
-			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(unit);  // Update the unit in the DRO
+			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(unit);  // Update the unit label in the DRO
 			$('#strippit-dro .y-axis .dro-pos-well .dro-dim').text(unit);
 
-			$('#strippit-calc .calc-display-well .dro-dim').text(unit);  // Update the unit in the calculator readout
+			$('#strippit-calc .calc-display-well .dro-dim').text(unit);  // Update the unit label in the calculator readout
 
 		}
 
@@ -520,33 +508,20 @@ define([ 'jquery' ], $ => ({
 		$xValDOM: $('#strippit-dro > div.x-axis > div.dro-pos-well > h2.dro-pos table tr'),
 		$yValDOM: $('#strippit-dro > div.y-axis > div.dro-pos-well > h2.dro-pos table tr'),
 
-		// xDOM: {
-		// 	negpos: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-negpos'),
-		// 	intgray: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intgray'),
-		// 	intblack: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intblack'),
-		// 	intdecimal: $('#strippit-dro > div.x-axis h2.dro-pos span.xyz-intdecimal')
-		// },
-		// yDOM: {
-		// 	negpos: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-negpos'),
-		// 	intgray: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intgray'),
-		// 	intblack: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intblack'),
-		// 	intdecimal: $('#strippit-dro > div.y-axis h2.dro-pos span.xyz-intdecimal')
-		// },
-
 		// Specifies how many digits should be shown before the decimal place by default.
 		intgrayDigits: 3,
+
 		// Updates the DRO values in the DOM.
 		updateDOM(x, y) {
 
 			if (x === this.x && y === this.y) {
 
-				debug.log('Redundant DRO update.');
-
+				// debug.log('Redundant DRO update.');
 				return false;
 
 			}
 
-			debug.log('Updating DRO DOM values.');
+			// debug.log('Updating DRO DOM values.');
 
 			const { intgrayDigits } = this;
 
@@ -566,8 +541,8 @@ define([ 'jquery' ], $ => ({
 			const yDecimal = yDec;
 			const yIntgray = yIntblack.length < intgrayDigits ? '0'.repeat(intgrayDigits - yIntblack.length) : '';
 
-			debug.log(`${xNegpos ? '' : '-'} ${xIntgray} ${xIntblack} . ${xDecimal}`);
-			debug.log(`${yNegpos ? '' : '-'} ${yIntgray} ${yIntblack} . ${yDecimal}`);
+			// debug.log(`${xNegpos ? '' : '-'} ${xIntgray} ${xIntblack} . ${xDecimal}`);
+			// debug.log(`${yNegpos ? '' : '-'} ${yIntgray} ${yIntblack} . ${yDecimal}`);
 
 			// Build the HTML for the DRO values.
 			let xValHTML = '<td style="width:70px; text-align:right">';
@@ -591,8 +566,8 @@ define([ 'jquery' ], $ => ({
 			return true;
 
 		}
-	},
 
+	},
 	updateDroLimits() {
 
 		const { dro, machLimits, unit, intomm, droLimitMinDecDigits: minDigits, droLimitMaxDecDigits: maxDigits } = this;
@@ -635,7 +610,6 @@ define([ 'jquery' ], $ => ({
 		// dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1]);
 
 	},
-
 	calc: {
 
 		/**
@@ -730,7 +704,7 @@ define([ 'jquery' ], $ => ({
 			// const Decimal = valSplit[1] ? valSplit[1] : '';
 			const decimalIntgray = Decimal.length < decgrayDigits ? '0'.repeat(decgrayDigits - Decimal.length) : '';
 
-			// debug.log(`${ Negpos ? '' : '-' } ${Intgray} ${Intblack} ${ dpDimmed ? '' : '.' } ${Decimal} ${decimalIntgray}`);
+			// // debug.log(`${ Negpos ? '' : '-' } ${Intgray} ${Intblack} ${ dpDimmed ? '' : '.' } ${Decimal} ${decimalIntgray}`);
 
 			// Build the HTML for the DRO values.
 			let valHTML = '<td style="width:70px; text-align:right">';
@@ -748,7 +722,6 @@ define([ 'jquery' ], $ => ({
 
 		}
 	},
-
 	flashLimitWarning(axis) {
 
 		// The number of times to flash the warning on and off.
@@ -765,13 +738,12 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
-
 	setAxis(axis) {
 
-		const { port } = this;
-		const { value } = this.calc;
-		const { commandCount } = this.savepos;
-		let [ lowLimit, highLimit ] = this.machLimits[axis];
+		const { port, calc, savePosition, machLimits } = this;
+		const { value } = calc;
+		const { commandCount } = savePosition;
+		let [ lowLimit, highLimit ] = machLimits[axis];
 
 		if (this.unit === 'mm') {  // If the units mode is in millimeters [mm]
 
@@ -805,28 +777,38 @@ define([ 'jquery' ], $ => ({
 
 		publish('/connection-widget/port-sendjson', port, { Data });
 
-		this.savepos.commandCount += 1;  // Keep track of the number of commands that have been sent
-
-		this.calc.updateDOM('');  // Clear the value in the calculator so that the next value can be entered
+		savePosition.commandCount += 1;  // Keep track of the number of commands that have been sent
+		calc.updateDOM('');  // Clear the value in the calculator so that the next value can be entered
 
 		if (axis === 'x')  // If setting the x-axis
-			this.savepos.saveNextPos(Number(position));  // Save the position to the next available position slot
+			savePosition.saveNextPos(Number(position));  // Save the position to the next available position slot
 
 		return true;
 
 	},
 
-	savepos: {
+	savePosition: {
 		/**
-		 *  The current active position.
-		 *  @type {[type]}
+		 *  Stores current unit.
+		 *  Eg. 'inch' or 'mm'
+		 *  @type {String}
+		 */
+		unit: '',
+		/**
+		 *  The current active position as seen on the DOM buttons.
+		 *  @type {Number}
 		 */
 		currentPos: null,
 		/**
-		 *  Maximum save position slot number.
+		 *  Maximum number of position slots shown to the user at any give time.
 		 *  @type {Number}
 		 */
-		posMax: 24,
+		maxVisible: 24,
+		/**
+		 *  Maximum position available.
+		 *  @type {Number}
+		 */
+		maxPositions: 99,
 		/**
 		 *  This flag is set when the save position button is pressed.
 		 *  @type {Boolean}
@@ -838,20 +820,105 @@ define([ 'jquery' ], $ => ({
 		 */
 		clearSelection: false,
 		/**
-		 *  Stores the position values for each save position slot.
+		 *  Stores the x-axis position values for each save position slot.
+		 *  Value of null signifies an empty position slot.
 		 *  @type {Array}
 		 */
-		savedPos: [],
+		posData: [],
 		/**
 		 *  Stores a count of the number of commands have been sent to a device on the SPJS from this widget.
 		 *  This is used to send line numers with GCode move commands.
-		 *  @type {number}
+		 *  @type {Number}
 		 */
 		commandCount: 1,
+		/**
+		 *  Stores the unix time of the last set position.
+		 *  Used to ensure that the set next position is not cycled too fast.
+		 *  @type {Number}
+		 */
+		setPosTime: 0,
+		/**
+		 *  Minimum interval between set positions in Milliseconds [ms].
+		 *  Prevents a backup of commands to the controller resulting in 'haunted' motion.
+		 *  @type {Number}
+		 */
+		minSetPosInterval: 650,
+		/**
+		 *  Number of decimal places to round saved position values to.
+		 *  @type {Number}
+		 */
+		savedValueDecimalPlaces: 8,
+		/**
+		 *  Number of decimal places to round values to when send command to device.
+		 *  @type {Number}
+		 */
+		sendValueDecimalPlaces: 4,
+		savePosFileName: 'config/Saved_Positions.cson',
 
+		initialize() {
+
+			const { maxVisible, maxPositions, savePosFileName, savedValueDecimalPlaces } = this;
+
+			this.currentPos = null;
+			this.posData = [];
+
+			for (let i = 0; i < maxPositions; i++)
+				this.posData.push(null);
+
+			fsCSON.readFile(savePosFileName, (err, data) => {  // Read saved position data from previous session
+
+				if (err) {  // If there was an error reading the file
+
+					const fileData = {
+						unit: this.unit,
+						posData: this.posData
+					}
+
+					fsCSON.writeFileSafe(savePosFileName, fileData);
+					this.buildPositionButtons();
+
+					return false;
+
+				}
+
+				const { unit, posData } = data;
+				this.unit = unit;
+
+				for (let i = 0; i < posData.length && i < maxPositions; i++) {
+
+					if (posData[i] === null)
+						this.posData[i] = posData[i];
+
+					else
+						this.posData[i] = Math.roundTo(posData[i], savedValueDecimalPlaces);
+
+				}
+
+				this.buildPositionButtons();
+
+			});
+
+		},
+		buildPositionButtons() {
+
+			const { posData, maxVisible, maxPositions } = this;
+			let HTML = '';
+
+			for (let i = 0; i < maxPositions; i++) {  // Build HTML for each button
+
+				const posNum = i + 1;
+				const hiddenClass = i >= maxVisible ? ' hidden' : '';
+				const filledClass = posData[i] === null ? '' : ' slot-filled';
+				HTML += `<span btn-signal="position" btn-data="${posNum}" class="btn btn-xl btn-default pos-${posNum}${hiddenClass}${filledClass}">${posNum}</span>`
+
+			}
+
+			$('#strippit-savepos .position-btns').html(HTML);  // Add position buttons to DOM
+
+		},
 		setPrevPos(port) {
 
-			const { currentPos, posMax, savedPos } = this;
+			const { currentPos, maxPositions, posData } = this;
 
 			if (!port)  // If the port argument is invalid
 				return debug.error('The port argument is invalid.');
@@ -859,15 +926,15 @@ define([ 'jquery' ], $ => ({
 			if (currentPos === null)  // If no position slot is active
 				return false;
 
-			for (let i = 0; i < posMax; i++) {
+			for (let i = 0; i < maxPositions; i++) {
 
-				const posItem = currentPos - ((i % posMax) + 1);
-				debug.log(`slot: ${posItem}`);
+				const posItem = currentPos - ((i % maxPositions) + 1);
+				// debug.log(`slot: ${posItem}`);
 
 				if (posItem <= 0)  // If the position is invalid
 					return false;
 
-				if (savedPos[posItem - 1] !== null)  // If this slot has no saved position
+				if (posData[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
 
 			}
@@ -877,7 +944,7 @@ define([ 'jquery' ], $ => ({
 		},
 		setNextPos(port) {
 
-			const { currentPos, posMax, savedPos } = this;
+			const { currentPos, maxPositions, posData } = this;
 
 			if (!port)  // If the port argument is invalid
 				return debug.error('The port argument is invalid.');
@@ -885,12 +952,12 @@ define([ 'jquery' ], $ => ({
 			if (currentPos === null)  // If no position slot is active
 				return false;
 
-			for (let i = 1; i < posMax; i++) {
+			for (let i = 1; i < maxPositions; i++) {
 
-				const posItem = (((i + currentPos) - 1) % posMax) + 1;
-				debug.log(`slot: ${posItem}`);
+				const posItem = (((i + currentPos) - 1) % maxPositions) + 1;
+				// debug.log(`slot: ${posItem}`);
 
-				if (savedPos[posItem - 1] !== null)  // If this slot has no saved position
+				if (posData[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
 
 			}
@@ -900,55 +967,67 @@ define([ 'jquery' ], $ => ({
 		},
 		setPos(port, pos) {
 
+			const { setPosTime, minSetPosInterval, maxPositions, posData, commandCount, sendValueDecimalPlaces } = this;
+			const currentTime = Date.now();
+
+			if (currentTime - setPosTime < minSetPosInterval)  // If the minimum interval between set positions has not occured
+				return false;
+
+			this.setPosTime = currentTime;
+
 			if (!port)  // If the port argument is invalid
 				return debug.error('The port argument is invalid.');
 
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > this.posMax)  // If the pos argument is invalid
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > maxPositions)  // If the pos argument is invalid
 				return debug.error('Attempted to set a saved position that is out of range.');
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
 
-			if (this.savedPos[pos - 1] === null)  // If no position data is saved to the requested slot
+			if (posData[pos - 1] === null)  // If no position data is saved to the requested slot
 				return false;
 
+			const value = Math.roundTo(posData[pos - 1], sendValueDecimalPlaces);
 			const Data = [
 				{ Msg: 'M08', Pause: 150 },
-				{ Msg: `N${this.commandCount} G0 Z${this.savedPos[pos - 1]}`, Pause: 100 },
+				{ Msg: `N${commandCount} G0 Z${value}`, Pause: 100 },
 				{ Msg: 'M09', Pause: 150 }
 			];
 
 			publish('/connection-widget/port-sendjson', port, { Data });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
 
 			this.commandCount += 1;  // Keep track of the number of commands that have been sent
+			this.updateBtnStatus(pos, 'active');  // Hilite the position button as active
 
-			if (this.currentPos !== null)  // If another position slot is active.
-				$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
-
-			this.currentPos = pos;  // Make this position slot active
-
-			$(`#strippit-savepos span.pos-${pos}`).addClass('slot-active');  // Apply 'active' hiliting to the respective position slot
+			// if (this.currentPos !== null)  // If another position slot is active.
+			// 	$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
+			//
+			// this.currentPos = pos;  // Make this position slot active
+			// $(`#strippit-savepos span.pos-${pos}`).addClass('slot-active');  // Apply 'active' hiliting to the respective position slot
 
 			return true;
 
 		},
 
-		saveNextPos(value) {  // Save the given value to the next available position slot (with reference to currently selected position)
+		/**
+		 *  Save a given value to the next available position slot following the active position slot.
+		 *  @param {Number} value Value to be saved to the following position slot.
+		 */
+		saveNextPos(value) {
 
-			const { currentPos, posMax, savedPos } = this;
-			let refPos = currentPos;
+			const { currentPos, maxVisible, maxPositions, posData } = this;
+			let referencePos = currentPos;
 
 			if (currentPos === null)
-				refPos = 1;
+				referencePos = 1;
 
-			for (let i = 0; i < posMax; i++) {
+			for (let i = 0; i < maxPositions; i++) {
 
-				const posItem = (i + refPos) % posMax;
+				const posIndex = (i + (referencePos - 1)) % maxPositions;
+				// debug.log(`slot: ${posIndex}`);
 
-				debug.log(`slot: ${posItem}`);
-
-				if (savedPos[posItem - 1] === null)
-					return this.savePos(posItem, value);
+				if (posData[posIndex] === null)
+					return this.savePosition(posIndex + 1, value);
 
 			}
 
@@ -957,72 +1036,59 @@ define([ 'jquery' ], $ => ({
 		},
 		/**
 		 *  Save position data to a position slot.
-		 *  @param  {Number} pos   The position slot number as seen on the DOM button.
-		 *  @param  {Number} value The position value to be saved to the position slot.
+		 *  @param {Number} pos   The position slot number as seen on the DOM button.
+		 *  @param {Number} value The position value to be saved to the position slot.
 		 */
-		savePos(pos, value) {
+		savePosition(pos, value) {
 
-			const { posMax, currentPos } = this;
+			const { maxPositions, currentPos } = this;
 
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > posMax)  // If the pos argument is invalid
+			this.saveFunc('off');
+			this.deleteFunc('off');
+
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > maxPositions)  // If the pos argument is invalid
 				return debug.error('Attempted to set a saved position that is out of range.');
 
+			this.posData[pos - 1] = value;  // Save the value to the selected position
+			this.updateBtnStatus(pos, 'active');  // Apply 'filled' and 'active' hiliting to the respective position slot
+
+			this.updatePositionsToFile();
+
+		},
+		/**
+		 *  Delete position slot data.
+		 *  @param {Number} pos The position slot number as seen on the DOM button.
+		 */
+		deletePos(pos) {
+
+			const { maxPositions, posData, currentPos } = this;
+
 			this.saveFunc('off');
 			this.deleteFunc('off');
 
-			this.savedPos[pos - 1] = value;  // Save the value to the selected position
-
-			if (currentPos !== null)  // If another position slot is active
-				$(`#strippit-savepos span.pos-${currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
-
-			this.currentPos = pos;  // Make this position slot active
-
-			$(`#strippit-savepos span.pos-${pos}`).addClass('slot-filled');  // Apply 'filled' and 'active' hiliting to the respective position slot
-			$(`#strippit-savepos span.pos-${pos}`).addClass('slot-active');
-
-			debug.table(this.savedPos);
-
-		},
-		deletePos(pos) {  // Delete the position data for the given position slot
-
-			const { posMax, savedPos, currentPos } = this;
-
-			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > posMax)  // If the pos argument is invalid
+			if (typeof pos === 'undefined' || isNaN(pos) || pos <= 0 || pos > maxPositions)  // If the pos argument is invalid
 				debug.error('Attempted to delete a saved position that is out of range.');
 
-			this.saveFunc('off');
-			this.deleteFunc('off');
+			this.posData[pos - 1] = null;
+			this.updateBtnStatus(pos, 'empty');  // Remove filled hiliting from the position slot
 
-			if (savedPos[pos - 1] === null)  // If this is a redundant update
-				return false;
-
-			this.savedPos[pos - 1] = null;
-
-			$(`#strippit-savepos span.pos-${pos}`).removeClass('slot-filled'); // Remove filled hiliting from the respective position slot
-
-			if (pos === currentPos) {  // If removing the currently selected position slot
-
-				this.currentPos = null;
-				$(`#strippit-savepos span.pos-${pos}`).removeClass('slot-active');
-
-			}
-
-			debug.table(this.savedPos);
-			return true;
+			this.updatePositionsToFile();
 
 		},
 
-		saveFunc(data) {
-
-			// Arg. (eg. 'toggle' or 'on' or 'off').
+		/**
+		 *  Activates or deactivates the save position state.
+		 *  @param {String} task (Eg. 'toggle' or 'on' or 'off')
+		 */
+		saveFunc(task) {
 
 			const { saveSelection } = this;
-			let flag = data;
+			let flag = task;
 
-			if (data !== 'toggle' && data !== 'on' && data !== 'off')
-				return debug.error('Invalid data argument value.');
+			if (task !== 'toggle' && task !== 'on' && task !== 'off')
+				return debug.error('Invalid task argument value.');
 
-			else if ((data === 'on' && saveSelection) || (data === 'off' && !saveSelection))  // If this is a redundant update
+			else if ((task === 'on' && saveSelection) || (task === 'off' && !saveSelection))  // If this is a redundant update
 				return;
 
 			if (flag === 'toggle' && saveSelection)
@@ -1046,17 +1112,19 @@ define([ 'jquery' ], $ => ({
 			return this.saveSelection;
 
 		},
-		deleteFunc(data) {
-
-			// Arg. (eg. 'toggle' or 'on' or 'off').
+		/**
+		 *  Activates or deactivates the delete position state.
+		 *  @param {String} task (Eg. 'toggle' or 'on' or 'off')
+		 */
+		deleteFunc(task) {
 
 			const { deleteSelection } = this;
-			let flag = data;
+			let flag = task;
 
-			if (data !== 'toggle' && data !== 'on' && data !== 'off')
-				return debug.error('Invalid data argument value.');
+			if (task !== 'toggle' && task !== 'on' && task !== 'off')
+				return debug.error('Invalid task argument value.');
 
-			else if ((data === 'on' && deleteSelection) || (data === 'off' && !deleteSelection))  // If this is a redundant update
+			else if ((task === 'on' && deleteSelection) || (task === 'off' && !deleteSelection))  // If this is a redundant update
 				return;
 
 			if (flag === 'toggle' && deleteSelection)
@@ -1080,27 +1148,96 @@ define([ 'jquery' ], $ => ({
 			return this.deleteSelection;
 
 		},
+		/**
+		 *  Clear all saved position data.
+		 */
+		clearAll() {
 
-		clearAll() {  // Clear all the saved position data
+			const { maxVisible, maxPositions } = this;
 
-			const { posMax } = this;
-
-			for (let i = 0; i < posMax; i++)  // Delete the position data in each position slot
+			for (let i = 0; i < maxPositions; i++)  // Delete the position data in each position slot
 				this.deletePos(i + 1);
 
 			this.saveFunc('off');
 			this.deleteFunc('off');
+			this.updatePositionsToFile();
+
+		},
+		/**
+		 *  Applies and removes hiliting to save position buttons.
+		 *  @param {Number} position The position slot number to update hiliting.
+		 *  @param {String} task 	 (Eg. 'active' or 'inactive' or 'filled' or 'empty')
+		 *                            'active' automatically implies 'filled'
+		 *                            'empty' automatically implies 'inactive'
+		 */
+		updateBtnStatus(position, task) {
+
+			const { maxVisible, maxPositions, posData, currentPos } = this;
+			const $targetBtn = $(`#strippit-savepos .position-btns .pos-${position}`);
+			const unlisted = position > maxVisible;
+
+			if (task === 'active') {
+
+				if (position !== currentPos && currentPos !== null)
+					this.updateBtnStatus(currentPos, 'inactive');  // Remove hiliting from currently active position slot
+
+				if (unlisted) {
+
+					$(`#strippit-savepos .position-btns .pos-${maxVisible}`).addClass('hidden');
+					$targetBtn.removeClass('hidden');
+
+				}
+
+				this.updateBtnStatus(position, 'filled');
+
+				this.currentPos = position;
+				$targetBtn.addClass('slot-active');  // Hilite the position slot as active
+
+			} else if (task === 'inactive') {
+
+				$targetBtn.removeClass('slot-active');  // Remove active hiliting
+				this.currentPos = null;
+
+				if (unlisted) {
+
+					$targetBtn.addClass('hidden');
+					$(`#strippit-savepos .position-btns .pos-${maxVisible}`).removeClass('hidden');
+
+				}
+
+			} else if (task === 'filled') {
+
+				$targetBtn.addClass('slot-filled');  // Hilite the position slot as filled
+
+			} else if (task === 'empty') {
+
+				if (position === currentPos)  // If this position slot is active
+					this.updateBtnStatus(position, 'inactive');  // Remove hiliting from the position slot
+
+				$targetBtn.removeClass('slot-filled');  // Remove filled hiliting
+
+			}
 
 		},
 
-		// hiliteSlotFilled(slot) {},
-		// hiliteSlotEmpty(slot) {},
-		// hiliteSlotActive(slot) {
-		//
-		// 	if (this.currentPos !== null)  // If another position slot is active
-		// 		$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
-		//
-		// }
+		updatePositionsToFile() {
+
+			const { posData, unit, savePosFileName, savedValueDecimalPlaces } = this;
+
+			fsCSON.updateFile(savePosFileName, (data) => {
+
+				let roundedPosData = [];
+
+				for (let i = 0; i < posData.length; i++)
+					roundedPosData[i] = Math.roundTo(posData[i], savedValueDecimalPlaces);
+
+				data.unit = unit;
+				data.posData = roundedPosData;
+				return data;
+
+			});
+
+		}
 
 	}
 
