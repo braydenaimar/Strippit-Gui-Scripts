@@ -803,7 +803,7 @@ define([ 'jquery' ], $ => ({
 		 *  Maximum number of position slots shown to the user at any give time.
 		 *  @type {Number}
 		 */
-		maxVisible: 28,
+		maxVisible: 24,
 		/**
 		 *  Maximum position available.
 		 *  @type {Number}
@@ -932,17 +932,10 @@ define([ 'jquery' ], $ => ({
 				// debug.log(`slot: ${posItem}`);
 
 				if (posItem <= 0)  // If the position is invalid
-					break;
+					return false;
 
-				if (posData[posItem - 1] !== null)  // If this slot has saved position value
+				if (posData[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
-
-			}
-
-			for (let i = maxPositions; i > currentPos; i--) {
-
-				if (posData[i - 1] !== null)  // If this slot has saved position value
-					return this.setPos(port, i);
 
 			}
 
@@ -996,9 +989,9 @@ define([ 'jquery' ], $ => ({
 
 			const value = Math.roundTo(posData[pos - 1], sendValueDecimalPlaces);
 			const Data = [
-				{ Msg: `N${commandCount}0 M08`, Pause: 150 },
-				{ Msg: `N${commandCount}1 G0 Z${value}`, Pause: 100 },
-				{ Msg: `N${commandCount}2 M09`, Pause: 150 }
+				{ Msg: 'M08', Pause: 150 },
+				{ Msg: `N${commandCount} G0 Z${value}`, Pause: 100 },
+				{ Msg: 'M09', Pause: 150 }
 			];
 
 			publish('/connection-widget/port-sendjson', port, { Data });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
