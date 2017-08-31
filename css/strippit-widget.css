@@ -26,11 +26,12 @@
 /* -- in/mm Button -- */
 #strippit-inmm {
 	position: absolute;
-	top: 130px;
+	/* top: 140px; */
 	right: 377px;
 	/*top: 375px;
 	left: 385px;*/
 	/* width: 80px; */
+	bottom: 296px;
 }
 /*#strippit-inmm span.btn-home {
 	padding-top: 7px;
@@ -49,7 +50,7 @@
 #strippit-feedstop {
 	position: absolute;
 	top: 18px;
-	left: 36px;
+	left: 29px;
 	z-index: 1005;
 }
 #strippit-feedstop span.btn {
@@ -189,31 +190,35 @@
 /* -- Save Position -- */
 #strippit-savepos {
 	position: absolute;
-	top: 115px;
-	left: 35px;
-	width: 210px;
+	/* top: 115px; */
+	left: 14px;
+	width: 204px;
+	/* bottom: 10px; */
+	bottom: 13px;
 }
 #strippit-savepos div.btn-header {
 	position: absolute;
-	top: 0;
-	width: 100%;
+	left: 100%;
+	bottom: 0;
+	margin-left: 6px;
 }
 #strippit-savepos div.step-btns {
-	position: absolute;
-	top: 250px;
-	left: 100%;
-	width: 100px;
+	/* position: absolute; */
+	/* top: 250px; */
+	/* left: 100%; */
+	/* width: 100px; */
 	/*border: 1px dashed green;*/
 }
 #strippit-savepos .btn-header .control-btns {
-	position: absolute;
-	top: 300px;
-	left: 100%;
+	/* position: absolute; */
+	/* top: 300px; */
+	/* left: 100%; */
 	width: 150px;
+	margin-top: 8px;
 }
 #strippit-savepos .position-btns {
-	position: absolute;
-	top: 40px;
+	/* position: absolute; */
+	/* top: 40px; */
 }
 #strippit-savepos .position-btns .btn {
 	border: dashed;
@@ -221,7 +226,7 @@
 	text-align: center;
 	width: 43px;
 	padding: 5px 0px;
-	margin: 10px 5px 0 0;
+	margin: 8px 8px 0 0;
 }
 #strippit-savepos .position-btns span.btn.slot-active {
 	border: solid;
@@ -297,8 +302,8 @@
 }
 .strippit-die-size {
 	position: fixed;
-	top: 228px;
-	left: 275px;
+	/* top: 230px; */
+	left: 266px;
 	/*width: 400px;*/
 	/*height: 250px;*/
 	background-color: #fff;
@@ -306,6 +311,7 @@
 	z-index: 1002;
 	padding: 7px;
 	border-radius: 3px;
+	bottom: 170px;
 }
 .strippit-die-size .die-size-label {
 	display: block;
@@ -319,11 +325,12 @@
 /* -- Calculator -- */
 #strippit-calc {
 	position: absolute;
-	top: 130px;
+	/* top: 140px; */
 	right: 12px;
 	width: 350px;
 	height: 330px;
 	/*border: 1px dashed green;*/
+	bottom: 10px;
 }
 #strippit-calc div.calc-display-well {
 	position: absolute;
@@ -503,7 +510,7 @@
     background: none;
     border: none;
 }
-.btn-active {
+.btn.btn-active {
 	background-color: #a5f5a5;
 	/*background-color: #dff0d8;*/
 }
