@@ -67,7 +67,7 @@
 
 /* -- DRO -- */
 #strippit-widget:not(.not-punch-press-display) .strippit-dro {  /* For punch press display */
-	right: 2px;
+	right: 0;
 }
 #strippit-dro {
 	position: absolute;
@@ -177,7 +177,7 @@
 
 /* -- Save Position -- */
 #strippit-widget:not(.not-punch-press-display) .strippit-savepos {  /* For punch press display */
-	bottom: 208px;
+	bottom: 210px;
 }
 #strippit-savepos {
 	position: absolute;
@@ -277,7 +277,7 @@
     z-index: 1001;
 }
 #strippit-widget:not(.not-punch-press-display) .strippit-die-size {  /* For punch press display */
-	bottom: 365px;
+	bottom: 367px;
 }
 .strippit-die-size {
 	position: fixed;
@@ -300,8 +300,8 @@
 
 /* -- Calculator -- */
 #strippit-widget:not(.not-punch-press-display) .strippit-calc {  /* For punch press display */
-	right: 2px;
-	bottom: 205px;
+	right: 0;
+	bottom: 207px;
 }
 #strippit-calc {
 	position: absolute;
