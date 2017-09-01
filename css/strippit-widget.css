@@ -1,6 +1,6 @@
 /* Strippit Widget CSS */
 
-#strippit-widget {
+#strippit-widget:not(.not-punch-press-display) {
 	zoom: 1.4;
     transform-origin: 0 0;
     transform: scaleX(1) scaleY(1.4) translate3d(0,0,0);
@@ -24,19 +24,15 @@
 }
 
 /* -- in/mm Button -- */
+#strippit-widget:not(.not-punch-press-display) .strippit-inmm {
+	right: 367px;
+	bottom: 491px;
+}
 #strippit-inmm {
 	position: absolute;
-	/* top: 140px; */
 	right: 377px;
-	/*top: 375px;
-	left: 385px;*/
-	/* width: 80px; */
 	bottom: 296px;
 }
-/*#strippit-inmm span.btn-home {
-	padding-top: 7px;
-	padding-bottom: 7px;
-}*/
 #strippit-inmm span.btnInMm {
 	padding-top: 10px;
 	padding-bottom: 10px;
@@ -66,7 +62,11 @@
 	top: 2px;
 	right: 2px;
 }
+
 /* -- DRO -- */
+#strippit-widget:not(.not-punch-press-display) .strippit-dro {
+	right: 2px;
+}
 #strippit-dro {
 	position: absolute;
 	top: 15px;
@@ -188,6 +188,9 @@
 }
 
 /* -- Save Position -- */
+#strippit-widget:not(.not-punch-press-display) .strippit-savepos {
+	bottom: 208px;
+}
 #strippit-savepos {
 	position: absolute;
 	/* top: 115px; */
@@ -290,6 +293,10 @@
 }
 
 /* -- Die Size Selector -- */
+#strippit-widget:not(.not-punch-press-display) .overlay {
+	top: -10px;
+	right: -33px;
+}
 .overlay {
     position: fixed;
     top: 0;
@@ -299,19 +306,20 @@
     background-color: #000;
     opacity: 0.8;
     z-index: 1001;
+    /* height: 200%; */
+}
+#strippit-widget:not(.not-punch-press-display) .strippit-die-size {
+	bottom: 365px;
 }
 .strippit-die-size {
 	position: fixed;
-	/* top: 230px; */
 	left: 266px;
-	/*width: 400px;*/
-	/*height: 250px;*/
+	bottom: 170px;
 	background-color: #fff;
 	opacity: 1;
 	z-index: 1002;
 	padding: 7px;
 	border-radius: 3px;
-	bottom: 170px;
 }
 .strippit-die-size .die-size-label {
 	display: block;
@@ -323,14 +331,18 @@
 }
 
 /* -- Calculator -- */
+#strippit-widget:not(.not-punch-press-display) .strippit-calc {
+	right: 2px;
+	bottom: 205px;
+}
 #strippit-calc {
 	position: absolute;
 	/* top: 140px; */
 	right: 12px;
+	bottom: 10px;
 	width: 350px;
 	height: 330px;
 	/*border: 1px dashed green;*/
-	bottom: 10px;
 }
 #strippit-calc div.calc-display-well {
 	position: absolute;

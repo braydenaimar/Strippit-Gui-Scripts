@@ -166,7 +166,7 @@ define([ 'jquery' ], $ => ({
 		 *  The time [ms] that is waited before sending a queue flush command to a device after the feedstop command.
 		 *  @type {number}
 		 */
-		waitQueueFlushOnFeedstop: 2000,
+		waitQueueFlushOnFeedstop: 100,
 		/**
 		 *  The time [ms] that is waited before sending a cycle resume command to a device after the queue flush command.
 		 *  @type {number}
@@ -608,6 +608,27 @@ define([ 'jquery' ], $ => ({
 		 *  @type {number}
 		 */
 		autoScrollThreshold: 50,
+		/**
+		 *  Delay between a port being opened and the watchdog checking to see that the port is responding.
+		 *  Set a value of zero (0) to disable the watchdog on port open.
+		 *  @default Overwritten by settings cson file.
+		 *  @type {Number}
+		 */
+		watchdogOnPortConnectDelay: 2000,
+		/**
+		 *  Delay between the watchdog checking that the port is responding and closing the port.
+		 *  Set a value of zero (0) to disable the closing of the port.
+		 *  @default Overwritten by settings cson file.
+		 *  @type {Number}
+		 */
+		watchdogPortCloseDelay: 3000,
+		/**
+		 *  Delay between closing the port and reopening the port in milliseconds [ms].
+		 *  Set a value of zero (0) to disable the reopening of the port.
+		 *  @default Overwritten by settings cson file.
+		 *  @type {Number}
+		 */
+		watchdogPortReopenDelay: 3000,
 		SPJS: {
 			// The logData object stores all the messages and commands added to the console log.
 			// A message would be { msg: '', type: '', line: '' }
@@ -784,7 +805,7 @@ define([ 'jquery' ], $ => ({
 			// Prevent any messages containing '<' or '>' because these can mess with the console log DOM structure.
 			if (/[<>]/.test(Msg)) {
 
-// 				if (Type === 'stdout' || Type === 'stderr') // console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
+				// if (Type === 'stdout' || Type === 'stderr') // console.log(`There are '<' and/or '>' character(s) in the Msg argument. These can mess with the DOM structure of the console log. Characters removed.\nMessage: ${Msg}\nNew Message: ${Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;')}`);
 
 				Msg = Msg.replace(/</g, '&#60;').replace(/>/g, '&#62;');
 
@@ -1565,24 +1586,16 @@ define([ 'jquery' ], $ => ({
 
 		// console.group(`${this.name}.initBody()`);
 
-		// Only connect to SPJS once all widgets have loaded so that we dont publish any important signals before other widgets have a chance to subscribe to them.
-		subscribe('/main/all-widgets-loaded', this, this.wsConnect.bind(this));
-		// When the window resizes, look at updating the size of DOM elements.
-		subscribe('/main/window-resize', this, this.resizeWidgetDom.bind(this));
-		// If this widget is made visible, update the size of DOM elements.
-		subscribe('/main/widget-visible', this, this.visibleWidget.bind(this));
+		subscribe('/main/all-widgets-loaded', this, this.wsConnect.bind(this));  // Only connect to SPJS once all widgets have loaded so that we dont publish any important signals before other widgets have a chance to subscribe to them.
+		subscribe('/main/window-resize', this, this.resizeWidgetDom.bind(this));  // When the window resizes, look at updating the size of DOM elements.
+		subscribe('/main/widget-visible', this, this.visibleWidget.bind(this));  // If this widget is made visible, update the size of DOM elements.
 
-		// Send a given message to the SPJS and add it to the console log so that it can be displayed as incomplete/complete.
-		subscribe(`/${this.id}/spjs-send`, this, this.newspjsSend.bind(this));
-		// Send message directly to SPJS as 'send [port] [cmd]' and add it to the respective port's log.
-		subscribe(`/${this.id}/port-send`, this, this.newportSend.bind(this));
-		// Send message directly to SPJS as 'sendnobuf [port] [cmd]' and add it to the respective port's log.
-		subscribe(`/${this.id}/port-sendnobuf`, this, this.newportSendNoBuf.bind(this));
-		// Send message directly to SPJS as 'sendjson { P: [port], Data: [{ D: [cmd], Id: [id] }] }' and add it to the respective port's log.
-		subscribe(`/${this.id}/port-sendjson`, this, this.newportSendJson.bind(this));
+		subscribe(`/${this.id}/spjs-send`, this, this.newspjsSend.bind(this));  // Send a given message to the SPJS and add it to the console log so that it can be displayed as incomplete/complete.
+		subscribe(`/${this.id}/port-send`, this, this.newportSend.bind(this));  // Send message directly to SPJS as 'send [port] [cmd]' and add it to the respective port's log.
+		subscribe(`/${this.id}/port-sendnobuf`, this, this.newportSendNoBuf.bind(this));  // Send message directly to SPJS as 'sendnobuf [port] [cmd]' and add it to the respective port's log.
+		subscribe(`/${this.id}/port-sendjson`, this, this.newportSendJson.bind(this));  // Send message directly to SPJS as 'sendjson { P: [port], Data: [{ D: [cmd], Id: [id] }] }' and add it to the respective port's log.
 		subscribe(`${this.id}/port-sendbuffered`, this, this.portSendBuffered.bind(this));
-		// Sends message to the given port to stop all motion on that device.
-		subscribe(`/${this.id}/port-feedstop`, this, this.portFeedstop.bind(this));
+		subscribe(`/${this.id}/port-feedstop`, this, this.portFeedstop.bind(this));  // Sends message to the given port to stop all motion on that device.
 
 		subscribe('gcode-buffer/control', this, (data) => {
 
@@ -2409,7 +2422,7 @@ define([ 'jquery' ], $ => ({
 
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { Msg: 'restart', Status: 'Completed' }));
 
-// // 			if (matchFound) // console.log('SPJS was shut down because of a \'restart\' command.');
+			// if (matchFound) // console.log('SPJS was shut down because of a \'restart\' command.');
 
 		}
 
@@ -3119,6 +3132,7 @@ define([ 'jquery' ], $ => ({
 
 		// console.groupCollapsed(`Port Connected: ${port}`);
 		const that = this;
+		const { watchdogOnPortConnectDelay } = this.consoleLog;
 
 		// If this port is already initiated (ie. this method was called redundantly), skip all DOM and object updates.
 		if (typeof this.consoleLog[port] != 'undefined' && this.consoleLog.openLogs.indexOf(port) !== -1) {
@@ -3220,6 +3234,16 @@ define([ 'jquery' ], $ => ({
 
 			}
 
+			if (watchdogOnPortConnectDelay) {  // If the watchdog on port connected is enabled
+
+				setTimeout(() => {
+
+					this.watchdogOnPortConnect(port);  // Check that the port is responding to commands
+
+				}, watchdogOnPortConnectDelay);
+
+			}
+
 			// If the temporary data buffer was used to buffer data until the port officially opened, transfer that data to the dataRecvBuffer object.
 			// if (this.tempDataRecvBuffer[port]) {
 			// 	this.dataRecvBuffer[port] = this.tempDataRecvBuffer[port];
@@ -3234,6 +3258,86 @@ define([ 'jquery' ], $ => ({
 		if (nextPort && nextPort.length && nextPort !== 'SPJS') this.portConnected(nextPort);
 
 		return true;
+
+	},
+	watchdogOnPortConnect(port) {
+
+		if (typeof port == 'undefined' || typeof this.consoleLog[port] == 'undefined')  // If the port argument is invalid
+			return debug.error('The port argument is invalid.');
+
+		const { consoleLog, SPJS } = this;
+		const { watchdogPortCloseDelay, watchdogPortReopenDelay } = consoleLog;
+		const { logData } = consoleLog[port];
+		const { Baud, Buffer } = SPJS.portMeta[port];
+		const unsafePort = this.makePortUnSafe(port);
+
+		let sentCount = 0;
+		let queuedCount = 0;
+
+		for (let i = 0; i < logData.length; i++) {
+
+			const { Msg, Type, Status } = logData[i];
+
+			if (Type === 'Command' || Type === 'MdiCommand') {  // If the message is a command
+
+				sentCount += 1;
+
+				if (Status === 'Complete')
+					return false;
+
+				else if (Status === 'Queued')
+					queuedCount += 1;
+
+			} else {  // If the message is from the port
+
+				return false;
+
+			}
+
+		}
+
+		if (sentCount > 1 && queuedCount === 1) {
+
+			this.newportSendNoBuf(port, { Msg: '%', IdPrefix: 'watchdog', Comment: 'WatchDog' });
+
+			if (watchdogPortCloseDelay) {  // If closing the port via the watchdog is enabled
+
+				setTimeout(() => {
+
+					const Msg = `close ${unsafePort}`;
+					this.newspjsSend({ Msg, IdPrefix: 'watchdog', Comment: 'WatchDog' });
+
+				}, watchdogPortCloseDelay);
+
+			}
+
+			if (watchdogPortCloseDelay && watchdogPortReopenDelay) {  // If reopening the port via the watchdog is enabled
+
+				setTimeout(() => {
+
+					const { wsState, openPorts, portMeta } = this.SPJS;
+
+					if (openPorts.includes(port))  // If the port is already opened again
+						return false;
+
+					if (wsState !== 'closed' && typeof portMeta[port] != 'undefined') {  // If the SPJS is not closed
+
+						const Msg = `open ${unsafePort} ${Baud} ${Buffer}`;
+						this.newspjsSend({ Msg, IdPrefix: 'watchdog', Comment: 'WatchDog' });
+
+					} else {  // If the spjs is closed
+
+						return false;
+
+					}
+
+				}, watchdogPortCloseDelay + watchdogPortReopenDelay);
+
+			}
+
+			return true;
+
+		}
 
 	},
 	portDisconnected(port) {
@@ -3523,7 +3627,7 @@ define([ 'jquery' ], $ => ({
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: Data[i].D, Status: 'Queued', UpdateRelated: true }));
 
-// 			if (!matchFound) // console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
+			// if (!matchFound) // console.log(`No match was found for Msg: '${Data[i].D}', Id: '${Data[i].Id}'`);
 
 		}
 
@@ -3565,7 +3669,7 @@ define([ 'jquery' ], $ => ({
 			// The command could have been sent as mdi from the spjs which means that it wouldnt show up in the port's log.
 			({ matchFound } = this.consoleLog.updateCmd('SPJS', { PartMsg: D[i], Status: 'Queued', UpdateRelated: true }));
 
-// 			if (!matchFound) // console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
+			// if (!matchFound) // console.log(`No match was found for Msg: '${D[i]}', Id: '${Ids[i]}'`);
 
 		}
 
@@ -4930,17 +5034,8 @@ define([ 'jquery' ], $ => ({
 
 		const { portMeta, openPorts, waitQueueFlushOnFeedstop, waitCycleResumeOnFeedstop } = this.SPJS;
 
-		if (!openPorts || !openPorts.includes(port)) {  // If the port argument is invalid
-
-			if (inDebugMode) {
-				throw new Error(`The port argument passed to the portFeedstop method is not valid.\n  port: '${port}'`);
-
-			} else {
-				console.error(`The port argument passed to the portFeedstop method is not valid.\n  port: '${port}'`);
-
-			}
-
-		}
+		if (!openPorts)  // If there are no open ports
+			return false;
 
 		this.newportSendNoBuf(port, { Msg: '!' });  // Send feedhold command
 		// this.newportSendJson(port, { Msg: '!\n' });

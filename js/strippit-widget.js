@@ -58,7 +58,6 @@ define([ 'jquery' ], $ => ({
 	 *  @type {String}
 	 */
 	dieSize: '',
-
 	/**
 	 *  Stores data about the machine limits for each die.
 	 *  @type {Object}
@@ -84,7 +83,6 @@ define([ 'jquery' ], $ => ({
 		x: [ 6.5, 102.5 ],
 		y: [ 0.125, 28.125 ]
 	},
-
 	// Stores the latest machine position.
 	machPosition: {
 		x: 0,
@@ -113,8 +111,7 @@ define([ 'jquery' ], $ => ({
 
 			if (platform !== 'linux' || architecture !== 'arm') {
 
-				$('#strippit-widget').css('zoom', '1');
-				$('#strippit-widget').css('transform', 'scaleX(1) scaleY(1) translate3d(0,0,0)');
+				$('#strippit-widget').addClass('not-punch-press-display');
 
 			}
 
@@ -144,16 +141,17 @@ define([ 'jquery' ], $ => ({
 
 		$('#strippit-feedstop').on('click', 'span.btn', () => {  // Initialize the Feedstop button
 
-			const { port } = this;
-			// debug.log('Button -Feedstop-');
+			const { port, savePosition } = this;
+			const { maxRetargetAttempts } = savePosition;
 
 			if (port) {  // If got a valid port
 
 				publish('/connection-widget/port-feedstop', port);  // Send a feedhold message to the device
+				savePosition.retargetCount = maxRetargetAttempts + 1;  // Prevent retargeting after feedstop button is pressed
 
 				setTimeout(() => {
 
-					publish('/connection-widget/port-sendjson', port, { Msg: [ 'M09', 'M09' ], IdPrefix: 'fstop', Pause: 200 });  // Drop solenoid finger
+					publish('/connection-widget/port-sendjson', port, { Msg: [ 'M09', 'M09' ], IdPrefix: 'fstop', Comment: 'Feedstop', Pause: 200 });  // Drop solenoid finger
 
 				}, 2500);
 
@@ -382,48 +380,57 @@ define([ 'jquery' ], $ => ({
 	},
 	recvPortData(port, { Msg, Data }) {  // The recvPortData method receives port data from devices on the SPJS
 
-		// // debug.log(`Got data from '${port}':\nLine: ${Msg}\nData: ${Data}\nData:`, Data);
-
+		const { machPosition, dro, savePosition } = this;
 		let updateDRO = false;
 		let updateUnit = false;
+		let velocity = null;
 
-		if (Data && Data.sr && typeof Data.sr.posz !== 'undefined') {  // If the data includes position info
+		if (Data && (Data.sr || Data.r)) {
 
-			// debug.log('Got x-axis postion update.');
+			savePosition.xMotionFlag = false;
+			savePosition.yMotionFlag = false;
+
+		}
+
+		if (Data && Data.sr && typeof Data.sr.posz !== 'undefined' && Data.sr.posz !== machPosition.x) {  // If the data includes position info
 
 			updateDRO = true;
 			this.machPosition.x = Data.sr.posz;  // Update the stored position in the widget
 
-		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posz !== 'undefined') {  // Response from a status report request
+			if (Data.sr.vel !== 0)
+				savePosition.xMotionFlag = true;
 
-			// debug.log('Got x-axis postion update.');
+		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posz !== 'undefined' && Data.r.sr.posz !== machPosition.x) {  // Response from a status report request
 
 			updateDRO = true;
 			this.machPosition.x = Data.r.sr.posz;  // Update the stored position in the widget
 
+			if (Data.r.sr.vel !== 0)
+				savePosition.xMotionFlag = true;
+
 		}
 
-		if (Data && Data.sr && typeof Data.sr.posy !== 'undefined') {  // If the data includes position info
-
-			// debug.log('Got y-axis postion update.');
+		if (Data && Data.sr && typeof Data.sr.posy !== 'undefined' && Data.sr.posy !== machPosition.y) {  // If the data includes position info
 
 			updateDRO = true;
 			this.machPosition.y = Data.sr.posy;  // Update the stored position in the widget
 
-		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posy !== 'undefined') {  // Response from a status report request
+			if (Data.sr.vel !== 0)
+				savePosition.yMotionFlag = true;
 
-			// debug.log('Got y-axis postion update.');
+		} else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.posy !== 'undefined' && Data.r.sr.posy !== machPosition.y) {  // Response from a status report request
 
 			updateDRO = true;
 			this.machPosition.y = Data.r.sr.posy; // Update the stored position in the widget
+
+			if (Data.r.sr.vel !== 0)
+				savePosition.yMotionFlag = true;
 
 		}
 
 		if (Data && Data.sr && typeof Data.sr.unit !== 'undefined') {  // Got units information
 
 			const { unit: unitData } = Data.sr;
-
-			// debug.log('Got unit mode update.');
 
 			if (unitData === 0 && this.unit !== 'inch') {       // Inches [in]
 
@@ -453,12 +460,46 @@ define([ 'jquery' ], $ => ({
 
 		}
 
+		if (Data && Data.sr && typeof Data.sr.vel != 'undefined')
+			velocity = Data.sr.vel;
+
+		else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.vel != 'undefined')
+			velocity = Data.r.sr.vel;
+
+		if (velocity === 0) {
+
+			const { port, machPosition } = this;
+			const { targetPosition, targetTolerance, retargetCount, maxRetargetAttempts } = savePosition;
+
+			if (retargetCount >= maxRetargetAttempts)  // If a retarget has already been attempted the maximum number of times
+				return false;
+
+			if (targetPosition.x !== null && Math.abs(machPosition.x - targetPosition.x) > targetTolerance) {  // If x-axis is not on target
+
+				savePosition.sendAxisCommand(port, { Axis: 'x', Value: targetPosition.x, Comment: 'Retarget' });
+				this.retargetCount += 1;
+
+			}
+
+			if (targetPosition.y !== null && Math.abs(machPosition.y - targetPosition.y) > targetTolerance) {  // If y-axis is not on target
+
+				savePosition.sendAxisCommand(port, { Axis: 'y', Value: targetPosition.y, Comment: 'Retarget' });
+				this.retargetCount += 1;
+
+			}
+
+		}
+
 		if (updateDRO) {  // If a position update was received
 
 			this.port = port;
-			this.dro.updateDOM(this.machPosition.x, this.machPosition.y);  // Update the DRO based on the new data
+			dro.updateDOM(this.machPosition.x, this.machPosition.y);  // Update the DRO based on the new data
 
 		}
+
+		// const { xMotionFlag, yMotionFlag } = savePosition;
+		// $('#strippit-dro .x-axis .dro-pos-well').removeClass(xMotionFlag ? '' : 'bg-success').addClass(xMotionFlag ? 'bg-success' : '');
+		// $('#strippit-dro .y-axis .dro-pos-well').removeClass(yMotionFlag ? '' : 'bg-success').addClass(yMotionFlag ? 'bg-success' : '');
 
 		if (updateUnit) {  // If a unit update was received
 
@@ -599,16 +640,6 @@ define([ 'jquery' ], $ => ({
 		dro.$yLimitLabel.find('.min-limit-label').text(limits.y[0]);  // Y Axis DRO limits
 		dro.$yLimitLabel.find('.max-limit-label').text(limits.y[1]);
 
-		// dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0].toString().includes('.') ? machLimits.x[0] : `${machLimits.x[0]}.0`);  // X Axis DRO limits
-		// dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1].toString().includes('.') ? machLimits.x[1] : `${machLimits.x[1]}.0`);
-		// dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0].toString().includes('.') ? machLimits.y[0] : `${machLimits.y[0]}.0`);  // Y Axis DRO limits
-		// dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1].toString().includes('.') ? machLimits.y[1] : `${machLimits.y[1]}.0`);
-
-		// dro.$xLimitLabel.find('.min-limit-label').text(machLimits.x[0]);  // X Axis DRO limits
-		// dro.$xLimitLabel.find('.max-limit-label').text(machLimits.x[1]);
-		// dro.$yLimitLabel.find('.min-limit-label').text(machLimits.y[0]);  // Y Axis DRO limits
-		// dro.$yLimitLabel.find('.max-limit-label').text(machLimits.y[1]);
-
 	},
 	calc: {
 
@@ -738,6 +769,9 @@ define([ 'jquery' ], $ => ({
 		}
 
 	},
+	/**
+	 *  @param {String} axis (eg. 'x' or 'y')
+	 */
 	setAxis(axis) {
 
 		const { port, calc, savePosition, machLimits } = this;
@@ -767,21 +801,15 @@ define([ 'jquery' ], $ => ({
 
 		}
 
-		const position = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;  // Remove trailing decimal place
+		const Axis = axis.toLowerCase();
+		const Value = (value.indexOf('.') === value.length - 1) ? value.substr(0, value.length - 1) : value;  // Remove trailing decimal place
+		const Comment = 'SetAxis';
+		savePosition.sendAxisCommand(port, { Axis, Value, Comment });
 
-		const Data = [
-			{ Msg: 'M08', Pause: 150 },
-			{ Msg: `N${commandCount} G0 ${axis === 'x' ? 'Z' : axis.toUpperCase()}${position}`, Pause: 100 },
-			{ Msg: 'M09', Pause: 150 }
-		];
-
-		publish('/connection-widget/port-sendjson', port, { Data });
-
-		savePosition.commandCount += 1;  // Keep track of the number of commands that have been sent
 		calc.updateDOM('');  // Clear the value in the calculator so that the next value can be entered
 
 		if (axis === 'x')  // If setting the x-axis
-			savePosition.saveNextPos(Number(position));  // Save the position to the next available position slot
+			savePosition.saveNextPos(Number(Value));  // Save the position to the next available position slot
 
 		return true;
 
@@ -830,7 +858,7 @@ define([ 'jquery' ], $ => ({
 		 *  This is used to send line numers with GCode move commands.
 		 *  @type {Number}
 		 */
-		commandCount: 1,
+		commandCount: 0,
 		/**
 		 *  Stores the unix time of the last set position.
 		 *  Used to ensure that the set next position is not cycled too fast.
@@ -853,7 +881,25 @@ define([ 'jquery' ], $ => ({
 		 *  @type {Number}
 		 */
 		sendValueDecimalPlaces: 4,
+		/**
+		 *  Delay between sending feedstop command and machine axis position commands in Milliseconds [ms].
+		 *  @type {Number}
+		 */
+		sendAfterFeedstopDelay: 150,
 		savePosFileName: 'config/Saved_Positions.cson',
+		xMotionFlag: false,
+		yMotionFlag: false,
+		retargetCount: 0,
+		targetPosition: {
+			x: null,
+			y: null
+		},
+		/**
+		 *  Maximum number of times that a retarget can be attempted.
+		 *  @type {Number}
+		 */
+		maxRetargetAttempts: 2,
+		targetTolerance: 0.002,
 
 		initialize() {
 
@@ -974,7 +1020,7 @@ define([ 'jquery' ], $ => ({
 		},
 		setPos(port, pos) {
 
-			const { setPosTime, minSetPosInterval, maxPositions, posData, commandCount, sendValueDecimalPlaces } = this;
+			const { setPosTime, minSetPosInterval, maxPositions, posData, commandCount, xMotionFlag, yMotionFlag, sendValueDecimalPlaces } = this;
 			const currentTime = Date.now();
 
 			if (currentTime - setPosTime < minSetPosInterval)  // If the minimum interval between set positions has not occured
@@ -994,23 +1040,29 @@ define([ 'jquery' ], $ => ({
 			if (posData[pos - 1] === null)  // If no position data is saved to the requested slot
 				return false;
 
-			const value = Math.roundTo(posData[pos - 1], sendValueDecimalPlaces);
-			const Data = [
-				{ Msg: `N${commandCount}0 M08`, Pause: 150 },
-				{ Msg: `N${commandCount}1 G0 Z${value}`, Pause: 100 },
-				{ Msg: `N${commandCount}2 M09`, Pause: 150 }
-			];
+			const Axis = 'x';
+			const Value = posData[pos - 1];
+			const Comment = 'SavePos';
+			this.sendAxisCommand(port, { Axis, Value, Comment });
 
-			publish('/connection-widget/port-sendjson', port, { Data });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
-
-			this.commandCount += 1;  // Keep track of the number of commands that have been sent
-			this.updateBtnStatus(pos, 'active');  // Hilite the position button as active
-
-			// if (this.currentPos !== null)  // If another position slot is active.
-			// 	$(`#strippit-savepos span.pos-${this.currentPos}`).removeClass('slot-active');  // Deactivate the currently active position slot
+			// if (!yMotionFlag)  // If the y-axis is not moving
+			// 	publish('/connection-widget/port-feedstop', port);
 			//
-			// this.currentPos = pos;  // Make this position slot active
-			// $(`#strippit-savepos span.pos-${pos}`).addClass('slot-active');  // Apply 'active' hiliting to the respective position slot
+			// const Data = [
+			// 	{ Msg: `N${commandCount}0 M08`, Pause: 50 },
+			// 	{ Msg: `N${commandCount}1 G0 Z${value}`, Pause: 100 },
+			// 	{ Msg: `N${commandCount}2 M09`, Pause: 50 }
+			// ];
+			//
+			// if (!yMotionFlag)  // If the y-axis is not moving
+			// 	setTimeout(() => { publish('/connection-widget/port-sendjson', port, { Data, IdPrefix: 'SavePos' }); }, 150);  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
+			//
+			// if (yMotionFlag)  // If the y-axis is in motion
+			// 	publish('/connection-widget/port-sendjson', port, { Data, IdPrefix: 'SavePos' });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
+			//
+			// this.commandCount += 1;  // Keep track of the number of commands that have been sent
+
+			this.updateBtnStatus(pos, 'active');  // Hilite the position button as active
 
 			return true;
 
@@ -1224,6 +1276,42 @@ define([ 'jquery' ], $ => ({
 				$targetBtn.removeClass('slot-filled');  // Remove filled hiliting
 
 			}
+
+		},
+
+		/**
+		 *  @param {String} port     Device to send commands to.
+		 *  @param {String} Axis     (eg. 'x' or 'y').
+		 *  @param {Number} Value    Axis value for machine to move to.
+		 *  @param {String} IdPrefix Id prefix in the console log.
+		 *  @param {String} Comment  Command comment in console log.
+		 */
+		sendAxisCommand(port, { Axis, Value, IdPrefix, Comment }) {
+
+			const { commandCount, xMotionFlag, yMotionFlag, targetPosition, sendValueDecimalPlaces, sendAfterFeedstopDelay } = this;
+
+			const axis = Axis === 'x' ? 'Z' : 'Y';
+			const value = Math.roundTo(Value, sendValueDecimalPlaces);
+			const Data = [
+				{ Msg: `N${commandCount}0 M08`, Pause: 50 },
+				{ Msg: `N${commandCount}1 G0 ${axis}${value}`, Pause: 100 },
+				{ Msg: `N${commandCount}2 M09`, Pause: 50 }
+			];
+
+			if (!yMotionFlag && Axis !== 'y' && value !== targetPosition[Axis.toLowerCase()]) {  // If the y-axis is not moving and this is not a y-axis command
+
+				publish('/connection-widget/port-feedstop', port);
+				setTimeout(() => { publish('/connection-widget/port-sendjson', port, { Data, IdPrefix, Comment }); }, sendAfterFeedstopDelay);  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
+
+			} else {  // If the y-axis is in motion
+
+				publish('/connection-widget/port-sendjson', port, { Data, IdPrefix, Comment });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
+
+			}
+
+			this.targetPosition[Axis.toLowerCase()] = value;
+			this.retargetCount = 0;
+			this.commandCount += 1;  // Keep track of the number of commands that have been sent
 
 		},
 
