@@ -148,7 +148,7 @@ h1, h2, h3, h4, h4, h5, h6 {
 /* -- Side Navigation Bar -- */
 #sidebar {
 	position: fixed;
-    top: 35px;
+    top: 32px;
     bottom: 0;
     right: 0;
 	width: 90px;
