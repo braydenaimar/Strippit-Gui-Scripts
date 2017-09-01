@@ -384,6 +384,7 @@ define([ 'jquery' ], $ => ({
 		let updateDRO = false;
 		let updateUnit = false;
 		let velocity = null;
+		let status = null;
 
 		if (Data && (Data.sr || Data.r)) {
 
@@ -466,7 +467,13 @@ define([ 'jquery' ], $ => ({
 		else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.vel != 'undefined')
 			velocity = Data.r.sr.vel;
 
-		if (velocity === 0) {
+		if (Data && Data.sr && typeof Data.sr.stat != 'undefined')
+			status = Data.sr.stat;
+
+		else if (Data && Data.r && Data.r.sr && typeof Data.r.sr.stat != 'undefined')
+			status = Data.r.sr.stat;
+
+		if (velocity === 0 && status === 3) {  // If the machine has stopped and not processing any other lines of Gcode
 
 			const { port, machPosition } = this;
 			const { targetPosition, targetTolerance, retargetCount, maxRetargetAttempts } = savePosition;
