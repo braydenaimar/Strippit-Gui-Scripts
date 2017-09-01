@@ -1,6 +1,6 @@
 /* Strippit Widget CSS */
 
-#strippit-widget:not(.not-punch-press-display) {
+#strippit-widget:not(.not-punch-press-display) {  /* For punch press display */
 	zoom: 1.4;
     transform-origin: 0 0;
     transform: scaleX(1) scaleY(1.4) translate3d(0,0,0);
@@ -24,14 +24,16 @@
 }
 
 /* -- in/mm Button -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-inmm {
+#strippit-widget:not(.not-punch-press-display) .strippit-inmm {  /* For punch press display */
 	right: 367px;
 	bottom: 491px;
+	display: none;
 }
 #strippit-inmm {
 	position: absolute;
 	right: 377px;
 	bottom: 296px;
+	display: inline-block;
 }
 #strippit-inmm span.btnInMm {
 	padding-top: 10px;
@@ -46,7 +48,7 @@
 #strippit-feedstop {
 	position: absolute;
 	top: 18px;
-	left: 36px;
+	left: 29px;
 	z-index: 1005;
 }
 #strippit-feedstop span.btn {
@@ -64,7 +66,7 @@
 }
 
 /* -- DRO -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-dro {
+#strippit-widget:not(.not-punch-press-display) .strippit-dro {  /* For punch press display */
 	right: 2px;
 }
 #strippit-dro {
@@ -72,19 +74,7 @@
 	top: 15px;
 	right: 12px;
 	width: 770px;
-	/*border: 1px dashed red;*/
 }
-/* -- Axis Home Buttons -- */
-/*#strippit-dro .btn-strippit-dro-xy .btn-home-y{
-	position: absolute;
-	top: 0;
-	right: 635px;
-	width: 60px;
-	height: 38px;
-}
-#strippit-dro-y .btn-home-y {
-	top: 40px;
-}*/
 #strippit-dro .dro-well {
     overflow: hidden;
     margin-bottom: 0;
@@ -97,8 +87,6 @@
 	right: 445px;
 	width: 80px;
 	height: 44px;
-    /*border-top-right-radius: 0;
-    border-bottom-right-radius: 0;*/
     margin-bottom: 0;
     margin-right: -1px;
     background-color: white;
@@ -188,36 +176,29 @@
 }
 
 /* -- Save Position -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-savepos {
+#strippit-widget:not(.not-punch-press-display) .strippit-savepos {  /* For punch press display */
 	bottom: 208px;
 }
 #strippit-savepos {
 	position: absolute;
-	top: 115px;
-	left: 35px;
-	width: 210px;
+	/* top: 115px; */
+	left: 14px;
+	width: 204px;
+	bottom: 13px;
 }
 #strippit-savepos div.btn-header {
 	position: absolute;
-	top: 0;
-	width: 100%;
+	left: 100%;
+	bottom: 0;
+	margin-left: 6px;
 }
 #strippit-savepos div.step-btns {
-	position: absolute;
-	top: 250px;
-	left: 100%;
-	width: 100px;
-	/*border: 1px dashed green;*/
 }
 #strippit-savepos .btn-header .control-btns {
-	position: absolute;
-	top: 300px;
-	left: 100%;
 	width: 150px;
+	margin-top: 8px;
 }
 #strippit-savepos .position-btns {
-	position: absolute;
-	top: 40px;
 }
 #strippit-savepos .position-btns .btn {
 	border: dashed;
@@ -225,7 +206,7 @@
 	text-align: center;
 	width: 43px;
 	padding: 5px 0px;
-	margin: 10px 5px 0 0;
+	margin: 8px 8px 0 0;
 }
 #strippit-savepos .position-btns span.btn.slot-active {
 	border: solid;
@@ -244,7 +225,6 @@
 	left: 250px;
 	width: 230px;
 	height: 100px;
-	/*border: 1px dashed blue;*/
 }
 #strippit-jog .jog-left-btns {
 	position: absolute;
@@ -252,7 +232,6 @@
 	left: 0;
 	width: 33.33%;
 	height: 100%;
-	/*border: 1px dashed red;*/
 }
 #strippit-jog .jog-middle-btns {
 	position: absolute;
@@ -260,7 +239,6 @@
 	left: 33.33%;
 	width: 33.33%;
 	height: 100%;
-	/*border: 1px dashed green;*/
 }
 #strippit-jog .jog-right-btns {
 	position: absolute;
@@ -268,28 +246,23 @@
 	right: 0;
 	width: 33.33%;
 	height: 100%;
-	/*border: 1px dashed orange;*/
 }
 #strippit-jog .jog-left-btns > span, #strippit-jog .btn-jog-yneg, #strippit-jog .jog-right-btns > span {
 	width: 88%;
-	/*height: 34px;*/
 	margin-top: 10px;
 }
 #strippit-jog .btn-jog-y {
 	width: 88%;
-	/*height: 34px;*/
 }
 #strippit-jog .jog-left-btns div, #strippit-jog .jog-right-btns div {
 	width: 88%;
-	/*border: 1px dashed black;*/
 }
 .jog-left-btns div > span, .jog-right-btns div > span {
 	width: 50%;
-	/*height: 34px;*/
 }
 
 /* -- Die Size Selector -- */
-#strippit-widget:not(.not-punch-press-display) .overlay {
+#strippit-widget:not(.not-punch-press-display) .overlay {  /* For punch press display */
 	top: -10px;
 	right: -33px;
 }
@@ -302,9 +275,8 @@
     background-color: #000;
     opacity: 0.8;
     z-index: 1001;
-    /* height: 200%; */
 }
-#strippit-widget:not(.not-punch-press-display) .strippit-die-size {
+#strippit-widget:not(.not-punch-press-display) .strippit-die-size {  /* For punch press display */
 	bottom: 365px;
 }
 .strippit-die-size {
@@ -327,18 +299,17 @@
 }
 
 /* -- Calculator -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-calc {
+#strippit-widget:not(.not-punch-press-display) .strippit-calc {  /* For punch press display */
 	right: 2px;
 	bottom: 205px;
 }
 #strippit-calc {
 	position: absolute;
-	top: 130px;
+	/* top: 140px; */
 	right: 12px;
 	bottom: 10px;
 	width: 350px;
 	height: 330px;
-	/*border: 1px dashed green;*/
 }
 #strippit-calc div.calc-display-well {
 	position: absolute;
@@ -368,13 +339,11 @@
 	left: 0;
 	width: 104%;
 	height: 100%;
-	/*border: 1px dashed red;*/
 }
 #strippit-calc div.calc-buttons > div {
 	width: 33%;
 	/*width: 25%;*/
 	height: 150%;
-	/*border: 1px dashed green;*/
 }
 #strippit-calc div.column-1 {
 	position: absolute;
@@ -385,13 +354,11 @@
 	position: absolute;
 	top: 0;
 	left: 33%;
-	/*left: 25%;*/
 }
 #strippit-calc div.column-3 {
 	position: absolute;
 	top: 0;
 	left: 67%;
-	/*left: 50%;*/
 }
 #strippit-calc div.column-4 {
 	position: absolute;
@@ -427,7 +394,6 @@
 #strippit-calc span.btn-unavailable > span.badge {
 	color: #ffffff;
 	background-color: #e9e9e9;
-	/*background-color: #e9e9e9;*/
 }
 
 
@@ -459,7 +425,6 @@
 }
 
 #strippit-dro-body .dro-menu {
-    /* z-index: 2; */
     position: absolute;
     left: 3px;
     top: 3px;
@@ -518,7 +483,7 @@
     background: none;
     border: none;
 }
-.btn-active {
+.btn.btn-active {
 	background-color: #a5f5a5;
 	/*background-color: #dff0d8;*/
 }
