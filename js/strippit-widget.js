@@ -173,11 +173,11 @@ define([ 'jquery' ], $ => ({
 
 			if (btnSignal === 'control') {
 
-				if (btnData === 'prev') {
+				if (btnData === 'prev' && port) {
 
 					savePosition.setPrevPos(port);
 
-				} else if (btnData === 'next') {
+				} else if (btnData === 'next' && port) {
 
 					savePosition.setNextPos(port);
 
@@ -209,7 +209,7 @@ define([ 'jquery' ], $ => ({
 				else if (deleteSelection)
 					savePosition.deletePos(Number(btnData));
 
-				else
+				else if (port)
 					savePosition.setPos(port, Number(btnData));
 
 			}
@@ -1023,7 +1023,7 @@ define([ 'jquery' ], $ => ({
 			const { setPosTime, minSetPosInterval, maxPositions, posData, commandCount, xMotionFlag, yMotionFlag, sendValueDecimalPlaces } = this;
 			const currentTime = Date.now();
 
-			if (currentTime - setPosTime < minSetPosInterval)  // If the minimum interval between set positions has not occured
+			if (currentTime - setPosTime < minSetPosInterval)  // If a position was just recently set
 				return false;
 
 			this.setPosTime = currentTime;
@@ -1044,23 +1044,6 @@ define([ 'jquery' ], $ => ({
 			const Value = posData[pos - 1];
 			const Comment = 'SavePos';
 			this.sendAxisCommand(port, { Axis, Value, Comment });
-
-			// if (!yMotionFlag)  // If the y-axis is not moving
-			// 	publish('/connection-widget/port-feedstop', port);
-			//
-			// const Data = [
-			// 	{ Msg: `N${commandCount}0 M08`, Pause: 50 },
-			// 	{ Msg: `N${commandCount}1 G0 Z${value}`, Pause: 100 },
-			// 	{ Msg: `N${commandCount}2 M09`, Pause: 50 }
-			// ];
-			//
-			// if (!yMotionFlag)  // If the y-axis is not moving
-			// 	setTimeout(() => { publish('/connection-widget/port-sendjson', port, { Data, IdPrefix: 'SavePos' }); }, 150);  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
-			//
-			// if (yMotionFlag)  // If the y-axis is in motion
-			// 	publish('/connection-widget/port-sendjson', port, { Data, IdPrefix: 'SavePos' });  // Send move command to the device on the SPJS to move to the saved position (Note that the z-axis is used instead of the x-axis)
-			//
-			// this.commandCount += 1;  // Keep track of the number of commands that have been sent
 
 			this.updateBtnStatus(pos, 'active');  // Hilite the position button as active
 
