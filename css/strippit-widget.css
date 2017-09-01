@@ -46,7 +46,7 @@
 #strippit-feedstop {
 	position: absolute;
 	top: 18px;
-	left: 29px;
+	left: 36px;
 	z-index: 1005;
 }
 #strippit-feedstop span.btn {
@@ -193,35 +193,31 @@
 }
 #strippit-savepos {
 	position: absolute;
-	/* top: 115px; */
-	left: 14px;
-	width: 204px;
-	/* bottom: 10px; */
-	bottom: 13px;
+	top: 115px;
+	left: 35px;
+	width: 210px;
 }
 #strippit-savepos div.btn-header {
 	position: absolute;
-	left: 100%;
-	bottom: 0;
-	margin-left: 6px;
+	top: 0;
+	width: 100%;
 }
 #strippit-savepos div.step-btns {
-	/* position: absolute; */
-	/* top: 250px; */
-	/* left: 100%; */
-	/* width: 100px; */
+	position: absolute;
+	top: 250px;
+	left: 100%;
+	width: 100px;
 	/*border: 1px dashed green;*/
 }
 #strippit-savepos .btn-header .control-btns {
-	/* position: absolute; */
-	/* top: 300px; */
-	/* left: 100%; */
+	position: absolute;
+	top: 300px;
+	left: 100%;
 	width: 150px;
-	margin-top: 8px;
 }
 #strippit-savepos .position-btns {
-	/* position: absolute; */
-	/* top: 40px; */
+	position: absolute;
+	top: 40px;
 }
 #strippit-savepos .position-btns .btn {
 	border: dashed;
@@ -229,7 +225,7 @@
 	text-align: center;
 	width: 43px;
 	padding: 5px 0px;
-	margin: 8px 8px 0 0;
+	margin: 10px 5px 0 0;
 }
 #strippit-savepos .position-btns span.btn.slot-active {
 	border: solid;
@@ -337,7 +333,7 @@
 }
 #strippit-calc {
 	position: absolute;
-	/* top: 140px; */
+	top: 130px;
 	right: 12px;
 	bottom: 10px;
 	width: 350px;
@@ -522,7 +518,7 @@
     background: none;
     border: none;
 }
-.btn.btn-active {
+.btn-active {
 	background-color: #a5f5a5;
 	/*background-color: #dff0d8;*/
 }

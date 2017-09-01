@@ -831,7 +831,7 @@ define([ 'jquery' ], $ => ({
 		 *  Maximum number of position slots shown to the user at any give time.
 		 *  @type {Number}
 		 */
-		maxVisible: 28,
+		maxVisible: 24,
 		/**
 		 *  Maximum position available.
 		 *  @type {Number}
@@ -978,17 +978,10 @@ define([ 'jquery' ], $ => ({
 				// debug.log(`slot: ${posItem}`);
 
 				if (posItem <= 0)  // If the position is invalid
-					break;
+					return false;
 
-				if (posData[posItem - 1] !== null)  // If this slot has saved position value
+				if (posData[posItem - 1] !== null)  // If this slot has no saved position
 					return this.setPos(port, posItem);
-
-			}
-
-			for (let i = maxPositions; i > currentPos; i--) {
-
-				if (posData[i - 1] !== null)  // If this slot has saved position value
-					return this.setPos(port, i);
 
 			}
 
