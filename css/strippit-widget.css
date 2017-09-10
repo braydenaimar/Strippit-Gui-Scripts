@@ -1,10 +1,10 @@
 /* Strippit Widget CSS */
 
-#strippit-widget:not(.not-punch-press-display) {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) {
 	zoom: 1.4;
     transform-origin: 0 0;
     transform: scaleX(1) scaleY(1.4) translate3d(0,0,0);
-}
+}*/
 
 /* -- Widget Body -- */
 #strippit-widget span.btn {
@@ -24,11 +24,11 @@
 }
 
 /* -- in/mm Button -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-inmm {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .strippit-inmm {
 	right: 367px;
 	bottom: 491px;
 	display: none;
-}
+}*/
 #strippit-inmm {
 	position: absolute;
 	right: 377px;
@@ -67,9 +67,9 @@
 }
 
 /* -- DRO -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-dro {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .strippit-dro {
 	right: 0;
-}
+}*/
 #strippit-dro {
 	position: absolute;
 	top: 15px;
@@ -177,9 +177,9 @@
 }
 
 /* -- Save Position -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-savepos {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .strippit-savepos {
 	bottom: 210px;
-}
+}*/
 #strippit-savepos {
 	position: absolute;
 	/* top: 115px; */
@@ -263,10 +263,10 @@
 }
 
 /* -- Die Size Selector -- */
-#strippit-widget:not(.not-punch-press-display) .overlay {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .overlay {
 	top: -10px;
 	right: -33px;
-}
+}*/
 .overlay {
     position: fixed;
     top: 0;
@@ -277,12 +277,12 @@
     opacity: 0.8;
     z-index: 1001;
 }
-#strippit-widget:not(.not-punch-press-display) .strippit-die-size {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .strippit-die-size {
 	bottom: 367px;
-}
+}*/
 .strippit-die-size {
 	position: fixed;
-	left: 266px;
+	left: 236px;
 	bottom: 170px;
 	background-color: #fff;
 	opacity: 1;
@@ -300,10 +300,10 @@
 }
 
 /* -- Calculator -- */
-#strippit-widget:not(.not-punch-press-display) .strippit-calc {  /* For punch press display */
+/*#strippit-widget:not(.not-punch-press-display) .strippit-calc {
 	right: 0;
 	bottom: 207px;
-}
+}*/
 #strippit-calc {
 	position: absolute;
 	/* top: 140px; */
