@@ -508,7 +508,7 @@ define([ 'jquery' ], $ => ({
 		if (updateUnit) {  // If a unit update was received
 
 			const { unit, intomm, mmtoin, dro, machLimits, savePosition } = this;
-			const { maxPositions, posData, unit: savePosUnit } = savePosition;
+			const { writeToSaveFile, maxPositions, posData, unit: savePosUnit } = savePosition;
 			const convFactor = (unit === 'mm') ? intomm : mmtoin;
 
 			if (unit !== savePosUnit) {
@@ -526,7 +526,9 @@ define([ 'jquery' ], $ => ({
 
 			}
 
-			savePosition.updatePositionsToFile();
+			if (writeToSaveFile)
+				savePosition.updatePositionsToFile();
+
 			this.updateDroLimits();
 
 			$('#strippit-dro .x-axis .dro-pos-well .dro-dim').text(unit);  // Update the unit label in the DRO
@@ -820,6 +822,7 @@ define([ 'jquery' ], $ => ({
 	},
 
 	savePosition: {
+		writeToSaveFile: false,
 		/**
 		 *  Stores current unit.
 		 *  Eg. 'inch' or 'mm'
@@ -927,6 +930,8 @@ define([ 'jquery' ], $ => ({
 					fsCSON.writeFileSafe(savePosFileName, fileData);
 					this.buildPositionButtons();
 
+					this.writeToSaveFile = true;
+
 					return false;
 
 				}
@@ -945,6 +950,7 @@ define([ 'jquery' ], $ => ({
 				}
 
 				this.buildPositionButtons();
+				this.writeToSaveFile = true;
 
 			});
 
