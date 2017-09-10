@@ -34,6 +34,7 @@
 	right: 377px;
 	bottom: 296px;
 	display: inline-block;
+	display: none;
 }
 #strippit-inmm span.btnInMm {
 	padding-top: 10px;
@@ -342,7 +343,6 @@
 }
 #strippit-calc div.calc-buttons > div {
 	width: 33%;
-	/*width: 25%;*/
 	height: 150%;
 }
 #strippit-calc div.column-1 {

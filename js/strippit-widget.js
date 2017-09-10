@@ -109,11 +109,8 @@ define([ 'jquery' ], $ => ({
 
 			const { platform, architecture, os } = hostMeta;
 
-			if (platform !== 'linux' || architecture !== 'arm') {
-
+			if (platform !== 'linux' || architecture !== 'arm')
 				$('#strippit-widget').addClass('not-punch-press-display');
-
-			}
 
 			savePosition.initialize();
 			this.updateDroLimits();
