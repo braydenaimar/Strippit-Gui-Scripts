@@ -20,9 +20,9 @@ app.on('browser-window-created', (e, window) => {
 app.on('ready', () => {
 
 	let win = null;
-	const [ platform, arch ] = [ os.platform(), os.arch() ];
+	const [ platform, arch, hostname ] = [ os.platform(), os.arch(), os.hostname() ];
 
-	if (platform === 'linux' && arch === 'arm') {  // If running on a Raspberry Pi
+	if (hostname === 'PUNCH-PRESS' || (platform === 'linux' && arch === 'arm')) {  // If running on a Raspberry Pi
 
 		console.log('Opening in deployment mode.');
 
