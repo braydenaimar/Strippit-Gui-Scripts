@@ -419,7 +419,7 @@ define([ 'jquery' ], $ => ({
 				// { Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
 				{ Msg: '{z:{am:1,vm:540,fr:540,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
 				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
-				{ Msg: '{2:{ma:2,sa:1.8,tr:1.0472,mi:1,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{2:{ma:2,sa:1.8,tr:1.0472,mi:2,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1519,mi:4,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{g54z:0}', Pause: 300 },
 				{ Msg: '{g54y:0}', Pause: 300 },
