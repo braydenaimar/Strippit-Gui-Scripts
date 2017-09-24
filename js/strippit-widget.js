@@ -372,6 +372,9 @@ define([ 'jquery' ], $ => ({
 			this.port = '';
 			this.dro.updateDOM(0, 0);
 
+			this.savePosition.targetPosition.x = null;
+			this.savePosition.targetPosition.y = null;
+
 		}
 
 	},
