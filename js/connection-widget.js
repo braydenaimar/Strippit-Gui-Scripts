@@ -417,15 +417,17 @@ define([ 'jquery' ], $ => ({
 				// { Msg: '{sv:1}', Pause: 50 },    // Status Report Verbosity [ 0 = off, 1 = filtered, 2 = verbose ]
 				// { Msg: '{sr:{line:t,posx:t,posy:t,posz:t,vel:t,unit:t,stat:t,feed:t,coor:t,momo:t,plan:t,path:t,dist:t}}', Pause: 200 },
 				// { Msg: '{qv:2}', Pause: 50 },   // Queue Report Verbosity [ 0 = off, 1 = single, 2 = tripple ]
-				{ Msg: '{z:{am:1,vm:571,fr:571,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
+				{ Msg: '{z:{am:1,vm:540,fr:540,tn:0,tm:96.063,jm:9.055,jh:31.5,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:0.984,zb:0.010}}', Pause: 1000 },  // X-Axis Settings jm:9, jh:31
 				{ Msg: '{y:{am:1,vm:150,fr:150,tn:0,tm:28.346,jm:0.5906,jh:3.937,jd:0.0020,sn:1,sx:0,sv:79,lv:8,lb:3.937,zb:0.188}}', Pause: 1000 },  // Y-Axis Settings jm:1, jh:4
-				{ Msg: '{2:{ma:2,sa:1.8,tr:1.0466,mi:4,po:1,pm:3}}', Pause: 500 },
-				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1515,mi:8,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{2:{ma:2,sa:1.8,tr:1.0472,mi:1,po:1,pm:3}}', Pause: 500 },
+				{ Msg: '{3:{ma:1,sa:1.8,tr:1.1519,mi:4,po:1,pm:3}}', Pause: 500 },
 				{ Msg: '{g54z:0}', Pause: 300 },
 				{ Msg: '{g54y:0}', Pause: 300 },
 				{ Msg: 'G91', Pause: 500 },
+				{ Msg: 'M08', Pause: 300 },
 				{ Msg: 'G91 G0 Y1 Z1', Pause: 500 },
 				{ Msg: 'Y-1 Z-1', Pause: 500 },
+				{ Msg: 'M09', Pause: 300 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: 'G90', Pause: 500 },
 				{ Msg: 'M08', Pause: 300 }, 					   // Lift the Finger Solenoid
