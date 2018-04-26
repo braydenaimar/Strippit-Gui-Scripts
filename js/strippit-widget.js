@@ -267,7 +267,7 @@ define([ 'jquery' ], $ => ({
 	},
 	initKeyboardShortcuts() {
 
-		Mousetrap.bind('v', () => this.savePosition.setNextPos(this.port));  // Advance to next saved position on punch
+		Mousetrap.bind('b', () => this.savePosition.setNextPos(this.port));  // Advance to next saved position on punch
 
 		Mousetrap.bind([ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ], this.keyboardShortcuts.bind(this));
 		Mousetrap.bind([ 'backspace', 'del', '.' ], this.keyboardShortcuts.bind(this));

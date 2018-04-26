@@ -42,7 +42,7 @@ Windows Firewall may pop-up with a security alert but you just need to click `Al
 
 If you are having issues, you may need to add the program to the list of exclusions for Windows Defender.
 
-#### Windows Defender Exclusion
+#### Windows Defender Exclusion (**Not Applicable to Windows 10 Creators Update)**
 
 1. Select `Start` and `Settings` to open the settings window.
 2. Select `Update & Security`.
@@ -58,84 +58,39 @@ If you are having issues, you may need to add the program to the list of exclusi
 12. Select `Exclude this file`.
 
 To clone a different branch run `git clone -b <branch> https://github.com/braydenaimar/Strippit-Gui-Scripts.git`.
-
 To switch between branches run `git checkout <branch>`.
 
 ### Linux
+Note: This installation process is not recommended if you care about the security of the host system as it includes changing file and user permissions.
 
-1. Install nodejs by running `sudo apt-get install nodejs`.
-2. Run `sudo apt-get install npm`.
-3. Run `sudo apt-get install git`.
-4. Run `git clone https://github.com/braydenaimar/Strippit-Gui-Scripts.git` to download the program into your home directory.
-5. Run `cd Strippit-Gui-Scripts` to open the directory.
-6. Run `npm install`.
-7. Navigate to '/json_server/linux_arm' right click on 'serial-port-json-server' and select 'Permissions', enable everyone to execute the file.
-8. Run `npm start` to launch the app.
+1. Change user permissions (to stop Linux from prompting user for password when running sudo commands in the terminal).
+    + You can follow the instructions below or look [here](https://askubuntu.com/questions/147241/execute-sudo-without-password) for more info.
+    + Run `sudo visudo`.
+    + Add `username ALL=(ALL) NOPASSWD: ALL` to the very end of the file (replace 'username' with your username).
+    + Make sure you did this correctly.
+    + No, seriously. Check that you spelt everything correctly. A spelling mistake here could leave you locked out of the system and with no option but to reinstall Linux.
+    + Press `ctrl+x`.
+    + Press `y`.
+    + Press `Enter`.
+    + If you see another prompt in the main terminal asking if you are realy super-duper sure you want to apply those changes, you should go back and make sure you did everything correctly.
+2. Open the terminal to install the required packages.
+    + Run `sudo apt-get install nodejs`.
+    + Run `sudo apt-get install npm`.
+    + Run `sudo apt-get install git`.
+    + [Ubuntu] Run `sudo apt install nodejs-legacy`.
+    + [Ubuntu / Ubuntu Mate] Run `sudo apt-get install lxterminal` (running `sudo apt install lxterminal` does the same thing).
+3. Run `git clone https://github.com/braydenaimar/Strippit-Gui-Scripts.git` to download the program into your home directory.
+4. Run `cd Strippit-Gui-Scripts` to open the directory.
+5. Run `npm install` (if you see many error messages, you can just ignore them and proceed to the next step).
+6. Change file permissions.
+    + Open the file explorer.
+    + Open the 'Strippit-Gui-Scripts' folder.
+    + Open the 'json_server' folder.
+    + Open the 'linux_arm' folder.
+    + [Ubuntu] Right click on the executable called 'serial-port-json-server', select 'Properties', select the 'Permissions' tab, and enable 'Allow executing file as a program'.
+    + [Ubuntu Mate] Right click on the executable called 'serial-port-json-server', select 'Permissions', and enable 'Allow executing file as a program'.
+7. Run `npm start` to launch the app.
 
-#### Ubuntu Mate
-You will also need to run `sudo apt-get install lxterminal`.
-
-Go to 'serial-port-json-server', right click and select 'Permissions', select 'Allow executing file as program'.
-
-File Tree
------
-Below a snapshot of the structure of files and folders of the application after installation on Windows.
-
-```
-Strippit-Gui-Scripts/
-├── js/
-|   ├── lib/
-|   |   ├── amplify.core.js
-|   |   ├── gui.js
-|   |   ├── jquery.js
-|   |   └── require.js
-│   ├── require-config.js
-│   ├── main.js
-│   ├── strippit-widget.js
-|   └── connection-widget.js
-├── css/
-|   ├── fonts/
-│   |   ├── fontawesome-webfont.eot
-│   |   ├── glyphicons-halflings-regular.eot
-│   |   └── ...
-|   ├── lib/
-|   |   ├── bootstrap-paper.min.css
-|   |   ├── font-awesome.min.css
-│   |   └── roboto-font.css
-|   ├── main.css
-│   ├── strippit-widget.css
-|   └── connection-widget.css
-├── html/
-│   ├── strippit-widget.html
-|   └── connection-widget.html
-├── icons/
-|   ├── boards/
-|   |   ├── tinyg.jpg
-|   |   └── tinygv9.jpg
-|   |   └── ...
-|   └── icon.png
-├── json-server/
-|   ├── windows_x64/
-|   |   ├── arduino/
-|   |   |   └── ...
-|   |   ├── drivers/windows/
-|   |   |   └── TinyGv2.inf
-|   |   ├── sample-cert.pem
-|   |   ├── sample-key.pem
-|   |   └── serial-port-json-server.exe
-|   └── linux_arm/
-|       ├── arduino/
-|       |   └── ...
-|       ├── sample-cert.pem
-|       ├── sample-key.pem
-|       └── serial-port-json-server.exe
-├── node_modules/
-|   ├── cson/
-|   |   └── ...
-|   └── electron/
-|       └── ...
-├── icon.ico
-├── index.js
-├── main.html
-└── package.json
-```
+If you have issues getting this to work:
+1. Try deleting the entire 'Strippit-Gui-Scripts' folder and redo all of the installation steps.
+2. Try running `npm install electron-prebuilt` after the last installation step.
